@@ -3,66 +3,66 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
-const tintColorLight = '#D4FF00'; // Neon Lime
-const tintColorDark = '#D4FF00'; // Neon Lime
+const tintColorLight = '#8B5CF6'; // Soft Purple
+const tintColorDark = '#A78BFA'; // Lighter Purple for dark mode
 
 export const Colors = {
   light: {
-    text: '#FFFFFF',
-    background: '#050511', // Deep Dark Blue/Black
+    text: '#1F2937', // Dark Gray/Purple
+    background: '#F3E8FF', // Lavender
     tint: tintColorLight,
-    icon: '#A0A0A0',
-    tabIconDefault: '#64748B',
+    icon: '#6B7280', // Gray 500
+    tabIconDefault: '#9CA3AF',
     tabIconSelected: tintColorLight,
-    primary: '#D4FF00', // Neon Lime
-    secondary: '#FF5500', // Neon Orange
-    tertiary: '#00FFFF', // Neon Cyan
-    surface: 'rgba(30, 41, 59, 0.7)', // Translucent dark slate
-    surfaceHighlight: 'rgba(255, 255, 255, 0.05)',
-    danger: '#FF3333',
-    success: '#00FF99', // Neon Green
-    warning: '#FFCC00',
-    border: 'rgba(255, 255, 255, 0.1)',
+    primary: '#8B5CF6', // Purple 500
+    primaryGradient: ['#8B5CF6', '#C084FC'], // Purple Gradient
+    secondary: '#EC4899', // Pink 500
+    surface: '#FFFFFF',
+    surfaceHighlight: 'rgba(255, 255, 255, 0.4)',
+    danger: '#EF4444',
+    success: '#10B981',
+    warning: '#F59E0B',
+    border: 'rgba(139, 92, 246, 0.1)', // Purple tint border
     shadow: {
-      shadowColor: '#D4FF00',
-      shadowOffset: { width: 0, height: 0 },
+      shadowColor: '#8B5CF6',
+      shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.1,
-      shadowRadius: 10,
-      elevation: 2,
+      shadowRadius: 12,
+      elevation: 4,
     },
     glass: {
-      backgroundColor: 'rgba(20, 20, 30, 0.6)',
-      borderColor: 'rgba(255, 255, 255, 0.1)',
-      borderWidth: 0.5,
+      backgroundColor: 'rgba(255, 255, 255, 0.7)',
+      borderColor: 'rgba(255, 255, 255, 0.5)',
+      borderWidth: 1,
     }
   },
   dark: {
-    text: '#FFFFFF',
-    background: '#050511', // Deep Dark Blue/Black
+    text: '#F9FAFB', // Cool White
+    background: '#111827', // Deep Gray
     tint: tintColorDark,
-    icon: '#A0A0A0',
-    tabIconDefault: '#94A3B8', // Slate 400
+    icon: '#9CA3AF',
+    tabIconDefault: '#4B5563',
     tabIconSelected: tintColorDark,
-    primary: '#D4FF00', // Neon Lime
-    secondary: '#FF5500', // Neon Orange
-    tertiary: '#00FFFF', // Neon Cyan
-    surface: 'rgba(30, 41, 59, 0.7)', // Translucent dark slate
+    primary: '#A78BFA', // Purple 400
+    primaryGradient: ['#7C3AED', '#A78BFA'],
+    secondary: '#F472B6', // Pink 400
+    surface: '#1F2937',
     surfaceHighlight: 'rgba(255, 255, 255, 0.05)',
-    danger: '#FF3333',
-    success: '#00FF99', // Neon Green
-    warning: '#FFCC00',
-    border: 'rgba(255, 255, 255, 0.1)',
+    danger: '#F87171',
+    success: '#34D399',
+    warning: '#FBBF24',
+    border: 'rgba(139, 92, 246, 0.2)',
     shadow: {
-      shadowColor: '#D4FF00',
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0.1,
-      shadowRadius: 10,
-      elevation: 2,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 12,
+      elevation: 4,
     },
     glass: {
-      backgroundColor: 'rgba(20, 20, 30, 0.6)',
+      backgroundColor: 'rgba(31, 41, 55, 0.7)',
       borderColor: 'rgba(255, 255, 255, 0.1)',
-      borderWidth: 0.5,
+      borderWidth: 1,
     }
   },
 };

@@ -11,6 +11,8 @@ import {
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
+import { ThemedBackground } from '@/components/ThemedBackground';
+import { GlassCard } from '@/components/GlassCard';
 
 export default function NotificationsScreen() {
     const router = useRouter();
@@ -42,14 +44,25 @@ export default function NotificationsScreen() {
     );
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-            <View style={styles.content}>
-                <SettingItem label="Meal Reminders" settingKey="mealReminders" />
-                <SettingItem label="Weekly Progress Reports" settingKey="weeklyProgress" />
-                <SettingItem label="Daily Health Tips" settingKey="tips" />
-                <SettingItem label="App Updates" settingKey="updates" />
-            </View>
-        </SafeAreaView>
+        <ThemedBackground>
+            <SafeAreaView style={styles.container}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                        <Ionicons name="arrow-back" size={24} color={colors.text} />
+                    </TouchableOpacity>
+                    <Text style={[styles.headerTitle, { color: colors.text }]}>Notifications</Text>
+                </View>
+
+                <View style={styles.content}>
+                    <GlassCard style={styles.card}>
+                        <SettingItem label="Meal Reminders" settingKey="mealReminders" />
+                        <SettingItem label="Weekly Progress Reports" settingKey="weeklyProgress" />
+                        <SettingItem label="Daily Health Tips" settingKey="tips" />
+                        <SettingItem label="App Updates" settingKey="updates" />
+                    </GlassCard>
+                </View>
+            </SafeAreaView>
+        </ThemedBackground>
     );
 }
 
@@ -57,8 +70,25 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+        gap: 16,
+    },
+    backButton: {
+        padding: 8,
+    },
+    headerTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+    },
     content: {
-        padding: 20,
+        padding: 24,
+    },
+    card: {
+        padding: 16,
+        borderRadius: 24,
     },
     item: {
         flexDirection: 'row',

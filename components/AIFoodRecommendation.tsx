@@ -17,6 +17,9 @@ import { useSelector } from 'react-redux';
 import { Colors } from "@/constants/Colors";
 import { useMealPlan } from "./MealPlanContext";
 import PersonalInfoModal from "./PersonalInfoModal";
+import { ThemedBackground } from "@/components/ThemedBackground";
+import { GlassCard } from "@/components/GlassCard";
+import { PrimaryButton } from "@/components/PrimaryButton";
 
 interface FoodItem {
   id: string;
@@ -455,10 +458,7 @@ const AIFoodRecommendation = ({
   };
 
   const FoodCard = ({ food }: { food: FoodItem }) => (
-    <TouchableOpacity
-      style={[styles.foodCard, { ...colors.glass, ...colors.shadow }]}
-      onPress={() => handleSelectFood(food)}
-    >
+    <GlassCard style={styles.foodCard} onPress={() => handleSelectFood(food)}>
       <View style={styles.foodHeader}>
         <Text style={[styles.foodName, { color: colors.text }]}>{food.name}</Text>
         <Text style={[styles.foodCalories, { color: colors.primary }]}>{food.calories} kcal</Text>
@@ -478,7 +478,7 @@ const AIFoodRecommendation = ({
           <Text style={[styles.nutritionValue, { color: colors.text }]}>{food.fat}g</Text>
         </View>
       </View>
-    </TouchableOpacity>
+    </GlassCard>
   );
 
   const renderContent = () => {
@@ -519,15 +519,12 @@ const AIFoodRecommendation = ({
                 We need your age, gender, height, weight, activity level, and
                 goals to provide personalized recommendations.
               </Text>
-              <TouchableOpacity
-                style={[styles.setupButton, { backgroundColor: colors.primary }]}
+              <PrimaryButton
+                title="Complete Profile Setup"
                 onPress={() => setShowPersonalInfoModal(true)}
-              >
-                <Ionicons name="person-add" size={20} color="white" />
-                <Text style={styles.setupButtonText}>
-                  Complete Profile Setup
-                </Text>
-              </TouchableOpacity>
+                icon="person-add"
+                style={styles.setupButton}
+              />
             </View>
           )}
 
@@ -538,16 +535,15 @@ const AIFoodRecommendation = ({
                 Add your Gemini API key to get personalized AI-powered meal
                 suggestions.
               </Text>
-              <TouchableOpacity
-                style={[styles.setupButton, { backgroundColor: colors.primary }]}
+              <PrimaryButton
+                title="Add API Key"
                 onPress={() => {
                   onClose();
                   // Navigate to settings
                 }}
-              >
-                <Ionicons name="key" size={20} color="white" />
-                <Text style={styles.setupButtonText}>Add API Key</Text>
-              </TouchableOpacity>
+                icon="key"
+                style={styles.setupButton}
+              />
             </View>
           )}
 
@@ -560,15 +556,12 @@ const AIFoodRecommendation = ({
                 Your profile is complete and API key is configured. Generate
                 personalized meal suggestions.
               </Text>
-              <TouchableOpacity
-                style={[styles.generateButton, { backgroundColor: colors.secondary }]}
+              <PrimaryButton
+                title="Generate AI Recommendations"
                 onPress={generateRecommendations}
-              >
-                <Ionicons name="bulb" size={20} color="white" />
-                <Text style={styles.generateButtonText}>
-                  Generate AI Recommendations
-                </Text>
-              </TouchableOpacity>
+                icon="bulb"
+                style={styles.generateButton}
+              />
             </View>
           )}
         </View>
@@ -614,6 +607,7 @@ const AIFoodRecommendation = ({
             Generate New Recommendations
           </Text>
         </TouchableOpacity>
+        <View style={{ height: 40 }} />
       </ScrollView>
     );
   };
@@ -625,19 +619,21 @@ const AIFoodRecommendation = ({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-        {/* Header */}
-        <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
-          <TouchableOpacity onPress={onClose}>
-            <Ionicons name="close" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={{ color: colors.text, fontSize: 18, fontWeight: '600' }}>AI Food Recommendations</Text>
-          <View />
-        </View>
+      <ThemedBackground>
+        <SafeAreaView style={styles.container}>
+          {/* Header */}
+          <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+            <TouchableOpacity onPress={onClose}>
+              <Ionicons name="close" size={24} color={colors.text} />
+            </TouchableOpacity>
+            <Text style={{ color: colors.text, fontSize: 18, fontWeight: '600' }}>AI Food Recommendations</Text>
+            <View style={{ width: 24 }} />
+          </View>
 
-        {/* Content */}
-        {renderContent()}
-      </SafeAreaView>
+          {/* Content */}
+          {renderContent()}
+        </SafeAreaView>
+      </ThemedBackground>
     </Modal>
   );
 };
@@ -656,11 +652,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 20,
     borderBottomWidth: 1,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
   },
   loadingContainer: {
     flex: 1,
@@ -683,60 +674,35 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
     marginTop: 16,
     marginBottom: 8,
   },
   emptyDescription: {
     fontSize: 16,
-    color: "#666",
     textAlign: "center",
     marginBottom: 32,
   },
   setupSection: {
     alignItems: "center",
     marginTop: 20,
+    width: '100%',
   },
   setupTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#333",
     marginBottom: 8,
   },
   setupDescription: {
     fontSize: 14,
-    color: "#666",
     textAlign: "center",
     marginBottom: 24,
     lineHeight: 20,
   },
   setupButton: {
-    backgroundColor: "#4CAF50",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  setupButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
+    width: '100%',
   },
   generateButton: {
-    backgroundColor: "#2196F3",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  generateButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
+    width: '100%',
   },
   recommendationsContainer: {
     flex: 1,
@@ -748,23 +714,19 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
     marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 16,
-    color: "#666",
     marginBottom: 12,
   },
   profileInfo: {
-    backgroundColor: "#E8F5E8",
     padding: 12,
     borderRadius: 8,
     marginTop: 8,
   },
   profileText: {
     fontSize: 12,
-    color: "#4CAF50",
     fontWeight: "500",
   },
   recommendationsList: {
@@ -772,10 +734,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   foodCard: {
-    backgroundColor: "white",
-    borderRadius: 16,
     padding: 16,
     marginBottom: 12,
+    borderRadius: 16,
   },
   foodHeader: {
     flexDirection: "row",
@@ -786,12 +747,10 @@ const styles = StyleSheet.create({
   foodName: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#333",
     flex: 1,
   },
   foodCalories: {
     fontSize: 14,
-    color: "#4CAF50",
     fontWeight: "600",
   },
   nutritionInfo: {
@@ -799,33 +758,29 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   nutritionItem: {
-    flex: 1,
+    alignItems: 'center',
   },
   nutritionLabel: {
     fontSize: 12,
-    color: "#666",
     marginBottom: 2,
   },
   nutritionValue: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
+    fontWeight: '600',
   },
   regenerateButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 12,
     marginHorizontal: 20,
     marginTop: 20,
-    marginBottom: 20,
-    backgroundColor: "#E8F5E8",
-    borderRadius: 12,
     gap: 8,
   },
   regenerateButtonText: {
     fontSize: 16,
-    color: "#4CAF50",
-    fontWeight: "600",
+    fontWeight: '600',
   },
 });
+```

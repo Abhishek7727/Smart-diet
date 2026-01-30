@@ -14,6 +14,8 @@ import {
 import { Share, Alert } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'expo-router';
+import { ThemedBackground } from '@/components/ThemedBackground';
+import { GlassCard } from '@/components/GlassCard';
 
 const ProfileScreen = () => {
   const colorScheme = useColorScheme();
@@ -60,7 +62,7 @@ const ProfileScreen = () => {
     value: string;
     subtitle?: string;
   }) => (
-    <View style={[styles.profileCard, { ...colors.glass, ...colors.shadow }]}>
+    <GlassCard style={styles.profileCard}>
       <View style={[styles.profileIcon, { backgroundColor: color }]}>
         <Ionicons name={icon as any} size={20} color="white" />
       </View>
@@ -69,7 +71,7 @@ const ProfileScreen = () => {
         <Text style={[styles.profileValue, { color: colors.text }]}>{value}</Text>
         {subtitle && <Text style={[styles.profileSubtitle, { color: colors.tabIconDefault }]}>{subtitle}</Text>}
       </View>
-    </View>
+    </GlassCard>
   );
 
   const AchievementCard = ({
@@ -83,10 +85,9 @@ const ProfileScreen = () => {
     description: string;
     achieved: boolean;
   }) => (
-    <View style={[
+    <GlassCard style={[
       styles.achievementCard,
-      { ...colors.glass },
-      achieved ? colors.shadow : { opacity: 0.7, borderWidth: 1, borderColor: colors.border }
+      !achieved && { opacity: 0.7, borderWidth: 1, borderColor: colors.border, backgroundColor: 'transparent' }
     ]}>
       <View style={[
         styles.achievementIcon,
@@ -103,124 +104,129 @@ const ProfileScreen = () => {
         </Text>
         <Text style={[styles.achievementDescription, { color: colors.icon }]}>{description}</Text>
       </View>
-    </View>
+    </GlassCard>
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>Profile</Text>
-          <TouchableOpacity
-            style={[styles.headerButton, { backgroundColor: colors.surfaceHighlight }]}
-            onPress={() => router.push('/(tabs)/settings')}
-          >
-            <Ionicons name="settings-outline" size={24} color={colors.text} />
-          </TouchableOpacity>
-        </View>
+    <ThemedBackground>
+      <SafeAreaView style={styles.container}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>Profile</Text>
+            <TouchableOpacity
+              style={[styles.headerButton, { backgroundColor: colors.surfaceHighlight }]}
+              onPress={() => router.push('/(tabs)/settings')}
+            >
+              <Ionicons name="settings-outline" size={24} color={colors.text} />
+            </TouchableOpacity>
+          </View>
 
-        {/* User Info */}
-        <View style={styles.userSection}>
-          <View style={[styles.avatarContainer, { ...colors.glass, ...colors.shadow, backgroundColor: colorScheme === 'dark' ? 'rgba(20, 20, 30, 0.85)' : 'rgba(255, 255, 255, 0.85)' }]}>
-            <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-              <Text style={[styles.avatarText, { color: 'black' }]}>{userData.name?.[0] || 'U'}</Text>
+          {/* User Info */}
+          <View style={styles.userSection}>
+            <GlassCard style={styles.avatarContainer}>
+              <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
+                <Text style={[styles.avatarText, { color: 'white' }]}>{userData.name?.[0] || 'U'}</Text>
+              </View>
+              <View style={styles.userInfo}>
+                <Text style={[styles.userName, { color: colors.text }]}>{userData.name || 'User'}</Text>
+                <Text style={[styles.userEmail, { color: colors.icon }]}>{userData.email || 'user@example.com'}</Text>
+              </View>
+            </GlassCard>
+          </View>
+
+          {/* Stats Overview */}
+          <View style={styles.statsSection}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Stats</Text>
+            <View style={styles.statsGrid}>
+              <ProfileCard
+                icon="flame"
+                color={colors.warning}
+                title="Total Calories"
+                value={`${totalNutrition.calories} kcal`}
+                subtitle={`${Math.round((totalNutrition.calories / nutritionalData.calories) * 100)}% of goal`}
+              />
+              <ProfileCard
+                icon="trophy"
+                color="#FFD700"
+                title="Streak"
+                value="7 days"
+                subtitle="Current streak"
+              />
+              <ProfileCard
+                icon="checkmark-circle"
+                color={colors.success}
+                title="Meals Completed"
+                value="3/4"
+                subtitle="Today's progress"
+              />
+              <ProfileCard
+                icon="trending-up"
+                color="#2196F3"
+                title="Weekly Average"
+                value="85%"
+                subtitle="Goal completion"
+              />
             </View>
-            <View style={styles.userInfo}>
-              <Text style={[styles.userName, { color: colors.text }]}>{userData.name || 'User'}</Text>
-              <Text style={[styles.userEmail, { color: colors.icon }]}>{userData.email || 'user@example.com'}</Text>
+          </View>
+
+          {/* Achievements */}
+          <View style={styles.achievementsSection}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Achievements</Text>
+            <AchievementCard
+              icon="star"
+              title="First Week"
+              description="Complete 7 days of meal planning"
+              achieved={true}
+            />
+            <AchievementCard
+              icon="nutrition"
+              title="Protein Master"
+              description="Meet protein goals for 5 consecutive days"
+              achieved={true}
+            />
+            <AchievementCard
+              icon="leaf"
+              title="Healthy Eater"
+              description="Stay within calorie goals for 10 days"
+              achieved={false}
+            />
+            <AchievementCard
+              icon="fitness"
+              title="Consistency King"
+              description="Plan meals for 30 consecutive days"
+              achieved={false}
+            />
+          </View>
+
+          {/* Quick Actions */}
+          <View style={styles.actionsSection}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Actions</Text>
+            <View style={styles.actionButtons}>
+              {[
+                { icon: 'person-outline', label: 'Edit Profile' },
+                { icon: 'notifications-outline', label: 'Notifications' },
+                { icon: 'help-circle-outline', label: 'Help & Support' },
+                { icon: 'share-outline', label: 'Share Progress' },
+              ].map((action, index) => (
+                <TouchableOpacity
+                  key={index}
+                  activeOpacity={0.8}
+                  onPress={() => handleAction(action.label)}
+                >
+                  <GlassCard style={styles.actionButton}>
+                    <Ionicons name={action.icon as any} size={20} color={colors.primary} />
+                    <Text style={[styles.actionText, { color: colors.text }]}>{action.label}</Text>
+                    <Ionicons name="chevron-forward" size={20} color={colors.icon} style={{ marginLeft: 'auto' }} />
+                  </GlassCard>
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
-        </View>
-
-        {/* Stats Overview */}
-        <View style={styles.statsSection}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Stats</Text>
-          <View style={styles.statsGrid}>
-            <ProfileCard
-              icon="flame"
-              color={colors.warning}
-              title="Total Calories"
-              value={`${totalNutrition.calories} kcal`}
-              subtitle={`${Math.round((totalNutrition.calories / nutritionalData.calories) * 100)}% of goal`}
-            />
-            <ProfileCard
-              icon="trophy"
-              color="#FFD700"
-              title="Streak"
-              value="7 days"
-              subtitle="Current streak"
-            />
-            <ProfileCard
-              icon="checkmark-circle"
-              color={colors.success}
-              title="Meals Completed"
-              value="3/4"
-              subtitle="Today's progress"
-            />
-            <ProfileCard
-              icon="trending-up"
-              color="#2196F3"
-              title="Weekly Average"
-              value="85%"
-              subtitle="Goal completion"
-            />
-          </View>
-        </View>
-
-        {/* Achievements */}
-        <View style={styles.achievementsSection}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Achievements</Text>
-          <AchievementCard
-            icon="star"
-            title="First Week"
-            description="Complete 7 days of meal planning"
-            achieved={true}
-          />
-          <AchievementCard
-            icon="nutrition"
-            title="Protein Master"
-            description="Meet protein goals for 5 consecutive days"
-            achieved={true}
-          />
-          <AchievementCard
-            icon="leaf"
-            title="Healthy Eater"
-            description="Stay within calorie goals for 10 days"
-            achieved={false}
-          />
-          <AchievementCard
-            icon="fitness"
-            title="Consistency King"
-            description="Plan meals for 30 consecutive days"
-            achieved={false}
-          />
-        </View>
-
-        {/* Quick Actions */}
-        <View style={styles.actionsSection}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Actions</Text>
-          <View style={styles.actionButtons}>
-            {[
-              { icon: 'person-outline', label: 'Edit Profile' },
-              { icon: 'notifications-outline', label: 'Notifications' },
-              { icon: 'help-circle-outline', label: 'Help & Support' },
-              { icon: 'share-outline', label: 'Share Progress' },
-            ].map((action, index) => (
-              <TouchableOpacity
-                key={index}
-                style={[styles.actionButton, { ...colors.glass, ...colors.shadow }]}
-                onPress={() => handleAction(action.label)}
-              >
-                <Ionicons name={action.icon as any} size={20} color={colors.primary} />
-                <Text style={[styles.actionText, { color: colors.text }]}>{action.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </SafeAreaView>
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      </SafeAreaView>
+    </ThemedBackground>
   );
 };
 
@@ -268,7 +274,6 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'white',
   },
   userInfo: {
     flex: 1,
@@ -291,7 +296,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   statsGrid: {
-    gap: 12,
+    gap: 16,
   },
   profileCard: {
     flexDirection: 'row',
@@ -372,4 +377,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-}); 
+});

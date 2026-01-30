@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
-    TextInput,
     TouchableOpacity,
     StyleSheet,
     ScrollView,
     Alert,
+    KeyboardAvoidingView,
+    Platform,
     SafeAreaView,
     useColorScheme,
 } from 'react-native';
@@ -15,6 +16,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateProfile } from '@/store/userSlice';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
+import { ThemedBackground } from '@/components/ThemedBackground';
+import { GlassInput } from '@/components/GlassInput';
+import { PrimaryButton } from '@/components/PrimaryButton';
 
 export default function EditProfileScreen() {
     const router = useRouter();
@@ -60,57 +64,79 @@ export default function EditProfileScreen() {
         router.back();
     };
 
-    const InputField = ({ label, value, fieldKey, placeholder, keyboardType = 'default' }: any) => (
-        <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
-            <TextInput
-                style={[styles.input, { backgroundColor: colors.surfaceHighlight, color: colors.text }]}
-                value={value}
-                onChangeText={(text) => handleChange(fieldKey, text)}
-                placeholder={placeholder}
-                placeholderTextColor={colors.icon}
-                keyboardType={keyboardType}
-            />
-        </View>
-    );
-
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-            <View style={[styles.header, { borderBottomColor: colors.border }]}>
-                <TouchableOpacity onPress={() => router.back()}>
-                    <Ionicons name="close" size={24} color={colors.text} />
-                </TouchableOpacity>
-                <Text style={[styles.headerTitle, { color: colors.text }]}>Edit Profile</Text>
-                <TouchableOpacity onPress={handleSave}>
-                    <Text style={[styles.saveButton, { color: colors.primary }]}>Save</Text>
-                </TouchableOpacity>
-            </View>
-
-            <ScrollView contentContainerStyle={styles.content}>
-                <InputField label="Full Name" value={formData.name} fieldKey="name" placeholder="John Doe" />
-
-                <View style={styles.row}>
-                    <View style={styles.halfWidth}>
-                        <InputField label="Age" value={formData.age} fieldKey="age" placeholder="25" keyboardType="numeric" />
-                    </View>
-                    <View style={styles.halfWidth}>
-                        <InputField label="Calories Goal" value={formData.targetCalories} fieldKey="targetCalories" placeholder="2000" keyboardType="numeric" />
-                    </View>
+        <ThemedBackground>
+            <SafeAreaView style={styles.container}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.closeButton}>
+                        <Ionicons name="close" size={24} color={colors.text} />
+                    </TouchableOpacity>
+                    <Text style={[styles.headerTitle, { color: colors.text }]}>Edit Profile</Text>
+                    <TouchableOpacity onPress={handleSave}>
+                        <Text style={[styles.saveButtonText, { color: colors.primary }]}>Save</Text>
+                    </TouchableOpacity>
                 </View>
 
-                <View style={styles.row}>
-                    <View style={styles.halfWidth}>
-                        <InputField label="Weight (kg)" value={formData.weight} fieldKey="weight" placeholder="70" keyboardType="numeric" />
-                    </View>
-                    <View style={styles.halfWidth}>
-                        <InputField label="Height (cm)" value={formData.height} fieldKey="height" placeholder="175" keyboardType="numeric" />
-                    </View>
-                </View>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={styles.keyboardView}
+                >
+                    <ScrollView contentContainerStyle={styles.content}>
+                        <GlassInput
+                            placeholder="Full Name"
+                            value={formData.name}
+                            onChangeText={(text) => handleChange('name', text)}
+                            icon="person-outline"
+                        />
 
-                <InputField label="Fitness Goal" value={formData.goal} fieldKey="goal" placeholder="Lose Weight / Build Muscle" />
+                        <View style={styles.row}>
+                            <View style={styles.halfWidth}>
+                                <GlassInput
+                                    placeholder="Age"
+                                    value={formData.age}
+                                    onChangeText={(text) => handleChange('age', text)}
+                                // keyboardType="numeric" // GlassInput needs prop update for this, strictly strings for now or update component
+                                />
+                            </View>
+                            <View style={styles.halfWidth}>
+                                <GlassInput
+                                    placeholder="Goal (kcal)"
+                                    value={formData.targetCalories}
+                                    onChangeText={(text) => handleChange('targetCalories', text)}
+                                />
+                            </View>
+                        </View>
 
-            </ScrollView>
-        </SafeAreaView>
+                        <View style={styles.row}>
+                            <View style={styles.halfWidth}>
+                                <GlassInput
+                                    placeholder="Weight (kg)"
+                                    value={formData.weight}
+                                    onChangeText={(text) => handleChange('weight', text)}
+                                />
+                            </View>
+                            <View style={styles.halfWidth}>
+                                <GlassInput
+                                    placeholder="Height (cm)"
+                                    value={formData.height}
+                                    onChangeText={(text) => handleChange('height', text)}
+                                />
+                            </View>
+                        </View>
+
+                        <GlassInput
+                            placeholder="Fitness Goal"
+                            value={formData.goal}
+                            onChangeText={(text) => handleChange('goal', text)}
+                            icon="trophy-outline"
+                        />
+
+                        <PrimaryButton title="Save Changes" onPress={handleSave} style={styles.saveButton} />
+
+                    </ScrollView>
+                </KeyboardAvoidingView>
+            </SafeAreaView>
+        </ThemedBackground>
     );
 }
 
@@ -123,32 +149,24 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: 16,
-        borderBottomWidth: 1,
+    },
+    closeButton: {
+        padding: 8,
     },
     headerTitle: {
-        fontSize: 18,
-        fontWeight: '600',
+        fontSize: 20,
+        fontWeight: '700',
     },
-    saveButton: {
-        fontWeight: 'bold',
+    saveButtonText: {
+        fontWeight: '700',
         fontSize: 16,
+    },
+    keyboardView: {
+        flex: 1,
     },
     content: {
-        padding: 20,
-        gap: 20,
-    },
-    inputGroup: {
-        gap: 8,
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '500',
-    },
-    input: {
-        height: 50,
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        fontSize: 16,
+        padding: 24,
+        gap: 16,
     },
     row: {
         flexDirection: 'row',
@@ -157,4 +175,7 @@ const styles = StyleSheet.create({
     halfWidth: {
         flex: 1,
     },
+    saveButton: {
+        marginTop: 24,
+    }
 });

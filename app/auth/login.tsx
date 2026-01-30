@@ -2,20 +2,20 @@ import React, { useState } from 'react';
 import {
     View,
     Text,
-    TextInput,
     TouchableOpacity,
     StyleSheet,
     Alert,
     KeyboardAvoidingView,
     Platform,
-    SafeAreaView,
     useColorScheme,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginSuccess } from '@/store/userSlice';
 import { Colors } from '@/constants/Colors';
-import { Ionicons } from '@expo/vector-icons';
+import { ThemedBackground } from '@/components/ThemedBackground';
+import { GlassInput } from '@/components/GlassInput';
+import { PrimaryButton } from '@/components/PrimaryButton';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
@@ -32,7 +32,6 @@ export default function LoginScreen() {
             return;
         }
 
-        // Check if user exists on device
         if (!userData.email || !userData.password) {
             Alert.alert('Account Not Found', 'No account found on this device. Please register first.');
             return;
@@ -47,53 +46,40 @@ export default function LoginScreen() {
     };
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <ThemedBackground>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.content}
+                style={styles.container}
             >
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
-                </TouchableOpacity>
-
                 <View style={styles.header}>
-                    <Text style={[styles.title, { color: colors.text }]}>Welcome Back</Text>
+                    <Text style={[styles.title, { color: colors.text }]}>Login</Text>
                     <Text style={[styles.subtitle, { color: colors.icon }]}>
-                        Login to access your plan
+                        Welcome Back
+                    </Text>
+                    <Text style={[styles.description, { color: colors.icon }]}>
+                        Login to continue your journey.
                     </Text>
                 </View>
 
                 <View style={styles.form}>
-                    <View style={[styles.inputContainer, { backgroundColor: colors.surfaceHighlight }]}>
-                        <Ionicons name="mail-outline" size={20} color={colors.icon} style={styles.inputIcon} />
-                        <TextInput
-                            style={[styles.input, { color: colors.text }]}
-                            placeholder="Email"
-                            placeholderTextColor={colors.icon}
-                            value={email}
-                            onChangeText={setEmail}
-                            autoCapitalize="none"
-                            keyboardType="email-address"
-                        />
-                    </View>
+                    <GlassInput
+                        placeholder="Email"
+                        value={email}
+                        onChangeText={setEmail}
+                        icon="mail-outline"
+                    />
+                    <GlassInput
+                        placeholder="Password"
+                        value={password}
+                        onChangeText={setPassword}
+                        icon="lock-closed-outline"
+                        secureTextEntry
+                    />
 
-                    <View style={[styles.inputContainer, { backgroundColor: colors.surfaceHighlight }]}>
-                        <Ionicons name="lock-closed-outline" size={20} color={colors.icon} style={styles.inputIcon} />
-                        <TextInput
-                            style={[styles.input, { color: colors.text }]}
-                            placeholder="Password"
-                            placeholderTextColor={colors.icon}
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry
-                        />
-                    </View>
+                    <PrimaryButton title="Log In" onPress={handleLogin} style={styles.button} />
 
-                    <TouchableOpacity
-                        style={[styles.button, { backgroundColor: colors.primary }]}
-                        onPress={handleLogin}
-                    >
-                        <Text style={styles.buttonText}>Login</Text>
+                    <TouchableOpacity style={styles.forgotButton}>
+                        <Text style={[styles.forgotText, { color: colors.icon }]}>Forgot Password?</Text>
                     </TouchableOpacity>
 
                     <View style={styles.footer}>
@@ -101,74 +87,57 @@ export default function LoginScreen() {
                             Don't have an account?
                         </Text>
                         <TouchableOpacity onPress={() => router.push('/auth/register')}>
-                            <Text style={[styles.link, { color: colors.primary }]}>Register</Text>
+                            <Text style={[styles.link, { color: colors.primary }]}>Sign Up</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
             </KeyboardAvoidingView>
-        </SafeAreaView>
+        </ThemedBackground>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-    },
-    content: {
-        flex: 1,
         padding: 24,
         justifyContent: 'center',
     },
-    backButton: {
-        position: 'absolute',
-        top: 50,
-        left: 24,
-        zIndex: 1,
-    },
     header: {
         marginBottom: 40,
+        alignItems: 'center',
     },
     title: {
         fontSize: 32,
-        fontWeight: 'bold',
+        fontWeight: '800',
         marginBottom: 8,
     },
     subtitle: {
+        fontSize: 24,
+        fontWeight: '600',
+        marginBottom: 8,
+    },
+    description: {
         fontSize: 16,
+        textAlign: 'center',
+        opacity: 0.8,
     },
     form: {
-        gap: 16,
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        height: 56,
-    },
-    inputIcon: {
-        marginRight: 12,
-    },
-    input: {
-        flex: 1,
-        fontSize: 16,
+        width: '100%',
     },
     button: {
-        height: 56,
-        borderRadius: 12,
-        justifyContent: 'center',
-        alignItems: 'center',
         marginTop: 24,
     },
-    buttonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
+    forgotButton: {
+        alignItems: 'center',
+        marginTop: 16,
+    },
+    forgotText: {
+        fontSize: 14,
     },
     footer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: 24,
+        marginTop: 40,
         gap: 8,
     },
     footerText: {

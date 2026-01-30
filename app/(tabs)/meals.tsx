@@ -14,11 +14,14 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   useColorScheme,
   View
 } from 'react-native';
+import { ThemedBackground } from '@/components/ThemedBackground';
+import { GlassCard } from '@/components/GlassCard';
+import { GlassInput } from '@/components/GlassInput';
+import { PrimaryButton } from '@/components/PrimaryButton';
 
 const { width } = Dimensions.get('window');
 
@@ -151,7 +154,7 @@ const MealsScreen = () => {
   };
 
   const MealItem = ({ meal }: { meal: any }) => (
-    <View style={[styles.mealItem, { backgroundColor: colors.surface, shadowColor: colors.text }]}>
+    <GlassCard style={styles.mealItem}>
       <View style={styles.mealHeader}>
         <View style={styles.mealInfo}>
           <Text style={[styles.mealTitle, { color: colors.text }]}>{meal.title}</Text>
@@ -173,7 +176,7 @@ const MealsScreen = () => {
               setShowAIRecommendations(true);
             }}
           >
-            <Ionicons name="add-circle" size={28} color={colors.primary} />
+            <Ionicons name="add-circle" size={32} color={colors.primary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -216,11 +219,11 @@ const MealsScreen = () => {
           <Text style={[styles.emptySubtext, { color: colors.icon }]}>Tap + to suggest a meal</Text>
         </TouchableOpacity>
       )}
-    </View>
+    </GlassCard>
   );
 
   const NutritionSummary = () => (
-    <View style={[styles.nutritionSummary, { backgroundColor: colors.surface, shadowColor: colors.text }]}>
+    <GlassCard style={styles.nutritionSummary}>
       <Text style={[styles.summaryTitle, { color: colors.text }]}>Today's Nutrition</Text>
       <View style={styles.summaryGrid}>
         <View style={styles.summaryItem}>
@@ -259,7 +262,7 @@ const MealsScreen = () => {
           </View>
         </View>
       )}
-    </View>
+    </GlassCard>
   );
 
   const CustomMealModal = () => (
@@ -269,186 +272,175 @@ const MealsScreen = () => {
       presentationStyle="pageSheet"
       onRequestClose={() => setShowCustomMealModal(false)}
     >
-      <SafeAreaView style={[styles.modalContainer, { backgroundColor: colors.background }]}>
-        <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
-          <TouchableOpacity onPress={() => setShowCustomMealModal(false)} style={styles.modalCloseButton}>
-            <Text style={{ color: colors.primary, fontSize: 16 }}>Cancel</Text>
-          </TouchableOpacity>
-          <Text style={[styles.modalTitle, { color: colors.text }]}>Add Custom Meal</Text>
-          <TouchableOpacity onPress={handleAddCustomMeal} style={styles.modalSaveButton}>
-            <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 16 }}>Save</Text>
-          </TouchableOpacity>
-        </View>
+      <ThemedBackground>
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+            <TouchableOpacity onPress={() => setShowCustomMealModal(false)} style={styles.modalCloseButton}>
+              <Text style={{ color: colors.primary, fontSize: 16 }}>Cancel</Text>
+            </TouchableOpacity>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Add Custom Meal</Text>
+            <View style={{ width: 50 }} />
+          </View>
 
-        <ScrollView style={styles.modalContent} keyboardShouldPersistTaps="handled">
-          <View style={styles.inputGroup}>
-            <Text style={[styles.inputLabel, { color: colors.text }]}>Meal Name</Text>
-            <TextInput
-              style={[
-                styles.textInput,
-                { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }
-              ]}
+          <ScrollView style={styles.modalContent} keyboardShouldPersistTaps="handled">
+            <GlassInput
+              placeholder="e.g. Grilled Chicken Salad"
               value={customMealData.name}
               onChangeText={(text) => setCustomMealData(prev => ({ ...prev, name: text }))}
-              placeholder="e.g. Grilled Chicken Salad"
-              placeholderTextColor={colors.icon}
+              label="Meal Name"
             />
-          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={[styles.inputLabel, { color: colors.text }]}>Calories</Text>
-            <TextInput
-              style={[
-                styles.textInput,
-                { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }
-              ]}
+            <GlassInput
+              placeholder="0"
               value={customMealData.calories}
               onChangeText={(text) => setCustomMealData(prev => ({ ...prev, calories: text }))}
-              placeholder="0"
-              placeholderTextColor={colors.icon}
-              keyboardType="numeric"
+              label="Calories"
+            // keyboardType="numeric" // GlassInput needs update
             />
-          </View>
 
-          <View style={styles.macroInputsContainer}>
-            <View style={[styles.inputGroup, { flex: 1 }]}>
-              <Text style={[styles.inputLabel, { color: colors.text }]}>Protein (g)</Text>
-              <TextInput
-                style={[
-                  styles.textInput,
-                  { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }
-                ]}
-                value={customMealData.protein}
-                onChangeText={(text) => setCustomMealData(prev => ({ ...prev, protein: text }))}
-                placeholder="0"
-                placeholderTextColor={colors.icon}
-                keyboardType="numeric"
-              />
+            <View style={styles.macroInputsContainer}>
+              <View style={{ flex: 1 }}>
+                <GlassInput
+                  placeholder="0"
+                  value={customMealData.protein}
+                  onChangeText={(text) => setCustomMealData(prev => ({ ...prev, protein: text }))}
+                  label="Protein (g)"
+                // keyboardType="numeric"
+                />
+              </View>
+
+              <View style={{ flex: 1 }}>
+                <GlassInput
+                  placeholder="0"
+                  value={customMealData.carbs}
+                  onChangeText={(text) => setCustomMealData(prev => ({ ...prev, carbs: text }))}
+                  label="Carbs (g)"
+                // keyboardType="numeric"
+                />
+              </View>
+
+              <View style={{ flex: 1 }}>
+                <GlassInput
+                  placeholder="0"
+                  value={customMealData.fat}
+                  onChangeText={(text) => setCustomMealData(prev => ({ ...prev, fat: text }))}
+                  label="Fat (g)"
+                // keyboardType="numeric"
+                />
+              </View>
             </View>
 
-            <View style={[styles.inputGroup, { flex: 1 }]}>
-              <Text style={[styles.inputLabel, { color: colors.text }]}>Carbs (g)</Text>
-              <TextInput
-                style={[
-                  styles.textInput,
-                  { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }
-                ]}
-                value={customMealData.carbs}
-                onChangeText={(text) => setCustomMealData(prev => ({ ...prev, carbs: text }))}
-                placeholder="0"
-                placeholderTextColor={colors.icon}
-                keyboardType="numeric"
-              />
-            </View>
+            <PrimaryButton
+              title="Save Meal"
+              onPress={handleAddCustomMeal}
+              style={styles.modalSaveButton}
+            />
 
-            <View style={[styles.inputGroup, { flex: 1 }]}>
-              <Text style={[styles.inputLabel, { color: colors.text }]}>Fat (g)</Text>
-              <TextInput
-                style={[
-                  styles.textInput,
-                  { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }
-                ]}
-                value={customMealData.fat}
-                onChangeText={(text) => setCustomMealData(prev => ({ ...prev, fat: text }))}
-                placeholder="0"
-                placeholderTextColor={colors.icon}
-                keyboardType="numeric"
-              />
-            </View>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
+          </ScrollView>
+        </SafeAreaView>
+      </ThemedBackground>
     </Modal>
   );
 
   if (contextLoading) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={[styles.loadingText, { color: colors.icon }]}>Loading your meals...</Text>
-        </View>
-      </SafeAreaView>
+      <ThemedBackground>
+        <SafeAreaView style={styles.container}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={[styles.loadingText, { color: colors.icon }]}>Loading your meals...</Text>
+          </View>
+        </SafeAreaView>
+      </ThemedBackground>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>Meal Tracking</Text>
-          <View style={styles.headerActions}>
+    <ThemedBackground>
+      <SafeAreaView style={styles.container}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>Meal Tracking</Text>
+            <View style={styles.headerActions}>
+              <TouchableOpacity
+                style={[styles.headerButton, { backgroundColor: colors.surfaceHighlight }]}
+                onPress={handleClearAllMeals}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="trash-outline" size={20} color={colors.danger} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Nutrition Summary */}
+          <NutritionSummary />
+
+          {/* Meals List */}
+          <View style={styles.mealsContainer}>
+            <View style={styles.sectionHeader}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Detailed Breakdown</Text>
+            </View>
+            {meals.map((meal) => (
+              <MealItem key={meal.id} meal={meal} />
+            ))}
+          </View>
+
+          {/* Floating Action Buttons / Quick Actions */}
+          <View style={styles.quickActions}>
             <TouchableOpacity
-              style={[styles.headerButton, { backgroundColor: colors.surfaceHighlight }]}
-              onPress={handleClearAllMeals}
+              activeOpacity={0.8}
+              onPress={handleAIRecommendations}
+              style={{ flex: 1 }}
             >
-              <Ionicons name="trash-outline" size={20} color={colors.danger} />
+              <GlassCard style={styles.actionButton}>
+                <View style={[styles.actionIcon, { backgroundColor: colors.primary + '20' }]}>
+                  <Ionicons name="sparkles" size={20} color={colors.primary} />
+                </View>
+                <Text style={[styles.actionText, { color: colors.text }]}>
+                  {!hasCompletedSetup ? 'Start Setup' : 'AI Assistant'}
+                </Text>
+              </GlassCard>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => {
+                setSelectedMealId('breakfast'); // Default to breakfast
+                setShowCustomMealModal(true);
+              }}
+              style={{ flex: 1 }}
+            >
+              <GlassCard style={styles.actionButton}>
+                <View style={[styles.actionIcon, { backgroundColor: colors.secondary + '20' }]}>
+                  <Ionicons name="create-outline" size={20} color={colors.secondary} />
+                </View>
+                <Text style={[styles.actionText, { color: colors.text }]}>Manual Entry</Text>
+              </GlassCard>
             </TouchableOpacity>
           </View>
-        </View>
 
-        {/* Nutrition Summary */}
-        <NutritionSummary />
+          <View style={styles.bottomSpacer} />
+        </ScrollView>
 
-        {/* Meals List */}
-        <View style={styles.mealsContainer}>
-          <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Detailed Breakdown</Text>
-          </View>
-          {meals.map((meal) => (
-            <MealItem key={meal.id} meal={meal} />
-          ))}
-        </View>
+        {/* AI Food Recommendation Modal */}
+        <AIFoodRecommendation
+          visible={showAIRecommendations}
+          onClose={() => {
+            setShowAIRecommendations(false);
+            setSelectedMealId(null);
+          }}
+          onSelectFood={handleSelectFood}
+          selectedMealType={selectedMealId || 'breakfast'}
+        />
 
-        {/* Floating Action Buttons / Quick Actions */}
-        <View style={styles.quickActions}>
-          <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: colors.surface, shadowColor: colors.text }]}
-            onPress={handleAIRecommendations}
-          >
-            <View style={[styles.actionIcon, { backgroundColor: colors.primary + '20' }]}>
-              <Ionicons name="sparkles" size={20} color={colors.primary} />
-            </View>
-            <Text style={[styles.actionText, { color: colors.text }]}>
-              {!hasCompletedSetup ? 'Start Setup' : 'AI Assistant'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: colors.surface, shadowColor: colors.text }]}
-            onPress={() => {
-              setSelectedMealId('breakfast'); // Default to breakfast
-              setShowCustomMealModal(true);
-            }}
-          >
-            <View style={[styles.actionIcon, { backgroundColor: colors.secondary + '20' }]}>
-              <Ionicons name="create-outline" size={20} color={colors.secondary} />
-            </View>
-            <Text style={[styles.actionText, { color: colors.text }]}>Manuel Entry</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.bottomSpacer} />
-      </ScrollView>
-
-      {/* AI Food Recommendation Modal */}
-      <AIFoodRecommendation
-        visible={showAIRecommendations}
-        onClose={() => {
-          setShowAIRecommendations(false);
-          setSelectedMealId(null);
-        }}
-        onSelectFood={handleSelectFood}
-        selectedMealType={selectedMealId || 'breakfast'}
-      />
-
-      {/* Custom Meal Modal */}
-      <CustomMealModal />
-    </SafeAreaView>
+        {/* Custom Meal Modal */}
+        <CustomMealModal />
+      </SafeAreaView>
+    </ThemedBackground>
   );
 };
 
@@ -490,16 +482,16 @@ const styles = StyleSheet.create({
   headerButton: {
     padding: 8,
     borderRadius: 20,
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   nutritionSummary: {
     marginHorizontal: 20,
     marginBottom: 24,
     borderRadius: 24,
     padding: 20,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
   },
   summaryTitle: {
     fontSize: 18,
@@ -559,10 +551,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 16,
     marginBottom: 16,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 1,
   },
   mealHeader: {
     flexDirection: 'row',
@@ -645,10 +633,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
   },
   actionIcon: {
     width: 36,
@@ -680,7 +664,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   modalSaveButton: {
-    padding: 8,
+    marginTop: 24,
   },
   modalTitle: {
     fontSize: 18,
@@ -699,15 +683,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginLeft: 4,
   },
-  textInput: {
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    borderWidth: 1,
-  },
   macroInputsContainer: {
     flexDirection: 'row',
     gap: 12,
   },
-}); 
+});
