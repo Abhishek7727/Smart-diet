@@ -1,13 +1,16 @@
 import { useMealPlan } from "@/components/MealPlanContext";
+import { Colors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
   Dimensions,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 
@@ -15,6 +18,8 @@ const { width } = Dimensions.get("window");
 
 // Home Screen Component
 const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const [selectedView, setSelectedView] = useState("Daily");
   const { meals, nutritionalData, getTotalNutrition, personalInfo } =
     useMealPlan();
@@ -37,179 +42,224 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
     const isOverTarget = value > target;
 
     return (
-      <View style={styles.metricCard}>
-        <View style={[styles.metricIcon, { backgroundColor: color }]}>
-          <Ionicons name={icon as any} size={20} color="white" />
+      <View
+        style={[
+          styles.metricCard,
+          { backgroundColor: colors.surface, shadowColor: colors.text },
+        ]}
+      >
+        <View style={styles.metricHeader}>
+          <View style={[styles.metricIcon, { backgroundColor: color + "20" }]}>
+            <Ionicons name={icon as any} size={20} color={color} />
+          </View>
+          <Text style={[styles.metricTitle, { color: colors.icon }]}>
+            {title}
+          </Text>
         </View>
-        <Text style={styles.metricTitle}>{title}:</Text>
-        <Text style={styles.metricValue}>
-          {value}/{target}
-          {title === "Calorie" ? " kcal" : "g"}
-        </Text>
-        <View style={styles.progressBar}>
+
+        <View style={styles.metricContent}>
+          <Text style={[styles.metricValue, { color: colors.text }]}>
+            {value}
+            <Text style={[styles.metricTarget, { color: colors.icon }]}>
+              /{target}
+            </Text>
+          </Text>
+          <Text style={[styles.metricUnit, { color: colors.icon }]}>
+            {title === "Calorie" ? "kcal" : "g"}
+          </Text>
+        </View>
+
+        <View style={[styles.progressBar, { backgroundColor: colors.surfaceHighlight }]}>
           <View
             style={[
               styles.progressFill,
               {
                 width: `${percentage}%`,
-                backgroundColor: isOverTarget ? "#FF5722" : "#4CAF50",
+                backgroundColor: isOverTarget ? colors.danger : color,
               },
             ]}
           />
         </View>
-        <Text
-          style={[
-            styles.percentageText,
-            { color: isOverTarget ? "#FF5722" : "#4CAF50" },
-          ]}
-        >
-          {percentage.toFixed(0)}%
-        </Text>
       </View>
     );
   };
 
   const MealCard = ({ meal }: { meal: any }) => (
-    <View style={styles.mealCard}>
+    <TouchableOpacity
+      activeOpacity={0.8}
+      style={[
+        styles.mealCard,
+        {
+          backgroundColor: colors.surface,
+          shadowColor: colors.text
+        }
+      ]}
+    >
       <View style={styles.mealHeader}>
-        <View>
-          <Text style={styles.mealTitle}>{meal.title}</Text>
-          <Text style={styles.mealTime}>({meal.time})</Text>
+        <View style={styles.mealIconContainer}>
+          <Ionicons
+            name={meal.id === 'breakfast' ? 'sunny-outline' : meal.id === 'lunch' ? 'restaurant-outline' : meal.id === 'dinner' ? 'moon-outline' : 'cafe-outline'}
+            size={20}
+            color={meal.hasFood ? colors.success : colors.icon}
+          />
         </View>
-        {meal.hasFood ? (
-          <Ionicons name="checkmark" size={20} color="#4CAF50" />
-        ) : (
-          <Ionicons name="add" size={20} color="#999" />
-        )}
+        <View style={styles.mealTitleContainer}>
+          <Text style={[styles.mealTitle, { color: colors.text }]}>
+            {meal.title}
+          </Text>
+          <Text style={[styles.mealTime, { color: colors.icon }]}>
+            {meal.time}
+          </Text>
+        </View>
+        <Ionicons
+          name={meal.hasFood ? "checkmark-circle" : "add-circle"}
+          size={28}
+          color={meal.hasFood ? colors.success : colors.primary}
+        />
       </View>
-      {meal.food && <Text style={styles.mealFood}>{meal.food.name}</Text>}
-    </View>
+
+      {meal.food ? (
+        <View style={[styles.mealFoodContainer, { backgroundColor: colors.surfaceHighlight }]}>
+          <Text style={[styles.mealFood, { color: colors.text }]} numberOfLines={1}>
+            {meal.food.name}
+          </Text>
+          <Text style={[styles.mealCalories, { color: colors.icon }]}>
+            {meal.food.calories} kcal
+          </Text>
+        </View>
+      ) : (
+        <View style={[styles.detailsPlaceholder, { borderColor: colors.border }]}>
+          <Text style={[styles.placeholderText, { color: colors.icon }]}>
+            Tap to add a healthy meal
+          </Text>
+        </View>
+      )}
+    </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         {/* Header */}
         <View style={styles.header}>
-          <View style={styles.dateContainer}>
-            <Ionicons name="time-outline" size={16} color="#666" />
-            <Text style={styles.dateText}>July 14, 2025</Text>
-            <Ionicons name="chevron-down" size={16} color="#666" />
+          <View>
+            <Text style={[styles.greetingText, { color: colors.icon }]}>
+              Hello, {personalInfo?.name?.split(' ')[0] || "Friend"}
+            </Text>
+            <Text style={[styles.questionText, { color: colors.text }]}>
+              Are Your Eating Healthy?
+            </Text>
           </View>
-          <TouchableOpacity>
-            <Ionicons name="person-outline" size={24} color="#333" />
+          <TouchableOpacity
+            style={[styles.profileButton, { backgroundColor: colors.surfaceHighlight }]}
+            onPress={() => onNavigate?.("profile")}
+          >
+            <Ionicons name="person" size={20} color={colors.text} />
           </TouchableOpacity>
-        </View>
-
-        {/* Greeting */}
-        <View style={styles.greetingContainer}>
-          <Text style={styles.greetingText}>Greetings there,</Text>
-          <Text style={styles.questionText}>Are You Eating Healthy?</Text>
         </View>
 
         {/* Metrics */}
-        <View style={styles.metricsContainer}>
-          {personalInfo ? (
-            <>
-              <MetricCard
-                icon="flame"
-                color="#FFC107"
-                title="Calorie"
-                value={totalNutrition.calories}
-                target={nutritionalData.calories}
-              />
-              <MetricCard
-                icon="water"
-                color="#2196F3"
-                title="Protein"
-                value={totalNutrition.protein}
-                target={nutritionalData.protein}
-              />
-              <MetricCard
-                icon="leaf"
-                color="#4CAF50"
-                title="Carbs"
-                value={totalNutrition.carbs}
-                target={nutritionalData.carbs}
-              />
-            </>
-          ) : (
-            <View style={styles.setupPrompt}>
-              <Ionicons name="person-add" size={48} color="#999" />
-              <Text style={styles.setupPromptTitle}>Complete Your Profile</Text>
-              <Text style={styles.setupPromptText}>
-                Set up your personal information to get personalized nutrition
-                targets and AI recommendations.
-              </Text>
-              <TouchableOpacity
-                style={styles.setupButton}
-                onPress={() => onNavigate?.("meals")}
-              >
-                <Text style={styles.setupButtonText}>Go to Meals & Setup</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
+        {personalInfo ? (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.metricsScroll}
+            contentContainerStyle={styles.metricsContainer}
+          >
+            <MetricCard
+              icon="flame"
+              color={colors.warning}
+              title="Calorie"
+              value={totalNutrition.calories}
+              target={nutritionalData.calories}
+            />
+            <MetricCard
+              icon="water"
+              color={colors.primary}
+              title="Protein"
+              value={totalNutrition.protein}
+              target={nutritionalData.protein}
+            />
+            <MetricCard
+              icon="leaf"
+              color={colors.success}
+              title="Carbs"
+              value={totalNutrition.carbs}
+              target={nutritionalData.carbs}
+            />
+            <MetricCard
+              icon="egg"
+              color={colors.secondary}
+              title="Fat"
+              value={totalNutrition.fat}
+              target={nutritionalData.fat}
+            />
+          </ScrollView>
+        ) : (
+          <View style={[styles.setupPrompt, { backgroundColor: colors.surface }]}>
+            <Ionicons name="nutrition" size={48} color={colors.primary} />
+            <Text style={[styles.setupPromptTitle, { color: colors.text }]}>
+              Start Your Journey
+            </Text>
+            <Text style={[styles.setupPromptText, { color: colors.icon }]}>
+              Set up your profile to receive personalized nutrition targets and meal plans.
+            </Text>
+            <TouchableOpacity
+              style={[styles.setupButton, { backgroundColor: colors.primary }]}
+              onPress={() => onNavigate?.("profile")}
+            >
+              <Text style={styles.setupButtonText}>Complete Profile</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* View Toggle */}
-        <View style={styles.toggleContainer}>
+        <View style={[styles.toggleContainer, { backgroundColor: colors.surface }]}>
           <TouchableOpacity
             style={[
               styles.toggleButton,
-              selectedView === "Daily" && styles.toggleButtonActive,
+              selectedView === "Daily" && { backgroundColor: colors.surfaceHighlight },
             ]}
             onPress={() => setSelectedView("Daily")}
           >
-            <Ionicons
-              name="calendar"
-              size={16}
-              color={selectedView === "Daily" ? "#333" : "#999"}
-            />
             <Text
               style={[
                 styles.toggleText,
-                selectedView === "Daily" && styles.toggleTextActive,
+                { color: selectedView === "Daily" ? colors.text : colors.icon },
               ]}
             >
-              Daily
+              Daily Plan
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[
               styles.toggleButton,
-              selectedView === "Weekly" && styles.toggleButtonActive,
+              selectedView === "Weekly" && { backgroundColor: colors.surfaceHighlight },
             ]}
             onPress={() => setSelectedView("Weekly")}
           >
-            <Ionicons
-              name="calendar-outline"
-              size={16}
-              color={selectedView === "Weekly" ? "#333" : "#999"}
-            />
             <Text
               style={[
                 styles.toggleText,
-                selectedView === "Weekly" && styles.toggleTextActive,
+                { color: selectedView === "Weekly" ? colors.text : colors.icon },
               ]}
             >
-              Weekly
+              Weekly Overview
             </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Meals */}
-        <View style={styles.mealsContainer}>
-          <View style={styles.mealRow}>
-            {meals.slice(0, 2).map((meal) => (
-              <MealCard key={meal.id} meal={meal} />
-            ))}
-          </View>
-          <View style={styles.mealRow}>
-            {meals.slice(2, 4).map((meal) => (
-              <MealCard key={meal.id} meal={meal} />
-            ))}
-          </View>
+        {/* Meals Grid */}
+        <View style={styles.mealsGrid}>
+          {meals.map((meal) => (
+            <MealCard key={meal.id} meal={meal} />
+          ))}
         </View>
+
+        <View style={styles.bottomSpacer} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -220,184 +270,201 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f1e3ec",
+  },
+  scrollContent: {
+    paddingTop: Platform.OS === 'android' ? 40 : 10,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
     paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 24,
-  },
-  dateContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  dateText: {
-    fontSize: 16,
-    color: "#666",
-  },
-  greetingContainer: {
-    paddingHorizontal: 24,
-    marginBottom: 36,
+    marginBottom: 24,
   },
   greetingText: {
-    fontSize: 26,
-    color: "#999",
-    fontWeight: "300",
+    fontSize: 16,
+    marginBottom: 4,
+    fontWeight: "500",
   },
   questionText: {
-    fontSize: 32,
-    color: "#333",
-    fontWeight: "bold",
-    marginTop: 8,
+    fontSize: 24,
+    fontWeight: "800",
+    letterSpacing: -0.5,
+    maxWidth: '80%',
+  },
+  profileButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  metricsScroll: {
+    paddingLeft: 24,
+    marginBottom: 32,
   },
   metricsContainer: {
-    flexDirection: "row",
-    paddingHorizontal: 24,
-    gap: 16,
-    marginBottom: 36,
+    paddingRight: 24,
+    gap: 12,
   },
   metricCard: {
-    flex: 1,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 20,
+    width: 140,
+    height: 160,
+    borderRadius: 24,
+    padding: 16,
+    justifyContent: "space-between",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  metricHeader: {
+    flexDirection: "row",
     alignItems: "center",
-    minHeight: 120,
+    marginBottom: 8,
   },
   metricIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
+    marginRight: 8,
   },
   metricTitle: {
     fontSize: 14,
-    color: "#666",
-    marginBottom: 6,
+    fontWeight: "600",
+  },
+  metricContent: {
+    marginVertical: 4,
   },
   metricValue: {
+    fontSize: 22,
+    fontWeight: "800",
+  },
+  metricTarget: {
     fontSize: 14,
-    color: "#333",
-    fontWeight: "600",
+    fontWeight: "400",
+  },
+  metricUnit: {
+    fontSize: 12,
+    marginTop: 2,
   },
   progressBar: {
     width: "100%",
-    height: 8,
-    backgroundColor: "#e0e0e0",
-    borderRadius: 4,
-    marginTop: 10,
-    marginBottom: 10,
+    height: 6,
+    borderRadius: 3,
+    overflow: "hidden",
   },
   progressFill: {
     height: "100%",
-    borderRadius: 4,
-  },
-  percentageText: {
-    fontSize: 14,
-    fontWeight: "600",
+    borderRadius: 3,
   },
   toggleContainer: {
     flexDirection: "row",
-    paddingHorizontal: 24,
-    marginBottom: 24,
-    backgroundColor: "white",
+    padding: 4,
     marginHorizontal: 24,
     borderRadius: 16,
-    padding: 6,
+    marginBottom: 24,
   },
   toggleButton: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 16,
+    paddingVertical: 12,
     borderRadius: 12,
-    gap: 8,
-  },
-  toggleButtonActive: {
-    backgroundColor: "#f1e3ec",
+    alignItems: "center",
   },
   toggleText: {
-    fontSize: 16,
-    color: "#999",
-  },
-  toggleTextActive: {
-    color: "#333",
+    fontSize: 14,
     fontWeight: "600",
   },
-  mealsContainer: {
+  mealsGrid: {
     paddingHorizontal: 24,
     gap: 16,
-  },
-  mealRow: {
-    flexDirection: "row",
-    gap: 16,
+    flexDirection: 'column', // Ensures full width cards
   },
   mealCard: {
-    flex: 1,
-    backgroundColor: "white",
     borderRadius: 20,
-    padding: 20,
-    minHeight: 120,
+    padding: 16,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   mealHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 12,
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  mealIconContainer: {
+    marginRight: 12,
+  },
+  mealTitleContainer: {
+    flex: 1,
   },
   mealTitle: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: "700",
   },
   mealTime: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 4,
+    fontSize: 13,
+    marginTop: 2,
+  },
+  mealFoodContainer: {
+    padding: 12,
+    borderRadius: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   mealFood: {
-    fontSize: 16,
-    color: "#666",
-    marginTop: 12,
+    fontSize: 15,
+    fontWeight: "600",
+    flex: 1,
+    marginRight: 8,
+  },
+  mealCalories: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  detailsPlaceholder: {
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    alignItems: 'center',
+  },
+  placeholderText: {
+    fontSize: 14,
   },
   setupPrompt: {
+    marginHorizontal: 24,
+    padding: 24,
+    borderRadius: 24,
     alignItems: "center",
-    padding: 20,
-    backgroundColor: "#f1e3ec",
-    borderRadius: 20,
-    marginTop: 20,
+    marginBottom: 32,
   },
   setupPromptTitle: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "#333",
-    marginTop: 15,
-    marginBottom: 10,
+    fontWeight: "800",
+    marginTop: 16,
+    marginBottom: 8,
   },
   setupPromptText: {
-    fontSize: 16,
-    color: "#666",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 24,
+    lineHeight: 22,
   },
   setupButton: {
-    backgroundColor: "transparent",
-    borderWidth: 2,
-    borderColor: "#666",
-    paddingVertical: 15,
-    paddingHorizontal: 30,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
     borderRadius: 12,
   },
   setupButtonText: {
-    color: "#666",
-    fontSize: 18,
-    fontWeight: "bold",
+    color: "white",
+    fontWeight: "700",
+    fontSize: 16,
   },
+  bottomSpacer: {
+    height: 100,
+  }
 });
