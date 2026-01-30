@@ -3,54 +3,66 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
-const tintColorLight = '#10B981'; // Emerald 500
-const tintColorDark = '#34D399'; // Emerald 400
+const tintColorLight = '#D4FF00'; // Neon Lime
+const tintColorDark = '#D4FF00'; // Neon Lime
 
 export const Colors = {
   light: {
-    text: '#1E293B', // Slate 800
-    background: '#F2F5F8', // Soft Blue-Grey for better contrast with white cards
+    text: '#FFFFFF',
+    background: '#050511', // Deep Dark Blue/Black
     tint: tintColorLight,
-    icon: '#64748B', // Slate 500
-    tabIconDefault: '#94A3B8', // Slate 400
+    icon: '#A0A0A0',
+    tabIconDefault: '#64748B',
     tabIconSelected: tintColorLight,
-    primary: '#10B981', // Emerald 500
-    secondary: '#F97316', // Orange 500
-    surface: '#FFFFFF',
-    surfaceHighlight: '#F1F5F9', // Slate 100
-    danger: '#EF4444', // Red 500
-    success: '#10B981', // Emerald 500
-    warning: '#F59E0B', // Amber 500
-    border: '#E2E8F0', // Slate 200
+    primary: '#D4FF00', // Neon Lime
+    secondary: '#FF5500', // Neon Orange
+    tertiary: '#00FFFF', // Neon Cyan
+    surface: 'rgba(30, 41, 59, 0.7)', // Translucent dark slate
+    surfaceHighlight: 'rgba(255, 255, 255, 0.05)',
+    danger: '#FF3333',
+    success: '#00FF99', // Neon Green
+    warning: '#FFCC00',
+    border: 'rgba(255, 255, 255, 0.1)',
     shadow: {
-      shadowColor: '#1E293B',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.08,
-      shadowRadius: 12,
-      elevation: 4,
+      shadowColor: '#D4FF00',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.1,
+      shadowRadius: 10,
+      elevation: 2,
+    },
+    glass: {
+      backgroundColor: 'rgba(20, 20, 30, 0.6)',
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      borderWidth: 1,
     }
   },
   dark: {
-    text: '#F1F5F9', // Slate 100
-    background: '#0F172A', // Slate 900
+    text: '#FFFFFF',
+    background: '#050511', // Deep Dark Blue/Black
     tint: tintColorDark,
-    icon: '#94A3B8', // Slate 400
-    tabIconDefault: '#64748B', // Slate 500
+    icon: '#A0A0A0',
+    tabIconDefault: '#94A3B8', // Slate 400
     tabIconSelected: tintColorDark,
-    primary: '#34D399', // Emerald 400
-    secondary: '#FB923C', // Orange 400
-    surface: '#1E293B', // Slate 800
-    surfaceHighlight: '#334155', // Slate 700
-    danger: '#F87171', // Red 400
-    success: '#34D399', // Emerald 400
-    warning: '#FBBF24', // Amber 400
-    border: '#334155', // Slate 700
+    primary: '#D4FF00', // Neon Lime
+    secondary: '#FF5500', // Neon Orange
+    tertiary: '#00FFFF', // Neon Cyan
+    surface: 'rgba(30, 41, 59, 0.7)', // Translucent dark slate
+    surfaceHighlight: 'rgba(255, 255, 255, 0.05)',
+    danger: '#FF3333',
+    success: '#00FF99', // Neon Green
+    warning: '#FFCC00',
+    border: 'rgba(255, 255, 255, 0.1)',
     shadow: {
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 12,
-      elevation: 4,
+      shadowColor: '#D4FF00',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.1,
+      shadowRadius: 10,
+      elevation: 2,
+    },
+    glass: {
+      backgroundColor: 'rgba(20, 20, 30, 0.6)',
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      borderWidth: 1,
     }
   },
 };

@@ -12,7 +12,9 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useColorScheme,
 } from "react-native";
+import { Colors } from "@/constants/Colors";
 import { useMealPlan } from "./MealPlanContext";
 import PersonalInfoModal from "./PersonalInfoModal";
 
@@ -446,6 +448,9 @@ const AIFoodRecommendation: React.FC<AIFoodRecommendationProps> = ({
     );
   };
 
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
+
   const handleSelectFood = (food: FoodItem) => {
     onSelectFood(food);
     onClose();
@@ -453,26 +458,26 @@ const AIFoodRecommendation: React.FC<AIFoodRecommendationProps> = ({
 
   const FoodCard = ({ food }: { food: FoodItem }) => (
     <TouchableOpacity
-      style={styles.foodCard}
+      style={[styles.foodCard, { ...colors.glass, ...colors.shadow }]}
       onPress={() => handleSelectFood(food)}
     >
       <View style={styles.foodHeader}>
-        <Text style={styles.foodName}>{food.name}</Text>
-        <Text style={styles.foodCalories}>{food.calories} kcal</Text>
+        <Text style={[styles.foodName, { color: colors.text }]}>{food.name}</Text>
+        <Text style={[styles.foodCalories, { color: colors.primary }]}>{food.calories} kcal</Text>
       </View>
 
       <View style={styles.nutritionInfo}>
         <View style={styles.nutritionItem}>
-          <Text style={styles.nutritionLabel}>Protein</Text>
-          <Text style={styles.nutritionValue}>{food.protein}g</Text>
+          <Text style={[styles.nutritionLabel, { color: colors.icon }]}>Protein</Text>
+          <Text style={[styles.nutritionValue, { color: colors.text }]}>{food.protein}g</Text>
         </View>
         <View style={styles.nutritionItem}>
-          <Text style={styles.nutritionLabel}>Carbs</Text>
-          <Text style={styles.nutritionValue}>{food.carbs}g</Text>
+          <Text style={[styles.nutritionLabel, { color: colors.icon }]}>Carbs</Text>
+          <Text style={[styles.nutritionValue, { color: colors.text }]}>{food.carbs}g</Text>
         </View>
         <View style={styles.nutritionItem}>
-          <Text style={styles.nutritionLabel}>Fat</Text>
-          <Text style={styles.nutritionValue}>{food.fat}g</Text>
+          <Text style={[styles.nutritionLabel, { color: colors.icon }]}>Fat</Text>
+          <Text style={[styles.nutritionValue, { color: colors.text }]}>{food.fat}g</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -492,8 +497,8 @@ const AIFoodRecommendation: React.FC<AIFoodRecommendationProps> = ({
     if (isLoading) {
       return (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#4CAF50" />
-          <Text style={styles.loadingText}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.loadingText, { color: colors.icon }]}>
             Generating personalized recommendations...
           </Text>
         </View>
@@ -503,21 +508,21 @@ const AIFoodRecommendation: React.FC<AIFoodRecommendationProps> = ({
     if (recommendations.length === 0) {
       return (
         <View style={styles.emptyContainer}>
-          <Ionicons name="restaurant-outline" size={64} color="#CCC" />
-          <Text style={styles.emptyTitle}>AI Recommendations</Text>
-          <Text style={styles.emptyDescription}>
+          <Ionicons name="restaurant-outline" size={64} color={colors.icon} />
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>AI Recommendations</Text>
+          <Text style={[styles.emptyDescription, { color: colors.icon }]}>
             Get personalized meal suggestions based on your profile and goals.
           </Text>
 
           {!hasCompletedSetup && (
             <View style={styles.setupSection}>
-              <Text style={styles.setupTitle}>Complete Your Profile</Text>
-              <Text style={styles.setupDescription}>
+              <Text style={[styles.setupTitle, { color: colors.text }]}>Complete Your Profile</Text>
+              <Text style={[styles.setupDescription, { color: colors.icon }]}>
                 We need your age, gender, height, weight, activity level, and
                 goals to provide personalized recommendations.
               </Text>
               <TouchableOpacity
-                style={styles.setupButton}
+                style={[styles.setupButton, { backgroundColor: colors.primary }]}
                 onPress={() => setShowPersonalInfoModal(true)}
               >
                 <Ionicons name="person-add" size={20} color="white" />
@@ -530,13 +535,13 @@ const AIFoodRecommendation: React.FC<AIFoodRecommendationProps> = ({
 
           {hasCompletedSetup && !hasApiKey && (
             <View style={styles.setupSection}>
-              <Text style={styles.setupTitle}>Set Up AI Recommendations</Text>
-              <Text style={styles.setupDescription}>
+              <Text style={[styles.setupTitle, { color: colors.text }]}>Set Up AI Recommendations</Text>
+              <Text style={[styles.setupDescription, { color: colors.icon }]}>
                 Add your Gemini API key to get personalized AI-powered meal
                 suggestions.
               </Text>
               <TouchableOpacity
-                style={styles.setupButton}
+                style={[styles.setupButton, { backgroundColor: colors.primary }]}
                 onPress={() => {
                   onClose();
                   // Navigate to settings
@@ -550,15 +555,15 @@ const AIFoodRecommendation: React.FC<AIFoodRecommendationProps> = ({
 
           {hasCompletedSetup && hasApiKey && (
             <View style={styles.setupSection}>
-              <Text style={styles.setupTitle}>
+              <Text style={[styles.setupTitle, { color: colors.text }]}>
                 Ready for AI Recommendations
               </Text>
-              <Text style={styles.setupDescription}>
+              <Text style={[styles.setupDescription, { color: colors.icon }]}>
                 Your profile is complete and API key is configured. Generate
                 personalized meal suggestions.
               </Text>
               <TouchableOpacity
-                style={styles.generateButton}
+                style={[styles.generateButton, { backgroundColor: colors.secondary }]}
                 onPress={generateRecommendations}
               >
                 <Ionicons name="bulb" size={20} color="white" />
@@ -578,17 +583,17 @@ const AIFoodRecommendation: React.FC<AIFoodRecommendationProps> = ({
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>AI Recommendations</Text>
-          <Text style={styles.headerSubtitle}>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>AI Recommendations</Text>
+          <Text style={[styles.headerSubtitle, { color: colors.icon }]}>
             Personalized for {personalInfo?.name || "you"}
           </Text>
           {personalInfo && (
-            <View style={styles.profileInfo}>
-              <Text style={styles.profileText}>
+            <View style={[styles.profileInfo, { backgroundColor: colors.surfaceHighlight }]}>
+              <Text style={[styles.profileText, { color: colors.success }]}>
                 {personalInfo.age} years old • {personalInfo.gender} •{" "}
                 {personalInfo.weight}kg • {personalInfo.height}cm
               </Text>
-              <Text style={styles.profileText}>
+              <Text style={[styles.profileText, { color: colors.success }]}>
                 Goal: {personalInfo.goal.replace("_", " ")} • Target:{" "}
                 {personalInfo.targetCalories} kcal
               </Text>
@@ -606,8 +611,8 @@ const AIFoodRecommendation: React.FC<AIFoodRecommendationProps> = ({
           style={styles.regenerateButton}
           onPress={generateRecommendations}
         >
-          <Ionicons name="refresh" size={20} color="#4CAF50" />
-          <Text style={styles.regenerateButtonText}>
+          <Ionicons name="refresh" size={20} color={colors.success} />
+          <Text style={[styles.regenerateButtonText, { color: colors.success }]}>
             Generate New Recommendations
           </Text>
         </TouchableOpacity>
@@ -622,13 +627,13 @@ const AIFoodRecommendation: React.FC<AIFoodRecommendationProps> = ({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         {/* Header */}
-        <View style={styles.modalHeader}>
+        <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
           <TouchableOpacity onPress={onClose}>
-            <Ionicons name="close" size={24} color="#333" />
+            <Ionicons name="close" size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text>AI Food Recommendations</Text>
+          <Text style={{ color: colors.text, fontSize: 18, fontWeight: '600' }}>AI Food Recommendations</Text>
           <View />
         </View>
 

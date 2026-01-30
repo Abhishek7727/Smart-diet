@@ -23,7 +23,6 @@ const SettingsScreen = () => {
   const [geminiApiKey, setGeminiApiKey] = useState('');
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [darkModeEnabled, setDarkModeEnabled] = useState(false);
   const [storageStats, setStorageStats] = useState({
     hasPersonalInfo: false,
     hasMeals: false,
@@ -188,7 +187,7 @@ const SettingsScreen = () => {
   );
 
   const SettingsGroup = ({ children }: { children: React.ReactNode }) => (
-    <View style={[styles.settingsGroup, { backgroundColor: colors.surface, ...colors.shadow }]}>
+    <View style={[styles.settingsGroup, { ...colors.glass, ...colors.shadow }]}>
       {children}
     </View>
   );
@@ -222,7 +221,10 @@ const SettingsScreen = () => {
               3. Click "Create API Key"
             </Text>
             <Text style={[styles.modalText, { color: colors.icon }]}>
-              4. Copy the generated key and paste it below
+              4. Copy the generated key (starts with "AIza") and paste it below.
+            </Text>
+            <Text style={[styles.modalText, { color: colors.primary, marginTop: 8 }]}>
+              Note: The AI features improve the more updated your profile is!
             </Text>
           </View>
 
@@ -297,15 +299,6 @@ const SettingsScreen = () => {
               switchValue={notificationsEnabled}
               onSwitchChange={setNotificationsEnabled}
               showArrow={false}
-            />
-            <SettingItem
-              icon="moon"
-              title="Dark Mode"
-              subtitle="Use dark theme"
-              showSwitch={true}
-              switchValue={darkModeEnabled}
-              onSwitchChange={setDarkModeEnabled}
-              showArrow={false}
               isLast={true}
             />
           </SettingsGroup>
@@ -334,7 +327,7 @@ const SettingsScreen = () => {
         {/* Storage Statistics */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Storage Statistics</Text>
-          <View style={[styles.statsContainer, { backgroundColor: colors.surface, ...colors.shadow }]}>
+          <View style={[styles.statsContainer, { ...colors.glass, ...colors.shadow }]}>
             <View style={styles.statItem}>
               <Text style={[styles.statLabel, { color: colors.icon }]}>Personal Info</Text>
               <Text style={[styles.statValue, { color: storageStats.hasPersonalInfo ? colors.success : colors.danger }]}>
@@ -356,7 +349,7 @@ const SettingsScreen = () => {
           </View>
 
           {/* localStorage Details */}
-          <View style={[styles.localStorageContainer, { backgroundColor: colors.surface, ...colors.shadow }]}>
+          <View style={[styles.localStorageContainer, { ...colors.glass, ...colors.shadow }]}>
             <Text style={[styles.localStorageTitle, { color: colors.text }]}>localStorage Contents</Text>
             <Text style={[styles.localStorageDescription, { color: colors.icon }]}>
               This shows what data is currently stored in your device's localStorage:

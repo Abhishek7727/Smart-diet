@@ -36,9 +36,9 @@ const StatsScreen = () => {
   };
 
   const chartConfig = {
-    backgroundColor: colors.surface,
-    backgroundGradientFrom: colors.surface,
-    backgroundGradientTo: colors.surface,
+    backgroundColor: 'transparent',
+    backgroundGradientFrom: 'transparent',
+    backgroundGradientTo: 'transparent',
     decimalPlaces: 0,
     color: (opacity = 1) => colors.primary,
     labelColor: (opacity = 1) => colors.icon,
@@ -65,7 +65,7 @@ const StatsScreen = () => {
     value: number;
     target: number;
   }) => (
-    <View style={[styles.statCard, { backgroundColor: colors.surface, ...colors.shadow }]}>
+    <View style={[styles.statCard, { ...colors.glass, ...colors.shadow }]}>
       <View style={styles.statCardHeader}>
         <View style={[styles.statIcon, { backgroundColor: color }]}>
           <Ionicons name={icon as any} size={16} color="white" />
@@ -94,7 +94,7 @@ const StatsScreen = () => {
 
         {/* Smiley Icon */}
         <View style={styles.smileyContainer}>
-          <View style={[styles.smileyIcon, { backgroundColor: colors.surface, ...colors.shadow }]}>
+          <View style={[styles.smileyIcon, { ...colors.glass, ...colors.shadow }]}>
             <Text style={styles.smileyText}>😊</Text>
           </View>
         </View>
@@ -112,7 +112,7 @@ const StatsScreen = () => {
         </View>
 
         {/* View Toggle */}
-        <View style={[styles.toggleContainer, { backgroundColor: colors.surface, ...colors.shadow }]}>
+        <View style={[styles.toggleContainer, { ...colors.glass, ...colors.shadow }]}>
           <TouchableOpacity
             style={[
               styles.toggleButton,

@@ -31,7 +31,7 @@ const ProfileScreen = () => {
     value: string;
     subtitle?: string;
   }) => (
-    <View style={[styles.profileCard, { backgroundColor: colors.surface, ...colors.shadow }]}>
+    <View style={[styles.profileCard, { ...colors.glass, ...colors.shadow }]}>
       <View style={[styles.profileIcon, { backgroundColor: color }]}>
         <Ionicons name={icon as any} size={20} color="white" />
       </View>
@@ -56,7 +56,7 @@ const ProfileScreen = () => {
   }) => (
     <View style={[
       styles.achievementCard,
-      { backgroundColor: colors.surface },
+      { ...colors.glass },
       achieved ? colors.shadow : { opacity: 0.7, borderWidth: 1, borderColor: colors.border }
     ]}>
       <View style={[
@@ -90,7 +90,7 @@ const ProfileScreen = () => {
 
         {/* User Info */}
         <View style={styles.userSection}>
-          <View style={[styles.avatarContainer, { backgroundColor: colors.surface, ...colors.shadow }]}>
+          <View style={[styles.avatarContainer, { ...colors.glass, ...colors.shadow }]}>
             <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
               <Text style={styles.avatarText}>T</Text>
             </View>
@@ -177,7 +177,7 @@ const ProfileScreen = () => {
             ].map((action, index) => (
               <TouchableOpacity
                 key={index}
-                style={[styles.actionButton, { backgroundColor: colors.surface, ...colors.shadow }]}
+                style={[styles.actionButton, { ...colors.glass, ...colors.shadow }]}
               >
                 <Ionicons name={action.icon as any} size={20} color={colors.primary} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{action.label}</Text>

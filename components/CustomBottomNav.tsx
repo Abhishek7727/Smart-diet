@@ -1,11 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import React from 'react';
 import {
-    Animated,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  Animated,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Platform
 } from 'react-native';
+import { Colors } from '@/constants/Colors';
 
 export interface NavItem {
   id: string;
@@ -18,75 +21,94 @@ interface CustomBottomNavProps {
   items: NavItem[];
   activeTab: string;
   onTabPress: (id: string) => void;
-  backgroundColor?: string;
-  activeBackgroundColor?: string;
-  iconColor?: string;
-  activeIconColor?: string;
+  // Deprecated/Unused props removed/ignored for new branding
 }
 
 export const CustomBottomNav: React.FC<CustomBottomNavProps> = ({
   items,
   activeTab,
   onTabPress,
-  backgroundColor = 'white',
-  activeBackgroundColor = '#f1e3ec',
-  iconColor = '#666',
-  activeIconColor = '#333',
 }) => {
+  // We use fixed neon colors for the new theme
+  const activeColor = Colors.dark.primary;
+  const inactiveColor = Colors.dark.icon;
+
   return (
-    <View style={[styles.bottomNav, { backgroundColor }]}>
-      {items.map((item, index) => {
-        const isActive = activeTab === item.id;
-        
-        return (
-          <TouchableOpacity
-            key={item.id}
-            style={styles.navItem}
-            onPress={() => onTabPress(item.id)}
-            activeOpacity={0.7}
-          >
-            <Animated.View style={[
-              styles.iconContainer,
-              isActive && { backgroundColor: activeBackgroundColor }
-            ]}>
-              <Ionicons
-                name={isActive ? item.activeIcon as any : item.icon as any}
-                size={24}
-                color={isActive ? activeIconColor : iconColor}
-              />
-            </Animated.View>
-          </TouchableOpacity>
-        );
-      })}
+    <View style={styles.container}>
+      <BlurView intensity={80} tint="dark" style={styles.blurContainer}>
+        <View style={styles.tabRow}>
+          {items.map((item) => {
+            const isActive = activeTab === item.id;
+
+            return (
+              <TouchableOpacity
+                key={item.id}
+                style={styles.navItem}
+                onPress={() => onTabPress(item.id)}
+                activeOpacity={0.7}
+              >
+                <Animated.View style={[
+                  styles.iconContainer,
+                  isActive && {
+                    backgroundColor: 'rgba(212, 255, 0, 0.15)', // Neon Lime low opacity
+                    shadowColor: activeColor,
+                    shadowOpacity: 0.5,
+                    shadowRadius: 8,
+                  }
+                ]}>
+                  <Ionicons
+                    name={isActive ? item.activeIcon as any : item.icon as any}
+                    size={24}
+                    color={isActive ? activeColor : inactiveColor}
+                  />
+                </Animated.View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </BlurView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  bottomNav: {
-    flexDirection: 'row',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: -2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+  container: {
+    position: 'absolute',
+    bottom: 30,
+    left: 20,
+    right: 20,
+    borderRadius: 35,
+    overflow: 'hidden',
+    shadowColor: Colors.dark.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 15,
     elevation: 10,
+  },
+  blurContainer: {
+    width: '100%',
+    borderRadius: 35,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(10, 10, 20, 0.75)', // Slight dark tint for glass
+  },
+  tabRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    paddingVertical: 15,
+    paddingHorizontal: 10,
   },
   navItem: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
   },
   iconContainer: {
-    padding: 8,
-    borderRadius: 12,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

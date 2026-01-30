@@ -45,7 +45,7 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
       <View
         style={[
           styles.metricCard,
-          { backgroundColor: colors.surface, ...colors.shadow },
+          { ...colors.glass, ...colors.shadow },
         ]}
       >
         <View style={styles.metricHeader}>
@@ -90,7 +90,7 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
       style={[
         styles.mealCard,
         {
-          backgroundColor: colors.surface,
+          ...colors.glass,
           ...colors.shadow
         }
       ]}
@@ -199,7 +199,7 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
             />
           </ScrollView>
         ) : (
-          <View style={[styles.setupPrompt, { backgroundColor: colors.surface, ...colors.shadow }]}>
+          <View style={[styles.setupPrompt, { ...colors.glass, ...colors.shadow }]}>
             <Ionicons name="nutrition" size={48} color={colors.primary} />
             <Text style={[styles.setupPromptTitle, { color: colors.text }]}>
               Start Your Journey
@@ -217,7 +217,7 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
         )}
 
         {/* View Toggle */}
-        <View style={[styles.toggleContainer, { backgroundColor: colors.surface, ...colors.shadow }]}>
+        <View style={[styles.toggleContainer, { ...colors.glass, ...colors.shadow }]}>
           <TouchableOpacity
             style={[
               styles.toggleButton,

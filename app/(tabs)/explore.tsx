@@ -1,5 +1,4 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet, useColorScheme, View } from 'react-native';
+import { Platform, StyleSheet, useColorScheme, View, Image } from 'react-native';
 
 import { Collapsible } from '@/components/Collapsible';
 import { ExternalLink } from '@/components/ExternalLink';
@@ -29,7 +28,7 @@ export default function TabTwoScreen() {
       </ThemedView>
       <ThemedText style={{ marginBottom: 16 }}>This app includes example code to help you get started.</ThemedText>
 
-      <View style={[styles.card, { backgroundColor: colors.surface, ...colors.shadow }]}>
+      <View style={[styles.card, { ...colors.glass, ...colors.shadow }]}>
         <Collapsible title="File-based routing">
           <ThemedText>
             This app has two screens:{' '}
