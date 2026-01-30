@@ -45,7 +45,7 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
       <View
         style={[
           styles.metricCard,
-          { backgroundColor: colors.surface, shadowColor: colors.text },
+          { backgroundColor: colors.surface, ...colors.shadow },
         ]}
       >
         <View style={styles.metricHeader}>
@@ -91,7 +91,7 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
         styles.mealCard,
         {
           backgroundColor: colors.surface,
-          shadowColor: colors.text
+          ...colors.shadow
         }
       ]}
     >
@@ -199,7 +199,7 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
             />
           </ScrollView>
         ) : (
-          <View style={[styles.setupPrompt, { backgroundColor: colors.surface }]}>
+          <View style={[styles.setupPrompt, { backgroundColor: colors.surface, ...colors.shadow }]}>
             <Ionicons name="nutrition" size={48} color={colors.primary} />
             <Text style={[styles.setupPromptTitle, { color: colors.text }]}>
               Start Your Journey
@@ -217,7 +217,7 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
         )}
 
         {/* View Toggle */}
-        <View style={[styles.toggleContainer, { backgroundColor: colors.surface }]}>
+        <View style={[styles.toggleContainer, { backgroundColor: colors.surface, ...colors.shadow }]}>
           <TouchableOpacity
             style={[
               styles.toggleButton,
@@ -313,10 +313,6 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 16,
     justifyContent: "space-between",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
   },
   metricHeader: {
     flexDirection: "row",
@@ -385,10 +381,6 @@ const styles = StyleSheet.create({
   mealCard: {
     borderRadius: 20,
     padding: 16,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
   },
   mealHeader: {
     flexDirection: "row",

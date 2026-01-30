@@ -9,7 +9,7 @@ const tintColorDark = '#34D399'; // Emerald 400
 export const Colors = {
   light: {
     text: '#1E293B', // Slate 800
-    background: '#FAFAFA', // Zinc 50
+    background: '#F2F5F8', // Soft Blue-Grey for better contrast with white cards
     tint: tintColorLight,
     icon: '#64748B', // Slate 500
     tabIconDefault: '#94A3B8', // Slate 400
@@ -22,6 +22,13 @@ export const Colors = {
     success: '#10B981', // Emerald 500
     warning: '#F59E0B', // Amber 500
     border: '#E2E8F0', // Slate 200
+    shadow: {
+      shadowColor: '#1E293B',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      elevation: 4,
+    }
   },
   dark: {
     text: '#F1F5F9', // Slate 100
@@ -38,5 +45,12 @@ export const Colors = {
     success: '#34D399', // Emerald 400
     warning: '#FBBF24', // Amber 400
     border: '#334155', // Slate 700
+    shadow: {
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 12,
+      elevation: 4,
+    }
   },
 };

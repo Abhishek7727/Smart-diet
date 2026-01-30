@@ -1,4 +1,5 @@
 import { useMealPlan } from '@/components/MealPlanContext';
+import { Colors } from '@/constants/Colors';
 import StorageService from '@/services/StorageService';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
@@ -12,10 +13,13 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from 'react-native';
 
 const SettingsScreen = () => {
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
   const [geminiApiKey, setGeminiApiKey] = useState('');
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -70,9 +74,9 @@ const SettingsScreen = () => {
       'Are you sure you want to clear your Gemini API key? This will disable AI recommendations.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Clear', 
-          style: 'destructive', 
+        {
+          text: 'Clear',
+          style: 'destructive',
           onPress: async () => {
             try {
               await StorageService.clearGeminiApiKey();
@@ -95,42 +99,30 @@ const SettingsScreen = () => {
       'This will permanently delete ALL data stored in your device:\n\n• Personal information\n• Meal data\n• API keys\n• App settings\n\nThis action cannot be undone and will reset the app to its initial state.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Clear Everything', 
-          style: 'destructive', 
+        {
+          text: 'Clear Everything',
+          style: 'destructive',
           onPress: async () => {
             try {
-              // Show loading state
               Alert.alert(
                 'Clearing Data...',
                 'Please wait while we clear all localStorage data.',
                 [],
                 { cancelable: false }
               );
-              
-              // Clear all data from localStorage
+
               await StorageService.clearAllData();
-              
-              // Clear context state
+
               clearPersonalInfo();
               clearAllMeals();
               setGeminiApiKey('');
-              
-              // Reload settings to reflect changes
+
               await loadSettings();
-              
-              // Show success message
+
               Alert.alert(
                 'Data Cleared Successfully!',
                 'All localStorage data has been permanently deleted. The app has been reset to its initial state.',
-                [
-                  {
-                    text: 'OK',
-                    onPress: () => {
-                      // Optionally navigate to home or show setup screen
-                    }
-                  }
-                ]
+                [{ text: 'OK' }]
               );
             } catch (error) {
               console.error('Error clearing all data:', error);
@@ -146,15 +138,16 @@ const SettingsScreen = () => {
     );
   };
 
-  const SettingItem = ({ 
-    icon, 
-    title, 
-    subtitle, 
-    onPress, 
-    showSwitch = false, 
-    switchValue = false, 
-    onSwitchChange = () => {},
-    showArrow = true 
+  const SettingItem = ({
+    icon,
+    title,
+    subtitle,
+    onPress,
+    showSwitch = false,
+    switchValue = false,
+    onSwitchChange = () => { },
+    showArrow = true,
+    isLast = false
   }: {
     icon: string;
     title: string;
@@ -164,30 +157,40 @@ const SettingsScreen = () => {
     switchValue?: boolean;
     onSwitchChange?: (value: boolean) => void;
     showArrow?: boolean;
+    isLast?: boolean;
   }) => (
-    <TouchableOpacity 
-      style={styles.settingItem} 
-      onPress={onPress}
-      disabled={!onPress}
-    >
-      <View style={styles.settingIcon}>
-        <Ionicons name={icon as any} size={24} color="#4CAF50" />
-      </View>
-      <View style={styles.settingContent}>
-        <Text style={styles.settingTitle}>{title}</Text>
-        {subtitle && <Text style={styles.settingSubtitle}>{subtitle}</Text>}
-      </View>
-      {showSwitch ? (
-        <Switch
-          value={switchValue}
-          onValueChange={onSwitchChange}
-          trackColor={{ false: '#E0E0E0', true: '#4CAF50' }}
-          thumbColor={switchValue ? '#fff' : '#f4f3f4'}
-        />
-      ) : showArrow && onPress ? (
-        <Ionicons name="chevron-forward" size={20} color="#CCC" />
-      ) : null}
-    </TouchableOpacity>
+    <View>
+      <TouchableOpacity
+        style={[styles.settingItem, { backgroundColor: colors.surface }]}
+        onPress={onPress}
+        disabled={!onPress && !showSwitch}
+      >
+        <View style={[styles.settingIcon, { backgroundColor: colors.surfaceHighlight }]}>
+          <Ionicons name={icon as any} size={20} color={colors.primary} />
+        </View>
+        <View style={styles.settingContent}>
+          <Text style={[styles.settingTitle, { color: colors.text }]}>{title}</Text>
+          {subtitle && <Text style={[styles.settingSubtitle, { color: colors.icon }]}>{subtitle}</Text>}
+        </View>
+        {showSwitch ? (
+          <Switch
+            value={switchValue}
+            onValueChange={onSwitchChange}
+            trackColor={{ false: colors.border, true: colors.primary }}
+            thumbColor={'#fff'}
+          />
+        ) : showArrow && onPress ? (
+          <Ionicons name="chevron-forward" size={20} color={colors.tabIconDefault} />
+        ) : null}
+      </TouchableOpacity>
+      {!isLast && <View style={[styles.separator, { backgroundColor: colors.border }]} />}
+    </View>
+  );
+
+  const SettingsGroup = ({ children }: { children: React.ReactNode }) => (
+    <View style={[styles.settingsGroup, { backgroundColor: colors.surface, ...colors.shadow }]}>
+      {children}
+    </View>
   );
 
   const ApiKeyModal = () => (
@@ -197,46 +200,53 @@ const SettingsScreen = () => {
       presentationStyle="pageSheet"
       onRequestClose={() => setShowApiKeyModal(false)}
     >
-      <SafeAreaView style={styles.modalContainer}>
-        <View style={styles.modalHeader}>
-          <TouchableOpacity onPress={() => setShowApiKeyModal(false)}>
-            <Ionicons name="close" size={24} color="#333" />
+      <SafeAreaView style={[styles.modalContainer, { backgroundColor: colors.background }]}>
+        <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+          <TouchableOpacity onPress={() => setShowApiKeyModal(false)} style={styles.modalCloseButton}>
+            <Ionicons name="close" size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.modalTitle}>Gemini API Key</Text>
+          <Text style={[styles.modalTitle, { color: colors.text }]}>Gemini API Key</Text>
           <View style={{ width: 24 }} />
         </View>
 
-        <ScrollView style={styles.modalContent}>
+        <ScrollView style={styles.modalContent} keyboardShouldPersistTaps="handled">
           <View style={styles.modalSection}>
-            <Text style={styles.modalSectionTitle}>How to get your API key:</Text>
-            <Text style={styles.modalText}>
+            <Text style={[styles.modalSectionTitle, { color: colors.text }]}>How to get your API key:</Text>
+            <Text style={[styles.modalText, { color: colors.icon }]}>
               1. Go to Google AI Studio (https://makersuite.google.com/app/apikey)
             </Text>
-            <Text style={styles.modalText}>
+            <Text style={[styles.modalText, { color: colors.icon }]}>
               2. Sign in with your Google account
             </Text>
-            <Text style={styles.modalText}>
+            <Text style={[styles.modalText, { color: colors.icon }]}>
               3. Click "Create API Key"
             </Text>
-            <Text style={styles.modalText}>
+            <Text style={[styles.modalText, { color: colors.icon }]}>
               4. Copy the generated key and paste it below
             </Text>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>API Key</Text>
+            <Text style={[styles.inputLabel, { color: colors.text }]}>API Key</Text>
             <TextInput
-              style={styles.textInput}
+              style={[
+                styles.textInput,
+                { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }
+              ]}
               value={geminiApiKey}
               onChangeText={setGeminiApiKey}
               placeholder="Enter your Gemini API key"
+              placeholderTextColor={colors.icon}
               secureTextEntry
               autoCapitalize="none"
               autoCorrect={false}
             />
           </View>
 
-          <TouchableOpacity style={styles.saveButton} onPress={handleSaveApiKey}>
+          <TouchableOpacity
+            style={[styles.saveButton, { backgroundColor: colors.primary }]}
+            onPress={handleSaveApiKey}
+          >
             <Text style={styles.saveButtonText}>Save API Key</Text>
           </TouchableOpacity>
         </ScrollView>
@@ -245,129 +255,129 @@ const SettingsScreen = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Settings</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Settings</Text>
         </View>
 
         {/* AI Configuration */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>AI Configuration</Text>
-          <SettingItem
-            icon="key"
-            title="Gemini API Key"
-            subtitle={storageStats.hasApiKey ? "API key configured" : "Required for AI recommendations"}
-            onPress={() => setShowApiKeyModal(true)}
-          />
-          {storageStats.hasApiKey && (
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>AI Configuration</Text>
+          <SettingsGroup>
             <SettingItem
-              icon="trash-outline"
-              title="Clear API Key"
-              subtitle="Remove stored API key"
-              onPress={handleClearApiKey}
+              icon="key"
+              title="Gemini API Key"
+              subtitle={storageStats.hasApiKey ? "API key configured" : "Required for AI recommendations"}
+              onPress={() => setShowApiKeyModal(true)}
+              isLast={!storageStats.hasApiKey}
             />
-          )}
+            {storageStats.hasApiKey && (
+              <SettingItem
+                icon="trash-outline"
+                title="Clear API Key"
+                subtitle="Remove stored API key"
+                onPress={handleClearApiKey}
+                isLast={true}
+              />
+            )}
+          </SettingsGroup>
         </View>
 
         {/* App Settings */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>App Settings</Text>
-          <SettingItem
-            icon="notifications"
-            title="Notifications"
-            subtitle="Get reminders for meals"
-            showSwitch={true}
-            switchValue={notificationsEnabled}
-            onSwitchChange={setNotificationsEnabled}
-            showArrow={false}
-          />
-          <SettingItem
-            icon="moon"
-            title="Dark Mode"
-            subtitle="Use dark theme"
-            showSwitch={true}
-            switchValue={darkModeEnabled}
-            onSwitchChange={setDarkModeEnabled}
-            showArrow={false}
-          />
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>App Settings</Text>
+          <SettingsGroup>
+            <SettingItem
+              icon="notifications"
+              title="Notifications"
+              subtitle="Get reminders for meals"
+              showSwitch={true}
+              switchValue={notificationsEnabled}
+              onSwitchChange={setNotificationsEnabled}
+              showArrow={false}
+            />
+            <SettingItem
+              icon="moon"
+              title="Dark Mode"
+              subtitle="Use dark theme"
+              showSwitch={true}
+              switchValue={darkModeEnabled}
+              onSwitchChange={setDarkModeEnabled}
+              showArrow={false}
+              isLast={true}
+            />
+          </SettingsGroup>
         </View>
 
         {/* Data Management */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Data Management</Text>
-          <SettingItem
-            icon="person"
-            title="Personal Information"
-            subtitle={storageStats.hasPersonalInfo ? "Profile completed" : "No profile data"}
-            onPress={() => {
-              // Navigate to profile setup
-            }}
-          />
-          <SettingItem
-            icon="restaurant"
-            title="Meal Data"
-            subtitle={storageStats.hasMeals ? "Meals saved" : "No meal data"}
-            onPress={() => {
-              // Show meal data
-            }}
-          />
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Data Management</Text>
+          <SettingsGroup>
+            <SettingItem
+              icon="person"
+              title="Personal Information"
+              subtitle={storageStats.hasPersonalInfo ? "Profile completed" : "No profile data"}
+              onPress={() => { }}
+            />
+            <SettingItem
+              icon="restaurant"
+              title="Meal Data"
+              subtitle={storageStats.hasMeals ? "Meals saved" : "No meal data"}
+              onPress={() => { }}
+              isLast={true}
+            />
+          </SettingsGroup>
         </View>
 
         {/* Storage Statistics */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Storage Statistics</Text>
-          <View style={styles.statsContainer}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Storage Statistics</Text>
+          <View style={[styles.statsContainer, { backgroundColor: colors.surface, ...colors.shadow }]}>
             <View style={styles.statItem}>
-              <Text style={styles.statLabel}>Personal Info</Text>
-              <Text style={[styles.statValue, { color: storageStats.hasPersonalInfo ? '#4CAF50' : '#FF5722' }]}>
+              <Text style={[styles.statLabel, { color: colors.icon }]}>Personal Info</Text>
+              <Text style={[styles.statValue, { color: storageStats.hasPersonalInfo ? colors.success : colors.danger }]}>
                 {storageStats.hasPersonalInfo ? 'Saved' : 'Not Set'}
               </Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statLabel}>Meals</Text>
-              <Text style={[styles.statValue, { color: storageStats.hasMeals ? '#4CAF50' : '#FF5722' }]}>
+              <Text style={[styles.statLabel, { color: colors.icon }]}>Meals</Text>
+              <Text style={[styles.statValue, { color: storageStats.hasMeals ? colors.success : colors.danger }]}>
                 {storageStats.hasMeals ? 'Saved' : 'None'}
               </Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statLabel}>API Key</Text>
-              <Text style={[styles.statValue, { color: storageStats.hasApiKey ? '#4CAF50' : '#FF5722' }]}>
+              <Text style={[styles.statLabel, { color: colors.icon }]}>API Key</Text>
+              <Text style={[styles.statValue, { color: storageStats.hasApiKey ? colors.success : colors.danger }]}>
                 {storageStats.hasApiKey ? 'Configured' : 'Not Set'}
               </Text>
             </View>
           </View>
-          
+
           {/* localStorage Details */}
-          <View style={styles.localStorageContainer}>
-            <Text style={styles.localStorageTitle}>localStorage Contents</Text>
-            <Text style={styles.localStorageDescription}>
+          <View style={[styles.localStorageContainer, { backgroundColor: colors.surface, ...colors.shadow }]}>
+            <Text style={[styles.localStorageTitle, { color: colors.text }]}>localStorage Contents</Text>
+            <Text style={[styles.localStorageDescription, { color: colors.icon }]}>
               This shows what data is currently stored in your device's localStorage:
             </Text>
             <View style={styles.localStorageItems}>
               <View style={styles.localStorageItem}>
-                <Ionicons name="person" size={16} color="#4CAF50" />
-                <Text style={styles.localStorageItemText}>
-                  Personal Information: {storageStats.hasPersonalInfo ? '✓ Stored' : '✗ Not stored'}
+                <Ionicons name="person" size={16} color={colors.primary} />
+                <Text style={[styles.localStorageItemText, { color: colors.text }]}>
+                  Personal Information: {storageStats.hasPersonalInfo ? '✓' : '✗'}
                 </Text>
               </View>
               <View style={styles.localStorageItem}>
-                <Ionicons name="restaurant" size={16} color="#4CAF50" />
-                <Text style={styles.localStorageItemText}>
-                  Meal Data: {storageStats.hasMeals ? '✓ Stored' : '✗ Not stored'}
+                <Ionicons name="restaurant" size={16} color={colors.primary} />
+                <Text style={[styles.localStorageItemText, { color: colors.text }]}>
+                  Meal Data: {storageStats.hasMeals ? '✓' : '✗'}
                 </Text>
               </View>
               <View style={styles.localStorageItem}>
-                <Ionicons name="key" size={16} color="#4CAF50" />
-                <Text style={styles.localStorageItemText}>
-                  API Keys: {storageStats.hasApiKey ? '✓ Stored' : '✗ Not stored'}
-                </Text>
-              </View>
-              <View style={styles.localStorageItem}>
-                <Ionicons name="settings" size={16} color="#4CAF50" />
-                <Text style={styles.localStorageItemText}>
-                  App Settings: {storageStats.isFirstTime ? '✗ Not stored' : '✓ Stored'}
+                <Ionicons name="key" size={16} color={colors.primary} />
+                <Text style={[styles.localStorageItemText, { color: colors.text }]}>
+                  API Keys: {storageStats.hasApiKey ? '✓' : '✗'}
                 </Text>
               </View>
             </View>
@@ -376,56 +386,48 @@ const SettingsScreen = () => {
 
         {/* Danger Zone */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Danger Zone</Text>
-          <SettingItem
-            icon="trash"
-            title="Clear All Data"
-            subtitle="Permanently delete all app data"
-            onPress={handleClearAllData}
-          />
-          
-          {/* New prominent localStorage clear button */}
-          <TouchableOpacity 
-            style={styles.dangerButton} 
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Danger Zone</Text>
+          <TouchableOpacity
+            style={[styles.dangerButton, { backgroundColor: colors.danger + '15' }]}
             onPress={handleClearAllData}
           >
             <View style={styles.dangerButtonContent}>
-              <Ionicons name="trash" size={24} color="#FF5722" />
+              <Ionicons name="trash" size={24} color={colors.danger} />
               <View style={styles.dangerButtonText}>
-                <Text style={styles.dangerButtonTitle}>Clear All localStorage</Text>
-                <Text style={styles.dangerButtonSubtitle}>
-                  Delete all personal info, meals, API keys, and settings
+                <Text style={[styles.dangerButtonTitle, { color: colors.danger }]}>Clear All Data</Text>
+                <Text style={[styles.dangerButtonSubtitle, { color: colors.danger }]}>
+                  Delete all personal info, meals, keys
                 </Text>
               </View>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#FF5722" />
+            <Ionicons name="chevron-forward" size={20} color={colors.danger} />
           </TouchableOpacity>
         </View>
 
         {/* App Info */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>App Information</Text>
-          <SettingItem
-            icon="information-circle"
-            title="Version"
-            subtitle="1.0.0"
-            showArrow={false}
-          />
-          <SettingItem
-            icon="document-text"
-            title="Privacy Policy"
-            onPress={() => {
-              // Open privacy policy
-            }}
-          />
-          <SettingItem
-            icon="help-circle"
-            title="Help & Support"
-            onPress={() => {
-              // Open help
-            }}
-          />
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>App Information</Text>
+          <SettingsGroup>
+            <SettingItem
+              icon="information-circle"
+              title="Version"
+              subtitle="1.0.0"
+              showArrow={false}
+            />
+            <SettingItem
+              icon="document-text"
+              title="Privacy Policy"
+              onPress={() => { }}
+            />
+            <SettingItem
+              icon="help-circle"
+              title="Help & Support"
+              onPress={() => { }}
+              isLast={true}
+            />
+          </SettingsGroup>
         </View>
+        <View style={{ height: 40 }} />
       </ScrollView>
 
       {/* API Key Modal */}
@@ -439,7 +441,6 @@ export default SettingsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f1e3ec',
   },
   header: {
     paddingHorizontal: 20,
@@ -447,34 +448,38 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: -0.5,
   },
   section: {
     marginBottom: 24,
+    paddingHorizontal: 20,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginHorizontal: 20,
+    fontWeight: '700',
     marginBottom: 12,
+    marginLeft: 4,
+  },
+  settingsGroup: {
+    borderRadius: 20,
+    overflow: 'hidden',
   },
   settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'white',
-    marginHorizontal: 20,
-    marginBottom: 1,
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
+  separator: {
+    height: 1,
+    marginLeft: 56,
+  },
   settingIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#E8F5E8',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -485,17 +490,13 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
   },
   settingSubtitle: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 13,
     marginTop: 2,
   },
   statsContainer: {
-    backgroundColor: 'white',
-    marginHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: 20,
     padding: 16,
   },
   statItem: {
@@ -506,91 +507,44 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 14,
-    color: '#666',
   },
   statValue: {
     fontSize: 14,
     fontWeight: '600',
   },
-  // Modal styles
-  modalContainer: {
-    flex: 1,
-    backgroundColor: '#f1e3ec',
+  localStorageContainer: {
+    borderRadius: 20,
+    padding: 16,
+    marginTop: 16,
   },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  modalContent: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  modalSection: {
-    marginBottom: 24,
-  },
-  modalSectionTitle: {
+  localStorageTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    marginBottom: 8,
+  },
+  localStorageDescription: {
+    fontSize: 13,
     marginBottom: 12,
+    lineHeight: 18,
   },
-  modalText: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-    lineHeight: 20,
+  localStorageItems: {
+    gap: 8,
   },
-  inputGroup: {
-    marginBottom: 24,
-  },
-  inputLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  textInput: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-  },
-  saveButton: {
-    backgroundColor: '#4CAF50',
-    borderRadius: 12,
-    paddingVertical: 16,
+  localStorageItem: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
-  saveButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+  localStorageItemText: {
+    fontSize: 14,
+    marginLeft: 8,
   },
   dangerButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#FFF3E0', // Light orange background
-    borderRadius: 12,
+    borderRadius: 20,
     paddingHorizontal: 16,
-    paddingVertical: 16,
-    marginTop: 12,
-    marginHorizontal: 20,
+    paddingVertical: 18,
   },
   dangerButtonContent: {
     flexDirection: 'row',
@@ -602,42 +556,71 @@ const styles = StyleSheet.create({
   dangerButtonTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FF5722',
   },
   dangerButtonSubtitle: {
     fontSize: 12,
-    color: '#FF5722',
     marginTop: 2,
   },
-  localStorageContainer: {
-    backgroundColor: 'white',
-    marginHorizontal: 20,
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 12,
+  // Modal styles
+  modalContainer: {
+    flex: 1,
   },
-  localStorageTitle: {
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+  },
+  modalCloseButton: {
+    padding: 8,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  modalContent: {
+    flex: 1,
+    padding: 24,
+  },
+  modalSection: {
+    marginBottom: 24,
+  },
+  modalSectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  localStorageDescription: {
-    fontSize: 14,
-    color: '#666',
     marginBottom: 12,
   },
-  localStorageItems: {
-    //
-  },
-  localStorageItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  localStorageItemText: {
+  modalText: {
     fontSize: 14,
-    color: '#333',
-    marginLeft: 8,
+    marginBottom: 8,
+    lineHeight: 20,
+  },
+  inputGroup: {
+    marginBottom: 24,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+  textInput: {
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    borderWidth: 1,
+  },
+  saveButton: {
+    borderRadius: 16,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
 }); 
