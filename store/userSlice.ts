@@ -13,12 +13,15 @@ export interface UserState {
     allergies: string[];
     targetCalories: string;
     isOnboarded: boolean;
+    isAuthenticated: boolean;
+    password?: string;
     apiKey: string | null;
 }
 
 const initialState: UserState = {
     name: '',
     email: '',
+    password: '',
     age: '',
     gender: '',
     weight: '',
@@ -29,6 +32,7 @@ const initialState: UserState = {
     allergies: [],
     targetCalories: '',
     isOnboarded: false,
+    isAuthenticated: false,
     apiKey: null,
 };
 
@@ -45,10 +49,20 @@ const userSlice = createSlice({
         updateProfile: (state, action: PayloadAction<Partial<UserState>>) => {
             return { ...state, ...action.payload };
         },
-        logout: () => initialState,
+        register: (state, action: PayloadAction<Partial<UserState>>) => {
+            return { ...state, ...action.payload, isAuthenticated: true, isOnboarded: true };
+        },
+        loginSuccess: (state) => {
+            state.isAuthenticated = true;
+        },
+        logout: (state) => {
+            // Only clear session, keep data
+            state.isAuthenticated = false;
+        },
+        deleteAccount: () => initialState,
     },
 });
 
-export const { setUser, setApiKey, updateProfile, logout } = userSlice.actions;
+export const { setUser, setApiKey, updateProfile, logout, register, loginSuccess, deleteAccount } = userSlice.actions;
 
 export default userSlice.reducer;

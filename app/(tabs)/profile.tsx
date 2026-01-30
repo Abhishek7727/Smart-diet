@@ -11,7 +11,9 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import { Share, Alert } from 'react-native';
 import { useSelector } from 'react-redux';
+import { useRouter } from 'expo-router';
 
 const ProfileScreen = () => {
   const colorScheme = useColorScheme();
@@ -19,6 +21,30 @@ const ProfileScreen = () => {
   const { getTotalNutrition, nutritionalData } = useMealPlan();
   const totalNutrition = getTotalNutrition();
   const userData = useSelector((state: any) => state.user);
+  const router = useRouter();
+
+  const handleAction = async (action: string) => {
+    switch (action) {
+      case 'Edit Profile':
+        router.push('/profile/edit');
+        break;
+      case 'Notifications':
+        router.push('/profile/notifications');
+        break;
+      case 'Help & Support':
+        router.push('/profile/help');
+        break;
+      case 'Share Progress':
+        try {
+          await Share.share({
+            message: `Check out my progress on Smart Diet! I've burned ${totalNutrition.calories} calories today!`,
+          });
+        } catch (error) {
+          Alert.alert('Error', 'Could not share content');
+        }
+        break;
+    }
+  };
 
 
   const ProfileCard = ({
@@ -86,7 +112,10 @@ const ProfileScreen = () => {
         {/* Header */}
         <View style={styles.header}>
           <Text style={[styles.headerTitle, { color: colors.text }]}>Profile</Text>
-          <TouchableOpacity style={[styles.headerButton, { backgroundColor: colors.surfaceHighlight }]}>
+          <TouchableOpacity
+            style={[styles.headerButton, { backgroundColor: colors.surfaceHighlight }]}
+            onPress={() => router.push('/(tabs)/settings')}
+          >
             <Ionicons name="settings-outline" size={24} color={colors.text} />
           </TouchableOpacity>
         </View>
@@ -181,6 +210,7 @@ const ProfileScreen = () => {
               <TouchableOpacity
                 key={index}
                 style={[styles.actionButton, { ...colors.glass, ...colors.shadow }]}
+                onPress={() => handleAction(action.label)}
               >
                 <Ionicons name={action.icon as any} size={20} color={colors.primary} />
                 <Text style={[styles.actionText, { color: colors.text }]}>{action.label}</Text>
