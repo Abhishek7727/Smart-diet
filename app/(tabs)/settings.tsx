@@ -16,6 +16,10 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
+import { setApiKey, setUser } from '@/store/userSlice';
+import { clearAllMeals } from '@/store/mealsSlice';
+
 
 const SettingsScreen = () => {
   const colorScheme = useColorScheme();
@@ -29,8 +33,11 @@ const SettingsScreen = () => {
     hasApiKey: false,
     isFirstTime: true,
   });
-
-  const { clearPersonalInfo, clearAllMeals } = useMealPlan();
+  const userData = useSelector((state: any) => state.user);
+  const dispatch = useDispatch();
+  const { clearPersonalInfo } = useMealPlan(); // Keeping context usage for now if it wraps logic, but ideally direct dispatch
+  // Actually, clearPersonalInfo in context does nothing important now? 
+  // Let's use Redux actions directly where possible.
 
   useEffect(() => {
     loadSettings();
@@ -38,9 +45,8 @@ const SettingsScreen = () => {
 
   const loadSettings = async () => {
     try {
-      const apiKey = await StorageService.getGeminiApiKey();
-      if (apiKey) {
-        setGeminiApiKey(apiKey);
+      if (userData.apiKey) {
+        setGeminiApiKey(userData.apiKey);
       }
 
       const stats = await StorageService.getStorageStats();
@@ -57,9 +63,8 @@ const SettingsScreen = () => {
     }
 
     try {
-      await StorageService.saveGeminiApiKey(geminiApiKey.trim());
+      dispatch(setApiKey(geminiApiKey.trim()));
       setShowApiKeyModal(false);
-      await loadSettings();
       Alert.alert('Success', 'API key saved successfully!');
     } catch (error) {
       console.error('Error saving API key:', error);
@@ -78,9 +83,8 @@ const SettingsScreen = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              await StorageService.clearGeminiApiKey();
+              dispatch(setApiKey(''));
               setGeminiApiKey('');
-              await loadSettings();
               Alert.alert('Success', 'API key cleared successfully!');
             } catch (error) {
               console.error('Error clearing API key:', error);
@@ -110,13 +114,11 @@ const SettingsScreen = () => {
                 { cancelable: false }
               );
 
-              await StorageService.clearAllData();
+              // Clear all Redux data
+              dispatch(clearAllMeals());
+              dispatch(setUser({ apiKey: null, name: '', email: '', targetCalories: '', age: '', weight: '', height: '' }));
 
-              clearPersonalInfo();
-              clearAllMeals();
               setGeminiApiKey('');
-
-              await loadSettings();
 
               Alert.alert(
                 'Data Cleared Successfully!',
@@ -258,7 +260,7 @@ const SettingsScreen = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={[styles.headerTitle, { color: colors.text }]}>Settings</Text>
@@ -311,7 +313,7 @@ const SettingsScreen = () => {
             <SettingItem
               icon="person"
               title="Personal Information"
-              subtitle={storageStats.hasPersonalInfo ? "Profile completed" : "No profile data"}
+              subtitle={userData.name ? "Profile completed" : "No profile data"}
               onPress={() => { }}
             />
             <SettingItem

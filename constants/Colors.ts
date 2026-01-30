@@ -33,7 +33,7 @@ export const Colors = {
     glass: {
       backgroundColor: 'rgba(20, 20, 30, 0.6)',
       borderColor: 'rgba(255, 255, 255, 0.1)',
-      borderWidth: 1,
+      borderWidth: 0.5,
     }
   },
   dark: {
@@ -62,7 +62,7 @@ export const Colors = {
     glass: {
       backgroundColor: 'rgba(20, 20, 30, 0.6)',
       borderColor: 'rgba(255, 255, 255, 0.1)',
-      borderWidth: 1,
+      borderWidth: 0.5,
     }
   },
 };

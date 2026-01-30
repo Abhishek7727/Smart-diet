@@ -13,6 +13,8 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import { useSelector } from 'react-redux';
+
 
 const { width } = Dimensions.get("window");
 
@@ -23,7 +25,9 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
   const [selectedView, setSelectedView] = useState("Daily");
   const { meals, nutritionalData, getTotalNutrition, personalInfo } =
     useMealPlan();
+
   const totalNutrition = getTotalNutrition();
+  const userData = useSelector((state: any) => state.user);
 
   const MetricCard = ({
     icon,
@@ -147,7 +151,7 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
         <View style={styles.header}>
           <View>
             <Text style={[styles.greetingText, { color: colors.icon }]}>
-              Hello, {personalInfo?.name?.split(' ')[0] || "Friend"}
+              Hello, {userData.name?.split(' ')[0] || "Friend"}
             </Text>
             <Text style={[styles.questionText, { color: colors.text }]}>
               Are Your Eating Healthy?
@@ -273,6 +277,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingTop: Platform.OS === 'android' ? 40 : 10,
+    paddingBottom: 100,
   },
   header: {
     flexDirection: "row",

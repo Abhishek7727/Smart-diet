@@ -11,12 +11,15 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import { useSelector } from 'react-redux';
 
 const ProfileScreen = () => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
   const { getTotalNutrition, nutritionalData } = useMealPlan();
   const totalNutrition = getTotalNutrition();
+  const userData = useSelector((state: any) => state.user);
+
 
   const ProfileCard = ({
     icon,
@@ -79,7 +82,7 @@ const ProfileScreen = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={[styles.headerTitle, { color: colors.text }]}>Profile</Text>
@@ -90,13 +93,13 @@ const ProfileScreen = () => {
 
         {/* User Info */}
         <View style={styles.userSection}>
-          <View style={[styles.avatarContainer, { ...colors.glass, ...colors.shadow }]}>
+          <View style={[styles.avatarContainer, { ...colors.glass, ...colors.shadow, backgroundColor: colorScheme === 'dark' ? 'rgba(20, 20, 30, 0.85)' : 'rgba(255, 255, 255, 0.85)' }]}>
             <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-              <Text style={styles.avatarText}>T</Text>
+              <Text style={[styles.avatarText, { color: 'black' }]}>{userData.name?.[0] || 'U'}</Text>
             </View>
             <View style={styles.userInfo}>
-              <Text style={[styles.userName, { color: colors.text }]}>Tanim</Text>
-              <Text style={[styles.userEmail, { color: colors.icon }]}>tanim@example.com</Text>
+              <Text style={[styles.userName, { color: colors.text }]}>{userData.name || 'User'}</Text>
+              <Text style={[styles.userEmail, { color: colors.icon }]}>{userData.email || 'user@example.com'}</Text>
             </View>
           </View>
         </View>

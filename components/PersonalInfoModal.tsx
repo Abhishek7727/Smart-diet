@@ -1,16 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Modal,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { updateProfile } from '@/store/userSlice';
+
 
 interface PersonalInfo {
   name: string;
@@ -31,11 +34,12 @@ interface PersonalInfoModalProps {
   onComplete: (info: PersonalInfo) => void;
 }
 
-const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
+const PersonalInfoModal = ({
   visible,
   onClose,
   onComplete,
-}) => {
+}: PersonalInfoModalProps) => {
+  const dispatch = useDispatch();
   const [currentStep, setCurrentStep] = useState(0);
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
     name: '',
@@ -104,20 +108,21 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
 
   const handleComplete = () => {
     // Validate required fields
-    if (!personalInfo.name || !personalInfo.age || !personalInfo.gender || 
-        !personalInfo.weight || !personalInfo.height || !personalInfo.activityLevel || 
-        !personalInfo.goal) {
+    if (!personalInfo.name || !personalInfo.age || !personalInfo.gender ||
+      !personalInfo.weight || !personalInfo.height || !personalInfo.activityLevel ||
+      !personalInfo.goal) {
       Alert.alert('Missing Information', 'Please fill in all required fields.');
       return;
     }
 
     // Always calculate target calories automatically
     const calculatedCalories = calculateTargetCalories();
-    const finalPersonalInfo = { 
-      ...personalInfo, 
-      targetCalories: calculatedCalories.toString() 
+    const finalPersonalInfo = {
+      ...personalInfo,
+      targetCalories: calculatedCalories.toString()
     };
-    
+
+    dispatch(updateProfile(finalPersonalInfo));
     onComplete(finalPersonalInfo);
   };
 
@@ -125,11 +130,11 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
     const age = parseInt(personalInfo.age);
     const weight = parseFloat(personalInfo.weight);
     const height = parseFloat(personalInfo.height);
-    
+
     // Basic BMR calculation (Mifflin-St Jeor Equation)
     let bmr = 10 * weight + 6.25 * height - 5 * age;
     bmr = personalInfo.gender === 'male' ? bmr + 5 : bmr - 161;
-    
+
     // Activity multiplier
     const activityMultipliers = {
       sedentary: 1.2,
@@ -138,9 +143,9 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
       very_active: 1.725,
       extremely_active: 1.9,
     };
-    
+
     let tdee = bmr * activityMultipliers[personalInfo.activityLevel as keyof typeof activityMultipliers];
-    
+
     // Goal adjustment
     switch (personalInfo.goal) {
       case 'lose_weight':
@@ -153,7 +158,7 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
         tdee += 200; // 200 calorie surplus
         break;
     }
-    
+
     return Math.round(tdee);
   };
 
@@ -202,7 +207,7 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
           <View style={styles.stepContainer}>
             <Text style={styles.stepTitle}>Basic Information</Text>
             <Text style={styles.stepDescription}>Let's start with some basic details about you.</Text>
-            
+
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Name *</Text>
               <TextInput
@@ -263,7 +268,7 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
           <View style={styles.stepContainer}>
             <Text style={styles.stepTitle}>Physical Statistics</Text>
             <Text style={styles.stepDescription}>Help us understand your current physical stats.</Text>
-            
+
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Weight (kg) *</Text>
               <TextInput
@@ -293,7 +298,7 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
           <View style={styles.stepContainer}>
             <Text style={styles.stepTitle}>Activity Level & Goals</Text>
             <Text style={styles.stepDescription}>Tell us about your activity level and what you want to achieve.</Text>
-            
+
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Activity Level *</Text>
               {activityLevels.map((level) => (
@@ -339,15 +344,15 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
               <Text style={styles.calorieInfoDescription}>
                 Your daily calorie target will be automatically calculated based on your age, gender, weight, height, activity level, and goal.
               </Text>
-              {personalInfo.age && personalInfo.gender && personalInfo.weight && 
-               personalInfo.height && personalInfo.activityLevel && personalInfo.goal && (
-                <View style={styles.calculatedCalories}>
-                  <Text style={styles.calculatedCaloriesLabel}>Estimated Daily Target:</Text>
-                  <Text style={styles.calculatedCaloriesValue}>
-                    {calculateTargetCalories()} calories
-                  </Text>
-                </View>
-              )}
+              {personalInfo.age && personalInfo.gender && personalInfo.weight &&
+                personalInfo.height && personalInfo.activityLevel && personalInfo.goal && (
+                  <View style={styles.calculatedCalories}>
+                    <Text style={styles.calculatedCaloriesLabel}>Estimated Daily Target:</Text>
+                    <Text style={styles.calculatedCaloriesValue}>
+                      {calculateTargetCalories()} calories
+                    </Text>
+                  </View>
+                )}
             </View>
           </View>
         );
@@ -357,7 +362,7 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
           <View style={styles.stepContainer}>
             <Text style={styles.stepTitle}>Dietary Preferences</Text>
             <Text style={styles.stepDescription}>Let us know about any dietary restrictions or allergies.</Text>
-            
+
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Dietary Restrictions</Text>
               <View style={styles.checkboxGrid}>
@@ -379,7 +384,7 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
                   </TouchableOpacity>
                 ))}
               </View>
-              
+
               <View style={styles.customInputContainer}>
                 <TextInput
                   style={styles.customInput}
@@ -406,7 +411,7 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
                   <Ionicons name="add" size={20} color="#4CAF50" />
                 </TouchableOpacity>
               </View>
-              
+
               {personalInfo.allergies.length > 0 && (
                 <View style={styles.tagContainer}>
                   {personalInfo.allergies.map((allergy, index) => (

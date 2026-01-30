@@ -112,9 +112,12 @@ class GeminiService {
       mealTypeDescriptions[mealType as keyof typeof mealTypeDescriptions] ||
       mealType;
 
-    return `You are a professional nutritionist and chef. Generate exactly 5 personalized meal recommendations for ${mealDescription} based on the following user profile.
-
-IMPORTANT: Only generate recommendations for ${mealDescription}. Do NOT include recommendations for other meal types like breakfast, lunch, dinner, or snacks unless specifically requested.
+    return `You are a professional nutritionist and chef specializing in healthy Indian cuisine. Generate exactly 5 personalized meal recommendations for ${mealDescription} based on the following user profile.
+    
+IMPORTANT: 
+- Generate strictly traditional Indian household dishes commonly cooked in Indian homes.
+- Only generate recommendations for ${mealDescription}. Do NOT include recommendations for other meal types like breakfast, lunch, dinner, or snacks unless specifically requested.
+- Ensure the dishes are healthy, balanced, and fit the user's calorie requirements.
 
 USER PROFILE:
 - Name: ${personalInfo.name}
@@ -138,14 +141,15 @@ CURRENT NUTRITION TODAY:
 MEAL TYPE: ${mealDescription}
 
 REQUIREMENTS:
-1. Generate exactly 5 meal options for ${mealDescription} ONLY
-2. Each meal must be appropriate for ${mealDescription} timing and context
-3. Consider the user's dietary restrictions and allergies
-4. Ensure meals align with their fitness goal
-5. Consider remaining daily calories and nutrition needs
-6. Make meals realistic and easy to prepare
-7. Include nutritional information for each meal
-8. Focus only on ${mealDescription} - do not mix with other meal types
+1. Generate exactly 5 meal options for ${mealDescription} ONLY.
+2. DISHES MUST BE AUTHENTIC INDIAN HOUSEHOLD MEALS (e.g., Poha, Upma, Dal Chawal, Roti Sabzi, Rajma Chawal, Khichdi, etc.).
+3. Each meal must be appropriate for ${mealDescription} timing and context.
+4. Consider the user's dietary restrictions and allergies.
+5. Ensure meals align with their fitness goal.
+6. Consider remaining daily calories and nutrition needs.
+7. Make meals realistic and easy to prepare in an Indian kitchen.
+8. Include nutritional information for each meal.
+9. Focus only on ${mealDescription} - do not mix with other meal types.
 
 RESPONSE FORMAT:
 Return a JSON array with exactly 5 objects, each containing:
@@ -235,150 +239,150 @@ Only return the JSON array, no additional text.`;
     const fallbackMeals = {
       breakfast: [
         {
-          name: "Oatmeal with Berries and Almonds",
+          name: "Vegetable Poha with Peanuts",
           calories: 280,
-          protein: 8,
+          protein: 6,
           carbs: 45,
+          fat: 8,
+        },
+        {
+          name: "Rava Upma with Mixed Veggies",
+          calories: 250,
+          protein: 7,
+          carbs: 40,
+          fat: 7,
+        },
+        {
+          name: "Besan Chilla with Mint Chutney",
+          calories: 220,
+          protein: 12,
+          carbs: 25,
+          fat: 8,
+        },
+        {
+          name: "Moong Dal Cheela",
+          calories: 200,
+          protein: 14,
+          carbs: 22,
           fat: 6,
         },
         {
-          name: "Greek Yogurt with Honey and Granola",
-          calories: 200,
-          protein: 15,
-          carbs: 20,
-          fat: 8,
-        },
-        {
-          name: "Whole Grain Toast with Avocado and Eggs",
+          name: "Multigrain Paratha with Curd",
           calories: 320,
           protein: 10,
-          carbs: 35,
-          fat: 18,
-        },
-        {
-          name: "Smoothie Bowl with Banana and Berries",
-          calories: 250,
-          protein: 12,
-          carbs: 30,
-          fat: 8,
-        },
-        {
-          name: "Scrambled Eggs with Spinach and Toast",
-          calories: 220,
-          protein: 18,
-          carbs: 5,
+          carbs: 45,
           fat: 12,
         },
       ],
       lunch: [
         {
-          name: "Grilled Chicken Salad with Mixed Greens",
+          name: "Dal Tadka with Brown Rice and Salad",
           calories: 350,
-          protein: 25,
-          carbs: 15,
-          fat: 18,
-        },
-        {
-          name: "Quinoa Bowl with Roasted Vegetables",
-          calories: 380,
-          protein: 12,
-          carbs: 45,
-          fat: 14,
-        },
-        {
-          name: "Turkey Sandwich on Whole Grain Bread",
-          calories: 320,
-          protein: 20,
-          carbs: 35,
-          fat: 12,
-        },
-        {
-          name: "Vegetable Soup with Grilled Cheese",
-          calories: 200,
-          protein: 8,
-          carbs: 25,
+          protein: 14,
+          carbs: 55,
           fat: 8,
         },
         {
-          name: "Tuna Salad with Crackers",
-          calories: 280,
+          name: "Roti with Mix Veg Sabzi and Dal",
+          calories: 380,
+          protein: 12,
+          carbs: 50,
+          fat: 14,
+        },
+        {
+          name: "Rajma Chawal (Kidney Beans Curry)",
+          calories: 420,
+          protein: 18,
+          carbs: 60,
+          fat: 12,
+        },
+        {
+          name: "Paneer Bhurji with 2 Chapatis",
+          calories: 400,
           protein: 22,
-          carbs: 10,
-          fat: 16,
+          carbs: 35,
+          fat: 18,
+        },
+        {
+          name: "Chana Masala with Jeera Rice",
+          calories: 380,
+          protein: 16,
+          carbs: 55,
+          fat: 10,
         },
       ],
       dinner: [
         {
-          name: "Salmon with Roasted Vegetables",
-          calories: 420,
-          protein: 28,
-          carbs: 20,
-          fat: 22,
+          name: "Moong Dal Khichdi with Ghee",
+          calories: 320,
+          protein: 12,
+          carbs: 45,
+          fat: 10,
         },
         {
-          name: "Lean Beef Stir Fry with Brown Rice",
-          calories: 380,
-          protein: 25,
-          carbs: 25,
+          name: "Roti with Palak Paneer",
+          calories: 350,
+          protein: 18,
+          carbs: 30,
           fat: 18,
         },
         {
-          name: "Vegetarian Pasta with Marinara Sauce",
-          calories: 350,
-          protein: 12,
-          carbs: 45,
-          fat: 12,
-        },
-        {
-          name: "Chicken Breast with Quinoa and Broccoli",
-          calories: 400,
-          protein: 30,
-          carbs: 35,
-          fat: 14,
-        },
-        {
-          name: "Tofu Curry with Basmati Rice",
-          calories: 320,
-          protein: 15,
-          carbs: 30,
+          name: "Grilled Paneer Salad",
+          calories: 280,
+          protein: 20,
+          carbs: 15,
           fat: 16,
+        },
+        {
+          name: "Oats Khichdi with Vegetables",
+          calories: 300,
+          protein: 10,
+          carbs: 45,
+          fat: 8,
+        },
+        {
+          name: "Lauki Kofta Curry with 1 Roti",
+          calories: 250,
+          protein: 8,
+          carbs: 30,
+          fat: 12,
         },
       ],
       snacks: [
         {
-          name: "Apple Slices with Almond Butter",
-          calories: 180,
+          name: "Roasted Makhana (Fox Nuts)",
+          calories: 120,
           protein: 4,
           carbs: 20,
-          fat: 10,
+          fat: 3,
         },
         {
-          name: "Hummus with Carrot and Celery Sticks",
+          name: "Sprouts Chaat",
           calories: 150,
-          protein: 6,
-          carbs: 18,
-          fat: 8,
+          protein: 8,
+          carbs: 25,
+          fat: 2,
         },
         {
-          name: "Greek Yogurt with Mixed Berries",
-          calories: 120,
-          protein: 12,
-          carbs: 8,
-          fat: 4,
+          name: "Masala Corn",
+          calories: 180,
+          protein: 5,
+          carbs: 30,
+          fat: 5,
         },
         {
-          name: "Mixed Nuts and Dried Cranberries",
-          calories: 200,
-          protein: 6,
-          carbs: 8,
-          fat: 18,
-        },
-        {
-          name: "Banana with Peanut Butter",
-          calories: 220,
+          name: "Dhokla (2 pieces)",
+          calories: 160,
           protein: 6,
           carbs: 25,
-          fat: 12,
+          fat: 5,
+        },
+        {
+          name: "Buttermilk (Chaas) with Masala",
+          calories: 60,
+          protein: 4,
+          carbs: 6,
+          fat: 2,
         },
       ],
     };

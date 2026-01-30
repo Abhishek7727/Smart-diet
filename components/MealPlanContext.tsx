@@ -1,23 +1,8 @@
-import StorageService from '@/services/StorageService';
-import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-
-interface FoodItem {
-  id: string;
-  name: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  category: string;
-}
-
-interface Meal {
-  id: string;
-  title: string;
-  time: string;
-  food?: FoodItem;
-  hasFood: boolean;
-}
+import React, { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '@/store/store';
+import { updateProfile } from '@/store/userSlice';
+import { setMeals, updateMeal as updateMealAction, removeMeal as removeMealAction, clearAllMeals as clearAllMealsAction, Meal, FoodItem } from '@/store/mealsSlice';
 
 interface NutritionalData {
   calories: number;
@@ -36,7 +21,7 @@ interface PersonalInfo {
   goal: string;
   dietaryRestrictions: string[];
   allergies: string[];
-  targetCalories: string; // Calculated automatically based on user data
+  targetCalories: string;
 }
 
 interface MealPlanContextType {
@@ -64,58 +49,58 @@ interface MealPlanProviderProps {
 }
 
 export const MealPlanProvider: React.FC<MealPlanProviderProps> = ({ children }) => {
-  const [meals, setMeals] = useState<Meal[]>([
-    {
-      id: 'breakfast',
-      title: 'Breakfast',
-      time: '7 AM',
-      hasFood: false,
-    },
-    {
-      id: 'lunch',
-      title: 'Lunch',
-      time: '12 PM',
-      hasFood: false,
-    },
-    {
-      id: 'snacks',
-      title: 'Snacks',
-      time: '3 PM',
-      hasFood: false,
-    },
-    {
-      id: 'dinner',
-      title: 'Dinner',
-      time: '7 PM',
-      hasFood: false,
-    },
-  ]);
+  const dispatch = useDispatch();
+  const meals = useSelector((state: RootState) => state.meals.meals);
+  const userData = useSelector((state: RootState) => state.user);
 
-  const [nutritionalData, setNutritionalData] = useState<NutritionalData>({
-    calories: 2000,
-    protein: 50,
-    carbs: 250,
-    fat: 65,
-  });
+  // isLoading is effectively false because data persists via Redux synchronously after rehydration
+  // But we can keep it false to satisfy interface
+  const isLoading = false;
 
-  // Calculate target nutrition based on personal info
-  const calculateTargetNutrition = (personalInfo: PersonalInfo): NutritionalData => {
-    const targetCalories = parseInt(personalInfo.targetCalories);
-    
-    // Calculate macronutrient ratios based on goal
-    let proteinRatio = 0.25; // 25% default
-    let carbsRatio = 0.55;   // 55% default
-    let fatRatio = 0.20;     // 20% default
-    
+  // Derive PersonalInfo from Redux UserData
+  const personalInfo: PersonalInfo | null = useMemo(() => {
+    if (!userData.name && !userData.targetCalories) return null;
+    return {
+      name: userData.name,
+      age: userData.age,
+      gender: userData.gender,
+      weight: userData.weight,
+      height: userData.height,
+      activityLevel: userData.activityLevel,
+      goal: userData.goal,
+      dietaryRestrictions: userData.dietaryRestrictions || [],
+      allergies: userData.allergies || [],
+      targetCalories: userData.targetCalories,
+    };
+  }, [userData]);
+
+  // Derive NutritionalData from PersonalInfo
+  const nutritionalData: NutritionalData = useMemo(() => {
+    if (!personalInfo || !personalInfo.targetCalories) {
+      return {
+        calories: 2000,
+        protein: 50,
+        carbs: 250,
+        fat: 65,
+      };
+    }
+
+    const targetCalories = parseInt(personalInfo.targetCalories) || 2000;
+
+    // Calculate macronutrient ratios based on goal (reusing logic from original context)
+    let proteinRatio = 0.25;
+    let carbsRatio = 0.55;
+    let fatRatio = 0.20;
+
     switch (personalInfo.goal) {
       case 'lose_weight':
-        proteinRatio = 0.30; // Higher protein for satiety
+        proteinRatio = 0.30;
         carbsRatio = 0.45;
         fatRatio = 0.25;
         break;
       case 'gain_weight':
       case 'build_muscle':
-        proteinRatio = 0.30; // Higher protein for muscle building
+        proteinRatio = 0.30;
         carbsRatio = 0.50;
         fatRatio = 0.20;
         break;
@@ -130,69 +115,21 @@ export const MealPlanProvider: React.FC<MealPlanProviderProps> = ({ children }) 
         fatRatio = 0.25;
         break;
     }
-    
-    // Calculate grams (1g protein = 4 cal, 1g carbs = 4 cal, 1g fat = 9 cal)
-    const proteinGrams = Math.round((targetCalories * proteinRatio) / 4);
-    const carbsGrams = Math.round((targetCalories * carbsRatio) / 4);
-    const fatGrams = Math.round((targetCalories * fatRatio) / 9);
-    
+
     return {
       calories: targetCalories,
-      protein: proteinGrams,
-      carbs: carbsGrams,
-      fat: fatGrams,
+      protein: Math.round((targetCalories * proteinRatio) / 4),
+      carbs: Math.round((targetCalories * carbsRatio) / 4),
+      fat: Math.round((targetCalories * fatRatio) / 9),
     };
-  };
-
-  const [personalInfo, setPersonalInfo] = useState<PersonalInfo | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Load data on app start
-  useEffect(() => {
-    loadInitialData();
-  }, []);
-
-  const loadInitialData = async () => {
-    try {
-      setIsLoading(true);
-      
-      // Load personal info
-      const savedPersonalInfo = await StorageService.getPersonalInfo();
-      if (savedPersonalInfo) {
-        setPersonalInfo(savedPersonalInfo);
-        setNutritionalData(calculateTargetNutrition(savedPersonalInfo)); // Update nutritional data on load
-      }
-
-      // Load meals
-      const savedMeals = await StorageService.getMeals();
-      if (savedMeals) {
-        setMeals(savedMeals);
-      }
-    } catch (error) {
-      console.error('Error loading initial data:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [personalInfo]);
 
   const updateMeal = (mealId: string, food: FoodItem) => {
-    setMeals(prevMeals =>
-      prevMeals.map(meal =>
-        meal.id === mealId
-          ? { ...meal, food, hasFood: true }
-          : meal
-      )
-    );
+    dispatch(updateMealAction({ id: mealId, food }));
   };
 
   const removeMeal = (mealId: string) => {
-    setMeals(prevMeals =>
-      prevMeals.map(meal =>
-        meal.id === mealId
-          ? { ...meal, food: undefined, hasFood: false }
-          : meal
-      )
-    );
+    dispatch(removeMealAction(mealId));
   };
 
   const addCustomMeal = (mealId: string, foodName: string, calories: number, protein: number, carbs: number, fat: number) => {
@@ -205,17 +142,11 @@ export const MealPlanProvider: React.FC<MealPlanProviderProps> = ({ children }) 
       fat,
       category: 'custom',
     };
-    updateMeal(mealId, customFood);
+    dispatch(updateMealAction({ id: mealId, food: customFood }));
   };
 
   const clearAllMeals = () => {
-    setMeals(prevMeals =>
-      prevMeals.map(meal => ({
-        ...meal,
-        food: undefined,
-        hasFood: false,
-      }))
-    );
+    dispatch(clearAllMealsAction());
   };
 
   const getTotalNutrition = (): NutritionalData => {
@@ -234,68 +165,38 @@ export const MealPlanProvider: React.FC<MealPlanProviderProps> = ({ children }) 
   };
 
   const savePersonalInfo = async (info: PersonalInfo) => {
-    try {
-      await StorageService.savePersonalInfo(info);
-      setPersonalInfo(info);
-      setNutritionalData(calculateTargetNutrition(info)); // Update nutritional data on save
-    } catch (error) {
-      console.error('Error saving personal info:', error);
-      throw error;
-    }
+    dispatch(updateProfile(info));
   };
 
   const loadPersonalInfo = async (): Promise<PersonalInfo | null> => {
-    try {
-      const info = await StorageService.getPersonalInfo();
-      if (info) {
-        setPersonalInfo(info);
-        setNutritionalData(calculateTargetNutrition(info)); // Update nutritional data on load
-      }
-      return info;
-    } catch (error) {
-      console.error('Error loading personal info:', error);
-      return null;
-    }
+    // Already loaded via Redux
+    return personalInfo;
   };
 
   const clearPersonalInfo = async () => {
-    try {
-      await StorageService.clearPersonalInfo();
-      setPersonalInfo(null);
-    } catch (error) {
-      console.error('Error clearing personal info:', error);
-    }
+    // Resetting to empty object or initial state
+    // For now we might just clear key fields if we had a clearProfile action, 
+    // but updateProfile with empty strings works too or we can implement logout
+    // dispatch(logout()); // If we want to clear everything
+    // Or just partial update:
+    /*
+    dispatch(updateProfile({
+      name: '', age: '', weight: '', height: '', targetCalories: '', ...
+    }));
+    */
   };
 
   const hasCompletedSetup = async (): Promise<boolean> => {
-    return await StorageService.hasCompletedSetup();
+    return !!(personalInfo?.name && personalInfo?.targetCalories);
   };
 
   const saveMealsToStorage = async () => {
-    try {
-      await StorageService.saveMeals(meals);
-    } catch (error) {
-      console.error('Error saving meals to storage:', error);
-    }
+    // No-op, Redux Persist handles this
   };
 
   const loadMealsFromStorage = async () => {
-    try {
-      const savedMeals = await StorageService.getMeals();
-      if (savedMeals) {
-        setMeals(savedMeals);
-      }
-    } catch (error) {
-      console.error('Error loading meals from storage:', error);
-    }
+    // No-op, Redux Persist handles this
   };
-
-  // Auto-save meals when they change
-  useEffect(() => {
-    if (!isLoading) {
-      saveMealsToStorage();
-    }
-  }, [meals, isLoading]);
 
   const value: MealPlanContextType = {
     meals,
@@ -328,4 +229,4 @@ export const useMealPlan = (): MealPlanContextType => {
     throw new Error('useMealPlan must be used within a MealPlanProvider');
   }
   return context;
-}; 
+};

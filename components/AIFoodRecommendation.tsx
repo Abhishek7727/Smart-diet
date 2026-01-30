@@ -1,5 +1,4 @@
 import GeminiService from "@/services/GeminiService";
-import StorageService from "@/services/StorageService";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
@@ -14,6 +13,7 @@ import {
   View,
   useColorScheme,
 } from "react-native";
+import { useSelector } from 'react-redux';
 import { Colors } from "@/constants/Colors";
 import { useMealPlan } from "./MealPlanContext";
 import PersonalInfoModal from "./PersonalInfoModal";
@@ -48,12 +48,12 @@ interface AIFoodRecommendationProps {
   selectedMealType?: string;
 }
 
-const AIFoodRecommendation: React.FC<AIFoodRecommendationProps> = ({
+const AIFoodRecommendation = ({
   visible,
   onClose,
   onSelectFood,
   selectedMealType = "breakfast",
-}) => {
+}: AIFoodRecommendationProps) => {
   const [showPersonalInfoModal, setShowPersonalInfoModal] = useState(false);
   const [recommendations, setRecommendations] = useState<FoodItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -61,40 +61,36 @@ const AIFoodRecommendation: React.FC<AIFoodRecommendationProps> = ({
   const [hasApiKey, setHasApiKey] = useState(false);
   const [hasCompletedSetup, setHasCompletedSetup] = useState(false);
 
-  const { meals, personalInfo: contextPersonalInfo } = useMealPlan();
+  const userData = useSelector((state: any) => state.user);
+  const { meals } = useMealPlan();
 
   useEffect(() => {
     if (visible) {
-      checkSetupStatus();
-      checkApiKey();
-      loadPersonalInfo();
-    }
-  }, [visible]);
+      if (userData.name) {
+        setHasCompletedSetup(true);
+        // Sync local personal info with Redux
+        setPersonalInfo(userData);
+      } else {
+        setHasCompletedSetup(false);
+      }
 
-  const checkSetupStatus = async () => {
-    const hasSetup = await StorageService.hasCompletedSetup();
-    setHasCompletedSetup(hasSetup);
-  };
-
-  const checkApiKey = async () => {
-    const apiKey = await StorageService.getGeminiApiKey();
-    setHasApiKey(!!apiKey);
-
-    // If we have an API key, configure the service
-    if (apiKey) {
-      try {
-        GeminiService.setApiKey(apiKey);
-      } catch (error) {
-        console.error("Error setting API key:", error);
+      if (userData.apiKey) {
+        setHasApiKey(true);
+        try {
+          GeminiService.setApiKey(userData.apiKey);
+        } catch (e) {
+          console.error("Error setting API key from Redux:", e);
+        }
+      } else {
         setHasApiKey(false);
       }
     }
-  };
+  }, [visible, userData]);
 
-  const loadPersonalInfo = async () => {
-    const info = await StorageService.getPersonalInfo();
-    setPersonalInfo(info);
-  };
+  // Helper functions removed as logic is now in useEffect
+
+
+
 
   const handleGenerateRecommendations = async () => {
     // First check if user has completed setup
@@ -138,16 +134,18 @@ const AIFoodRecommendation: React.FC<AIFoodRecommendationProps> = ({
 
   const handlePersonalInfoComplete = async (info: PersonalInfo) => {
     try {
-      // Save personal info
-      await StorageService.savePersonalInfo(info);
+      // Save personal info is handled by dispatch in Modal now, 
+      // but if Modal passes it back, we can dispatch it here or assume it's done. 
+      // Actually PersonalInfoModal does dispatch(updateProfile(info)). 
+      // We just need to update local state for the UI to reflect immediately if not using selector for this part.
+
+      // Since our useEffect depends on userData, Redux update will trigger re-render and update personalInfo.
+      // But we can set it locally for instant feedback if needed.
       setPersonalInfo(info);
       setHasCompletedSetup(true);
       setShowPersonalInfoModal(false);
 
-      // Check API key again
-      await checkApiKey();
-
-      if (!hasApiKey) {
+      if (!userData.apiKey) {
         Alert.alert(
           "API Key Required",
           "Great! Your profile is set up. Now please set your Gemini API key in Settings to get AI recommendations.",
@@ -185,7 +183,7 @@ const AIFoodRecommendation: React.FC<AIFoodRecommendationProps> = ({
     setIsLoading(true);
     try {
       const recommendations = await GeminiService.generateMealRecommendations(
-        personalInfo,
+        userData.name ? userData : personalInfo,
         selectedMealType,
         meals
       );
@@ -608,11 +606,11 @@ const AIFoodRecommendation: React.FC<AIFoodRecommendationProps> = ({
         </View>
 
         <TouchableOpacity
-          style={styles.regenerateButton}
+          style={[styles.regenerateButton, { ...colors.glass, borderColor: colors.primary, borderWidth: 0.5 }]}
           onPress={generateRecommendations}
         >
-          <Ionicons name="refresh" size={20} color={colors.success} />
-          <Text style={[styles.regenerateButtonText, { color: colors.success }]}>
+          <Ionicons name="refresh" size={20} color={colors.primary} />
+          <Text style={[styles.regenerateButtonText, { color: colors.primary }]}>
             Generate New Recommendations
           </Text>
         </TouchableOpacity>
@@ -649,7 +647,6 @@ export default AIFoodRecommendation;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f1e3ec",
   },
   modalHeader: {
     flexDirection: "row",
@@ -659,7 +656,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
   },
   modalTitle: {
     fontSize: 18,
