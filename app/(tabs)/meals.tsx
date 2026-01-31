@@ -122,6 +122,15 @@ const MealsScreen = () => {
     }
   };
 
+  // Helper to determine meal type based on current time
+  const getSmartMealId = () => {
+    const hour = new Date().getHours();
+    if (hour >= 4 && hour < 11) return 'breakfast';
+    if (hour >= 11 && hour < 16) return 'lunch';
+    if (hour >= 16 && hour < 19) return 'snacks';
+    return 'dinner';
+  };
+
   const handleAIRecommendations = () => {
     if (!hasCompletedSetup) {
       Alert.alert(
@@ -143,12 +152,20 @@ const MealsScreen = () => {
           { text: 'Cancel', style: 'cancel' },
           {
             text: 'Go to Settings', onPress: () => {
-              // Navigate to settings
+              // Navigate to settings (implementation pending)
+              // router.push('/settings'); 
             }
           },
         ]
       );
       return;
+    }
+
+    // Smart Selection: If no meal is manually selected (via + button), 
+    // validatethe current time to suggest the most relevant meal.
+    if (!selectedMealId) {
+      const smartId = getSmartMealId();
+      setSelectedMealId(smartId);
     }
 
     setShowAIRecommendations(true);
