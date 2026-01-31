@@ -2,15 +2,11 @@ import { Colors } from '@/constants/Colors';
 import { View, TextInput, StyleSheet, useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-interface GlassInputProps {
-    placeholder: string;
-    value: string;
-    onChangeText: (text: string) => void;
+interface GlassInputProps extends React.ComponentProps<typeof TextInput> {
     icon?: string;
-    secureTextEntry?: boolean;
 }
 
-export function GlassInput({ placeholder, value, onChangeText, icon, secureTextEntry }: GlassInputProps) {
+export function GlassInput({ icon, style, ...props }: GlassInputProps) {
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
 
@@ -19,15 +15,12 @@ export function GlassInput({ placeholder, value, onChangeText, icon, secureTextE
             backgroundColor: colors.surfaceHighlight,
             borderColor: colors.glass.borderColor,
             borderWidth: 1,
-        }]}>
+        }, style]}>
             {icon && <Ionicons name={icon as any} size={20} color={colors.icon} style={styles.icon} />}
             <TextInput
                 style={[styles.input, { color: colors.text }]}
-                placeholder={placeholder}
                 placeholderTextColor={colors.icon}
-                value={value}
-                onChangeText={onChangeText}
-                secureTextEntry={secureTextEntry}
+                {...props}
             />
         </View>
     );

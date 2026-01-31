@@ -22,7 +22,10 @@ import { clearAllMeals } from '@/store/mealsSlice';
 import { persistor } from '@/store/store';
 
 
+import { useRouter } from 'expo-router';
+
 const SettingsScreen = () => {
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
   const [geminiApiKey, setGeminiApiKey] = useState('');
@@ -330,14 +333,14 @@ const SettingsScreen = () => {
             <SettingItem
               icon="person"
               title="Personal Information"
-              subtitle={userData.name ? "Profile active" : "No profile data"}
-              onPress={() => { }}
+              subtitle={userData.name ? "Edit Profile" : "No profile data"}
+              onPress={() => router.push('/profile/edit')}
             />
             <SettingItem
               icon="restaurant"
               title="Meal Data"
               subtitle={`${meals.length} meals saved`}
-              onPress={() => { }}
+              onPress={() => router.push('/settings/meals')}
               isLast={true}
             />
           </SettingsGroup>
