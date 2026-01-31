@@ -1,35 +1,38 @@
 import React from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-    TouchableOpacity,
-    SafeAreaView,
-    useColorScheme,
-    Linking,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { Colors } from '@/constants/Colors';
-import { Ionicons } from '@expo/vector-icons';
+import { ScrollView, StyleSheet, Text, View, Linking, TouchableOpacity } from 'react-native';
 import { ScreenWrapper } from '@/components/ScreenWrapper';
 import { GlassCard } from '@/components/GlassCard';
-import { PrimaryButton } from '@/components/PrimaryButton';
+import { Colors } from '@/constants/Colors';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useColorScheme } from 'react-native';
 
-export default function HelpScreen() {
+const HelpScreen = () => {
     const router = useRouter();
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
 
-    const FAQItem = ({ question, answer }: { question: string, answer: string }) => (
-        <View style={[styles.faqItem, { backgroundColor: 'transparent' }]}>
-            <Text style={[styles.question, { color: colors.text }]}>{question}</Text>
-            <Text style={[styles.answer, { color: colors.icon }]}>{answer}</Text>
-        </View>
-    );
+    const faqItems = [
+        {
+            question: "How are my calories calculated?",
+            answer: "We use the Mifflin-St Jeor equation based on your age, gender, weight, height, and activity level to calculate your BMR and TDEE."
+        },
+        {
+            question: "Can I update my dietary preferences?",
+            answer: "Yes! Go to Profile > Edit Profile to update your dietary restrictions and allergies."
+        },
+        {
+            question: "How does the AI meal planner work?",
+            answer: "Our AI analyzes your profile and nutritional needs to generate personalized meal suggestions using the Gemini API."
+        },
+        {
+            question: "Is my data private?",
+            answer: "Yes. All your personal data is stored locally on your device. We do not store your data on external servers."
+        }
+    ];
 
-    const handleContactSupport = () => {
-        Linking.openURL('mailto:support@smartdiet.com?subject=Support Request');
+    const handleEmailSupport = () => {
+        Linking.openURL('mailto:support@smartdiet.app');
     };
 
     return (
@@ -41,40 +44,35 @@ export default function HelpScreen() {
                 <Text style={[styles.headerTitle, { color: colors.text }]}>Help & Support</Text>
             </View>
 
-            <ScrollView contentContainerStyle={styles.content}>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>Frequently Asked Questions</Text>
+            <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Contact Us</Text>
+                <TouchableOpacity onPress={handleEmailSupport}>
+                    <GlassCard style={styles.contactCard}>
+                        <View style={[styles.iconContainer, { backgroundColor: colors.primary + '20' }]}>
+                            <Ionicons name="mail" size={24} color={colors.primary} />
+                        </View>
+                        <View style={styles.contactInfo}>
+                            <Text style={[styles.contactTitle, { color: colors.text }]}>Email Support</Text>
+                            <Text style={[styles.contactSubtitle, { color: colors.icon }]}>Get help with your account</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={20} color={colors.icon} />
+                    </GlassCard>
+                </TouchableOpacity>
 
-                <GlassCard style={styles.card}>
-                    <FAQItem
-                        question="How does the AI recommendation work?"
-                        answer="Our AI analyzes your profile, goals, and dietary preferences to suggest personalized meal options powered by Google Gemini."
-                    />
-                    <View style={[styles.divider, { backgroundColor: colors.border }]} />
-                    <FAQItem
-                        question="Can I use the app offline?"
-                        answer="Yes! Local recommendations are available offline, but AI generation requires an internet connection."
-                    />
-                    <View style={[styles.divider, { backgroundColor: colors.border }]} />
-                    <FAQItem
-                        question="Is my data private?"
-                        answer="Absolutely. All your personal data is stored locally on your device."
-                    />
-                </GlassCard>
-
-                <View style={styles.contactSection}>
-                    <Text style={[styles.sectionTitle, { color: colors.text }]}>Need more help?</Text>
-                    <PrimaryButton
-                        title="Contact Support"
-                        onPress={handleContactSupport}
-                        style={styles.contactButton}
-                    />
+                <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 24 }]}>Frequently Asked Questions</Text>
+                <View style={styles.faqContainer}>
+                    {faqItems.map((item, index) => (
+                        <GlassCard key={index} style={styles.faqCard}>
+                            <Text style={[styles.question, { color: colors.text }]}>{item.question}</Text>
+                            <Text style={[styles.answer, { color: colors.icon }]}>{item.answer}</Text>
+                        </GlassCard>
+                    ))}
                 </View>
-
-                <Text style={[styles.version, { color: colors.icon }]}>Version 1.0.0</Text>
+                <View style={{ height: 40 }} />
             </ScrollView>
         </ScreenWrapper>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -83,59 +81,68 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 16,
-        gap: 16,
+        paddingHorizontal: 20,
+        paddingTop: 10,
+        paddingBottom: 20,
     },
     backButton: {
-        padding: 8,
+        marginRight: 16,
     },
     headerTitle: {
-        fontSize: 20,
-        fontWeight: '700',
+        fontSize: 24,
+        fontWeight: 'bold',
     },
     content: {
-        padding: 24,
-        gap: 20,
+        flex: 1,
+        paddingHorizontal: 20,
     },
     sectionTitle: {
         fontSize: 18,
         fontWeight: '700',
+        marginBottom: 16,
+        marginLeft: 4,
+    },
+    contactCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+        borderRadius: 20,
+    },
+    iconContainer: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 16,
+    },
+    contactInfo: {
+        flex: 1,
+    },
+    contactTitle: {
+        fontSize: 16,
+        fontWeight: '600',
         marginBottom: 4,
     },
-    card: {
-        padding: 16,
+    contactSubtitle: {
+        fontSize: 14,
     },
-    faqItem: {
-        padding: 8,
-        marginBottom: 8,
+    faqContainer: {
+        gap: 16,
+    },
+    faqCard: {
+        padding: 16,
+        borderRadius: 20,
     },
     question: {
         fontSize: 16,
         fontWeight: '600',
-        marginBottom: 6,
+        marginBottom: 8,
     },
     answer: {
         fontSize: 14,
         lineHeight: 20,
     },
-    divider: {
-        height: 1,
-        marginVertical: 8,
-        opacity: 0.5,
-    },
-    contactSection: {
-        marginTop: 20,
-        alignItems: 'center',
-        gap: 16,
-        width: '100%',
-    },
-    contactButton: {
-        width: '100%',
-    },
-    version: {
-        textAlign: 'center',
-        marginTop: 20,
-        marginBottom: 40,
-        fontSize: 12,
-    },
 });
+
+export default HelpScreen;

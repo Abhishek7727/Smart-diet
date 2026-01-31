@@ -281,6 +281,28 @@ const SettingsScreen = () => {
     </Modal>
   );
 
+  /* Nutrition Summary Card */
+  const NutritionSummary = () => {
+    const { getTotalNutrition, nutritionalData } = useMealPlan();
+    const total = getTotalNutrition();
+
+    return (
+      <View style={[styles.statsContainer, { backgroundColor: colors.surfaceHighlight }]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+          <Ionicons name="stats-chart" size={20} color={colors.primary} style={{ marginRight: 8 }} />
+          <Text style={[styles.sectionTitle, { marginBottom: 0, fontSize: 16 }]}>Nutrition Goals</Text>
+        </View>
+        <View style={styles.statItem}>
+          <Text style={[styles.statLabel, { color: colors.text }]}>Daily Calories</Text>
+          <Text style={[styles.statValue, { color: colors.primary }]}>{total.calories} / {nutritionalData.calories}</Text>
+        </View>
+        <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
+          <View style={[styles.progressFill, { width: `${Math.min((total.calories / nutritionalData.calories) * 100, 100)}%`, backgroundColor: colors.primary }]} />
+        </View>
+      </View>
+    );
+  };
+
   return (
     <ScreenWrapper style={styles.container}>
       <ScrollView
@@ -315,6 +337,11 @@ const SettingsScreen = () => {
           </GlassCard>
         </TouchableOpacity>
 
+        {/* Nutrition Overview */}
+        <View style={styles.section}>
+          <NutritionSummary />
+        </View>
+
         {/* AI Configuration */}
         <Text style={[styles.sectionTitle, { color: colors.text }]}>AI Configuration</Text>
         <SettingsGroup>
@@ -330,28 +357,6 @@ const SettingsScreen = () => {
         {/* App Settings */}
         <Text style={[styles.sectionTitle, { color: colors.text }]}>App Settings</Text>
         <SettingsGroup>
-          <View style={styles.settingRow}>
-            <View style={styles.settingLeft}>
-              <View style={[styles.iconContainer, { backgroundColor: colors.surfaceHighlight }]}>
-                <Ionicons name="moon" size={20} color={colors.primary} />
-              </View>
-              <View style={styles.settingTextContainer}>
-                <Text style={[styles.settingTitle, { color: colors.text }]}>Dark Mode</Text>
-                <Text style={[styles.settingSubtitle, { color: colors.icon }]}>
-                  {colorScheme === 'dark' ? 'On' : 'Off'} (System)
-                </Text>
-              </View>
-            </View>
-            <Switch
-              value={colorScheme === 'dark'}
-              onValueChange={() => {
-                Alert.alert('System Theme', 'Please change your system theme in device settings.');
-              }}
-              trackColor={{ false: '#767577', true: colors.primary }}
-              thumbColor={colors.text}
-            />
-          </View>
-          <View style={[styles.separator, { backgroundColor: colors.border }]} />
           <SettingItem
             icon="notifications"
             title="Notifications"
@@ -414,12 +419,12 @@ const SettingsScreen = () => {
             <SettingItem
               icon="document-text"
               title="Privacy Policy"
-              onPress={() => { }}
+              onPress={() => router.push('/profile/privacy')}
             />
             <SettingItem
               icon="help-circle"
               title="Help & Support"
-              onPress={() => { }}
+              onPress={() => router.push('/profile/help')}
               isLast={true}
             />
           </SettingsGroup>
@@ -678,5 +683,15 @@ const styles = StyleSheet.create({
   },
   settingTextContainer: {
     justifyContent: 'center',
+  },
+  progressBar: {
+    height: 8,
+    borderRadius: 4,
+    marginTop: 8,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 4,
   },
 });
