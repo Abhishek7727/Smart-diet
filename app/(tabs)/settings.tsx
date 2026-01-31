@@ -286,6 +286,27 @@ const SettingsScreen = () => {
     const { getTotalNutrition, nutritionalData } = useMealPlan();
     const total = getTotalNutrition();
 
+    // Data Status Checks
+    const hasPersonalInfo = !!(userData.name && userData.targetCalories);
+    const hasMeals = meals && meals.length > 0;
+    const hasApiKey = !!geminiApiKey;
+
+    const StatusRow = ({ label, isSaved }: { label: string; isSaved: boolean }) => (
+      <View style={styles.statItem}>
+        <Text style={[styles.statLabel, { color: colors.text }]}>{label}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <Ionicons
+            name={isSaved ? "checkmark-circle" : "alert-circle"}
+            size={16}
+            color={isSaved ? "green" : "red"}
+          />
+          <Text style={[styles.statValue, { color: isSaved ? "green" : "red" }]}>
+            {isSaved ? "Saved" : "Missing"}
+          </Text>
+        </View>
+      </View>
+    );
+
     return (
       <View style={[styles.statsContainer, { backgroundColor: colors.surfaceHighlight }]}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
@@ -299,6 +320,13 @@ const SettingsScreen = () => {
         <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
           <View style={[styles.progressFill, { width: `${Math.min((total.calories / nutritionalData.calories) * 100, 100)}%`, backgroundColor: colors.primary }]} />
         </View>
+
+        <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 12 }} />
+
+        <Text style={[styles.sectionTitle, { marginBottom: 8, fontSize: 14, color: colors.icon }]}>Data Status</Text>
+        <StatusRow label="Personal Info" isSaved={hasPersonalInfo} />
+        <StatusRow label="All Meals" isSaved={hasMeals} />
+        <StatusRow label="Gemini API" isSaved={hasApiKey} />
       </View>
     );
   };
