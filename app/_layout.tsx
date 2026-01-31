@@ -26,15 +26,22 @@ function AuthProtection({ children }: { children: React.ReactNode }) {
     if (!isMounted) return;
 
     const inAuthGroup = segments[0] === 'auth';
+    const inOnboarding = segments.length > 1 && segments[0] === 'auth' && segments[1] === 'onboarding';
 
     if (!isAuthenticated && !inAuthGroup) {
       // Redirect to the sign-in page.
       router.replace('/auth/login');
-    } else if (isAuthenticated && inAuthGroup) {
-      // Redirect away from the sign-in page.
+    } else if (isAuthenticated && !isOnboarded && !inOnboarding) {
+      // Redirect to onboarding if authenticated but not onboarded
+      router.replace('/auth/onboarding');
+    } else if (isAuthenticated && isOnboarded && inAuthGroup) {
+      // Redirect to home if authenticated and setup is done
       router.replace('/(tabs)');
     } else if (!isAuthenticated && !isOnboarded && !inAuthGroup) {
       // Handle case where user wiped data or fresh install but not in auth
+      // If we are not authenticated, go to register/login.
+      // If we are previously login but data wiped, this logic might need care, 
+      // but standard !isAuthenticated check covers it.
       router.replace('/auth/register');
     }
   }, [isAuthenticated, segments, isMounted, isOnboarded]);
@@ -70,6 +77,7 @@ export default function RootLayout() {
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen name="auth/login" options={{ headerShown: false }} />
                 <Stack.Screen name="auth/register" options={{ headerShown: false }} />
+                <Stack.Screen name="auth/onboarding" options={{ headerShown: false }} />
                 <Stack.Screen name="profile/edit" options={{ headerShown: false, presentation: 'modal' }} />
                 <Stack.Screen name="profile/notifications" options={{ title: 'Notifications' }} />
                 <Stack.Screen name="profile/help" options={{ title: 'Help & Support' }} />

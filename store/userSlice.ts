@@ -50,7 +50,7 @@ const userSlice = createSlice({
             return { ...state, ...action.payload };
         },
         register: (state, action: PayloadAction<Partial<UserState>>) => {
-            return { ...state, ...action.payload, isAuthenticated: true, isOnboarded: true };
+            return { ...state, ...action.payload, isAuthenticated: true, isOnboarded: false };
         },
         loginSuccess: (state) => {
             state.isAuthenticated = true;
@@ -59,10 +59,13 @@ const userSlice = createSlice({
             // Only clear session, keep data
             state.isAuthenticated = false;
         },
+        setOnboardingCompleted: (state) => {
+            state.isOnboarded = true;
+        },
         deleteAccount: () => initialState,
     },
 });
 
-export const { setUser, setApiKey, updateProfile, logout, register, loginSuccess, deleteAccount } = userSlice.actions;
+export const { setUser, setApiKey, updateProfile, logout, register, loginSuccess, deleteAccount, setOnboardingCompleted } = userSlice.actions;
 
 export default userSlice.reducer;
