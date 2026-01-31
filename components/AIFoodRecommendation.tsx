@@ -47,7 +47,7 @@ interface PersonalInfo {
 interface AIFoodRecommendationProps {
   visible: boolean;
   onClose: () => void;
-  onSelectFood: (food: FoodItem) => void;
+  onSelectFood: (food: FoodItem, mealType: string) => void;
   selectedMealType?: string;
 }
 
@@ -57,6 +57,7 @@ const AIFoodRecommendation = ({
   onSelectFood,
   selectedMealType = "breakfast",
 }: AIFoodRecommendationProps) => {
+  const [activeMealType, setActiveMealType] = useState(selectedMealType);
   const [showPersonalInfoModal, setShowPersonalInfoModal] = useState(false);
   const [recommendations, setRecommendations] = useState<FoodItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -453,7 +454,7 @@ const AIFoodRecommendation = ({
   const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
 
   const handleSelectFood = (food: FoodItem) => {
-    onSelectFood(food);
+    onSelectFood(food, activeMealType);
     onClose();
   };
 
@@ -522,7 +523,6 @@ const AIFoodRecommendation = ({
               <PrimaryButton
                 title="Complete Profile Setup"
                 onPress={() => setShowPersonalInfoModal(true)}
-                icon="person-add"
                 style={styles.setupButton}
               />
             </View>
@@ -541,7 +541,6 @@ const AIFoodRecommendation = ({
                   onClose();
                   // Navigate to settings
                 }}
-                icon="key"
                 style={styles.setupButton}
               />
             </View>
@@ -559,7 +558,6 @@ const AIFoodRecommendation = ({
               <PrimaryButton
                 title="Generate AI Recommendations"
                 onPress={generateRecommendations}
-                icon="bulb"
                 style={styles.generateButton}
               />
             </View>
@@ -575,6 +573,42 @@ const AIFoodRecommendation = ({
       >
         <View style={styles.header}>
           <Text style={[styles.headerTitle, { color: colors.text }]}>AI Recommendations</Text>
+
+          {/* Meal Type Selector */}
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+            {['breakfast', 'lunch', 'snacks', 'dinner'].map((type) => (
+              <TouchableOpacity
+                key={type}
+                style={[
+                  styles.mealTypeChip,
+                  {
+                    backgroundColor: activeMealType === type ? colors.primary : colors.surfaceHighlight,
+                    borderColor: activeMealType === type ? 'transparent' : colors.border,
+                    borderWidth: 1
+                  }
+                ]}
+                onPress={() => {
+                  setActiveMealType(type);
+                  // Optional: Automatically regenerate when switching? 
+                  // Let's stick to manual regenerate to save API calls, 
+                  // or user can press the button below.
+                  // But we should probably clear current recommendations if they don't match?
+                  // No, allow user to keep seeing them, but highlight they might be for a different time.
+                  // BETTER: Re-fetch fallback immediately or clear list.
+                  // Let's keep it simple: Just update state. User hits "Generate".
+                }}
+              >
+                <Text style={{
+                  color: activeMealType === type ? '#fff' : colors.text,
+                  fontWeight: '600',
+                  textTransform: 'capitalize'
+                }}>
+                  {type}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
           <Text style={[styles.headerSubtitle, { color: colors.icon }]}>
             Personalized for {personalInfo?.name || "you"}
           </Text>
@@ -604,7 +638,7 @@ const AIFoodRecommendation = ({
         >
           <Ionicons name="refresh" size={20} color={colors.primary} />
           <Text style={[styles.regenerateButtonText, { color: colors.primary }]}>
-            Generate New Recommendations
+            Generate New Recommendations ({activeMealType})
           </Text>
         </TouchableOpacity>
         <View style={{ height: 40 }} />
@@ -781,5 +815,13 @@ const styles = StyleSheet.create({
   regenerateButtonText: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  mealTypeChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    minWidth: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

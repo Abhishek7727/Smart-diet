@@ -22,6 +22,7 @@ import {
 import { ThemedBackground } from '@/components/ThemedBackground';
 import { GlassCard } from '@/components/GlassCard';
 import { GlassInput } from '@/components/GlassInput';
+import { useSelector } from 'react-redux';
 import { PrimaryButton } from '@/components/PrimaryButton';
 
 const { width } = Dimensions.get('window');
@@ -40,8 +41,9 @@ const MealsScreen = () => {
     fat: '',
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [hasCompletedSetup, setHasCompletedSetup] = useState(false);
-  const [hasApiKey, setHasApiKey] = useState(false);
+  const userData = useSelector((state: any) => state.user);
+  const hasCompletedSetup = !!(userData.name && userData.targetCalories);
+  const hasApiKey = !!userData.apiKey;
 
   const {
     meals,
@@ -56,26 +58,11 @@ const MealsScreen = () => {
 
   const totalNutrition = getTotalNutrition();
 
-  useEffect(() => {
-    checkSetupStatus();
-  }, []);
+  const handleSelectFood = (food: any, mealId?: string) => {
+    const targetMealId = mealId || selectedMealId;
 
-  const checkSetupStatus = async () => {
-    try {
-      const [hasSetup, apiKey] = await Promise.all([
-        StorageService.hasCompletedSetup(),
-        StorageService.getGeminiApiKey(),
-      ]);
-      setHasCompletedSetup(hasSetup);
-      setHasApiKey(!!apiKey);
-    } catch (error) {
-      console.error('Error checking setup status:', error);
-    }
-  };
-
-  const handleSelectFood = (food: any) => {
-    if (selectedMealId) {
-      updateMeal(selectedMealId, food);
+    if (targetMealId) {
+      updateMeal(targetMealId, food);
     }
     setShowAIRecommendations(false);
     setSelectedMealId(null);
