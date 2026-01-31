@@ -5,54 +5,66 @@ import { View, StyleSheet, useColorScheme, Platform, ViewStyle, StyleProp } from
 interface GlassCardProps {
     children: React.ReactNode;
     style?: StyleProp<ViewStyle>;
-    onPress?: () => void; // Add definition to fix lint, though strictly it should be on Touchable wrapper
+    onPress?: () => void;
 }
 
 export function GlassCard({ children, style }: GlassCardProps) {
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
 
-    // Flatten style to ensure we can split specific layout/spacing props
     const flatStyle = StyleSheet.flatten(style) || {};
 
-    // Extract padding properties to apply to internal content container
-    const {
-        padding,
-        paddingHorizontal,
-        paddingVertical,
-        paddingTop,
-        paddingBottom,
-        paddingLeft,
-        paddingRight,
+    // Split styles between Outer(Shadow/Layout) and Inner(Content/Padding/FlexChildren)
+
+    // Explicit list of keys to keep on Outer Container
+    // These affect the card's position and size in the parent
+    const containerKeys = [
+        'width', 'height', 'minWidth', 'minHeight', 'maxWidth', 'maxHeight',
+        'margin', 'marginBottom', 'marginTop', 'marginLeft', 'marginRight', 'marginHorizontal', 'marginVertical',
+        'flex', 'flexGrow', 'flexShrink', 'flexBasis',
+        'alignSelf', 'position', 'top', 'bottom', 'left', 'right', 'zIndex',
+        'transform', 'borderRadius', 'borderBottomLeftRadius', 'borderBottomRightRadius', 'borderTopLeftRadius', 'borderTopRightRadius'
+    ];
+
+    const containerStyle: any = Object.keys(flatStyle).reduce((acc: any, key) => {
+        if (containerKeys.includes(key)) {
+            acc[key] = flatStyle[key as keyof typeof flatStyle];
+        }
+        return acc;
+    }, {});
+
+    // Remaining keys go to Content Container (Padding, FlexDirection for children, Justify, Align for children, etc.)
+    // Note: Background color and border are handled explicitly by Glass Theme
+    const contentStyle: any = Object.keys(flatStyle).reduce((acc: any, key) => {
+        if (!containerKeys.includes(key) && key !== 'backgroundColor' && key !== 'borderWidth' && key !== 'borderColor') {
+            acc[key] = flatStyle[key as keyof typeof flatStyle];
+        }
+        return acc;
+    }, {});
+
+
+    // Default radius logic
+    const borderRadius = containerStyle.borderRadius !== undefined ? containerStyle.borderRadius : 24;
+
+    // Ensure outer container has radius for shadow
+    const finalContainerStyle = {
+        ...containerStyle,
         borderRadius,
-        ...otherStyles
-    } = flatStyle;
-
-    // Default radius
-    const radius = typeof borderRadius === 'number' ? borderRadius : 24;
-
-    const paddingStyles = {
-        padding,
-        paddingHorizontal,
-        paddingVertical,
-        paddingTop,
-        paddingBottom,
-        paddingLeft,
-        paddingRight,
     };
 
     return (
-        <View style={[styles.shadowContainer, otherStyles, { borderRadius: radius, overflow: 'visible', backgroundColor: 'transparent', borderWidth: 0 }]}>
+        <View style={[styles.shadowContainer, finalContainerStyle]}>
+            {/* Overflow Container clips the BlurView and Content */}
             <View style={[styles.overflowContainer, {
                 backgroundColor: colors.glass.backgroundColor,
                 borderColor: colors.glass.borderColor,
                 borderWidth: colors.glass.borderWidth,
-                borderRadius: radius,
+                borderRadius: borderRadius,
             }]}>
                 {Platform.OS !== 'web' ? (
                     <BlurView intensity={20} tint={colorScheme === 'dark' ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
                 ) : null}
-                <View style={[styles.content, paddingStyles]}>
+                <View style={[styles.content, contentStyle]}>
                     {children}
                 </View>
             </View>
@@ -62,7 +74,8 @@ export function GlassCard({ children, style }: GlassCardProps) {
 
 const styles = StyleSheet.create({
     shadowContainer: {
-        marginBottom: 16, // Default margin, can be overridden by otherStyles
+        marginBottom: 16, // Default margin, override-able
+        backgroundColor: 'transparent',
         // Shadow for iOS
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
@@ -76,6 +89,6 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
     content: {
-        // Padding is now injected dynamically
+        flex: 1, // Ensure it fills the space if needed
     },
 });
