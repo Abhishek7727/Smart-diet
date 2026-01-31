@@ -14,7 +14,7 @@ import {
   View,
 } from "react-native";
 import { useSelector } from 'react-redux';
-import { ThemedBackground } from "@/components/ThemedBackground";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { GlassCard } from "@/components/GlassCard";
 
 
@@ -23,6 +23,16 @@ const { width } = Dimensions.get("window");
 // Home Screen Component
 const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
   const colorScheme = useColorScheme();
+  // ... (keep existing hooks)
+
+  // Note: I am not including the entire component body in ReplacementContent to avoid huge output,
+  // but I must target the lines carefully.
+  // The tool requires EXACT target content. 
+  // I will replace the imports and the render wrapper.
+
+  // Let's do it in chunks.
+  // Chunk 1: Imports
+
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const [selectedView, setSelectedView] = useState("Daily");
   const { meals, nutritionalData, getTotalNutrition, personalInfo } =
@@ -136,132 +146,130 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
   );
 
   return (
-    <ThemedBackground>
-      <SafeAreaView style={styles.container}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-        >
-          {/* Header */}
-          <View style={styles.header}>
-            <View>
-              <Text style={[styles.greetingText, { color: colors.icon }]}>
-                Hello, {userData.name?.split(' ')[0] || "Friend"}
-              </Text>
-              <Text style={[styles.questionText, { color: colors.text }]}>
-                Scheduled Your Diet
-              </Text>
-            </View>
+    <ScreenWrapper style={styles.container}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <View>
+            <Text style={[styles.greetingText, { color: colors.icon }]}>
+              Hello, {userData.name?.split(' ')[0] || "Friend"}
+            </Text>
+            <Text style={[styles.questionText, { color: colors.text }]}>
+              Scheduled Your Diet
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.profileButton, { backgroundColor: colors.surfaceHighlight }]}
+            onPress={() => onNavigate?.("profile")}
+          >
+            <Ionicons name="person" size={20} color={colors.text} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Metrics */}
+        {personalInfo ? (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.metricsScroll}
+            contentContainerStyle={styles.metricsContainer}
+          >
+            <MetricCard
+              icon="flame"
+              color={colors.warning}
+              title="Calorie"
+              value={totalNutrition.calories}
+              target={parseInt(personalInfo.targetCalories) || 2000}
+            />
+            <MetricCard
+              icon="water"
+              color={colors.primary}
+              title="Protein"
+              value={totalNutrition.protein}
+              target={nutritionalData.protein}
+            />
+            <MetricCard
+              icon="leaf"
+              color={colors.success}
+              title="Carbs"
+              value={totalNutrition.carbs}
+              target={nutritionalData.carbs}
+            />
+            <MetricCard
+              icon="egg"
+              color={colors.secondary}
+              title="Fat"
+              value={totalNutrition.fat}
+              target={nutritionalData.fat}
+            />
+          </ScrollView>
+        ) : (
+          <GlassCard style={styles.setupPrompt}>
+            <Ionicons name="nutrition" size={48} color={colors.primary} />
+            <Text style={[styles.setupPromptTitle, { color: colors.text }]}>
+              Start Your Journey
+            </Text>
+            <Text style={[styles.setupPromptText, { color: colors.icon }]}>
+              Set up your profile to receive personalized nutrition targets and meal plans.
+            </Text>
             <TouchableOpacity
-              style={[styles.profileButton, { backgroundColor: colors.surfaceHighlight }]}
+              style={[styles.setupButton, { backgroundColor: colors.primary }]}
               onPress={() => onNavigate?.("profile")}
             >
-              <Ionicons name="person" size={20} color={colors.text} />
+              <Text style={styles.setupButtonText}>Complete Profile</Text>
             </TouchableOpacity>
-          </View>
+          </GlassCard>
+        )}
 
-          {/* Metrics */}
-          {personalInfo ? (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.metricsScroll}
-              contentContainerStyle={styles.metricsContainer}
-            >
-              <MetricCard
-                icon="flame"
-                color={colors.warning}
-                title="Calorie"
-                value={totalNutrition.calories}
-                target={nutritionalData.calories}
-              />
-              <MetricCard
-                icon="water"
-                color={colors.primary}
-                title="Protein"
-                value={totalNutrition.protein}
-                target={nutritionalData.protein}
-              />
-              <MetricCard
-                icon="leaf"
-                color={colors.success}
-                title="Carbs"
-                value={totalNutrition.carbs}
-                target={nutritionalData.carbs}
-              />
-              <MetricCard
-                icon="egg"
-                color={colors.secondary}
-                title="Fat"
-                value={totalNutrition.fat}
-                target={nutritionalData.fat}
-              />
-            </ScrollView>
-          ) : (
-            <GlassCard style={styles.setupPrompt}>
-              <Ionicons name="nutrition" size={48} color={colors.primary} />
-              <Text style={[styles.setupPromptTitle, { color: colors.text }]}>
-                Start Your Journey
-              </Text>
-              <Text style={[styles.setupPromptText, { color: colors.icon }]}>
-                Set up your profile to receive personalized nutrition targets and meal plans.
-              </Text>
-              <TouchableOpacity
-                style={[styles.setupButton, { backgroundColor: colors.primary }]}
-                onPress={() => onNavigate?.("profile")}
-              >
-                <Text style={styles.setupButtonText}>Complete Profile</Text>
-              </TouchableOpacity>
-            </GlassCard>
-          )}
-
-          {/* View Toggle */}
-          <View style={[styles.toggleContainer, { backgroundColor: colors.surfaceHighlight }]}>
-            <TouchableOpacity
+        {/* View Toggle */}
+        <View style={[styles.toggleContainer, { backgroundColor: colors.surfaceHighlight }]}>
+          <TouchableOpacity
+            style={[
+              styles.toggleButton,
+              selectedView === "Daily" && { backgroundColor: colors.glass.backgroundColor },
+            ]}
+            onPress={() => setSelectedView("Daily")}
+          >
+            <Text
               style={[
-                styles.toggleButton,
-                selectedView === "Daily" && { backgroundColor: colors.glass.backgroundColor },
+                styles.toggleText,
+                { color: selectedView === "Daily" ? colors.text : colors.icon },
               ]}
-              onPress={() => setSelectedView("Daily")}
             >
-              <Text
-                style={[
-                  styles.toggleText,
-                  { color: selectedView === "Daily" ? colors.text : colors.icon },
-                ]}
-              >
-                Daily Plan
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+              Daily Plan
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.toggleButton,
+              selectedView === "Weekly" && { backgroundColor: colors.surfaceHighlight },
+            ]}
+            onPress={() => setSelectedView("Weekly")}
+          >
+            <Text
               style={[
-                styles.toggleButton,
-                selectedView === "Weekly" && { backgroundColor: colors.surfaceHighlight },
+                styles.toggleText,
+                { color: selectedView === "Weekly" ? colors.text : colors.icon },
               ]}
-              onPress={() => setSelectedView("Weekly")}
             >
-              <Text
-                style={[
-                  styles.toggleText,
-                  { color: selectedView === "Weekly" ? colors.text : colors.icon },
-                ]}
-              >
-                Weekly Overview
-              </Text>
-            </TouchableOpacity>
-          </View>
+              Weekly Overview
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-          {/* Meals Grid */}
-          <View style={styles.mealsGrid}>
-            {meals.map((meal) => (
-              <MealCard key={meal.id} meal={meal} />
-            ))}
-          </View>
+        {/* Meals Grid */}
+        <View style={styles.mealsGrid}>
+          {meals.map((meal) => (
+            <MealCard key={meal.id} meal={meal} />
+          ))}
+        </View>
 
-          <View style={styles.bottomSpacer} />
-        </ScrollView>
-      </SafeAreaView>
-    </ThemedBackground>
+        <View style={styles.bottomSpacer} />
+      </ScrollView>
+    </ScreenWrapper>
   );
 };
 

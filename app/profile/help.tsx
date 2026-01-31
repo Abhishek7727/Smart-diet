@@ -12,7 +12,7 @@ import {
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
-import { ThemedBackground } from '@/components/ThemedBackground';
+import { ScreenWrapper } from '@/components/ScreenWrapper';
 import { GlassCard } from '@/components/GlassCard';
 import { PrimaryButton } from '@/components/PrimaryButton';
 
@@ -33,48 +33,46 @@ export default function HelpScreen() {
     };
 
     return (
-        <ThemedBackground>
-            <SafeAreaView style={styles.container}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color={colors.text} />
-                    </TouchableOpacity>
-                    <Text style={[styles.headerTitle, { color: colors.text }]}>Help & Support</Text>
+        <ScreenWrapper style={styles.container}>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                    <Ionicons name="arrow-back" size={24} color={colors.text} />
+                </TouchableOpacity>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>Help & Support</Text>
+            </View>
+
+            <ScrollView contentContainerStyle={styles.content}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Frequently Asked Questions</Text>
+
+                <GlassCard style={styles.card}>
+                    <FAQItem
+                        question="How does the AI recommendation work?"
+                        answer="Our AI analyzes your profile, goals, and dietary preferences to suggest personalized meal options powered by Google Gemini."
+                    />
+                    <View style={[styles.divider, { backgroundColor: colors.border }]} />
+                    <FAQItem
+                        question="Can I use the app offline?"
+                        answer="Yes! Local recommendations are available offline, but AI generation requires an internet connection."
+                    />
+                    <View style={[styles.divider, { backgroundColor: colors.border }]} />
+                    <FAQItem
+                        question="Is my data private?"
+                        answer="Absolutely. All your personal data is stored locally on your device."
+                    />
+                </GlassCard>
+
+                <View style={styles.contactSection}>
+                    <Text style={[styles.sectionTitle, { color: colors.text }]}>Need more help?</Text>
+                    <PrimaryButton
+                        title="Contact Support"
+                        onPress={handleContactSupport}
+                        style={styles.contactButton}
+                    />
                 </View>
 
-                <ScrollView contentContainerStyle={styles.content}>
-                    <Text style={[styles.sectionTitle, { color: colors.text }]}>Frequently Asked Questions</Text>
-
-                    <GlassCard style={styles.card}>
-                        <FAQItem
-                            question="How does the AI recommendation work?"
-                            answer="Our AI analyzes your profile, goals, and dietary preferences to suggest personalized meal options powered by Google Gemini."
-                        />
-                        <View style={[styles.divider, { backgroundColor: colors.border }]} />
-                        <FAQItem
-                            question="Can I use the app offline?"
-                            answer="Yes! Local recommendations are available offline, but AI generation requires an internet connection."
-                        />
-                        <View style={[styles.divider, { backgroundColor: colors.border }]} />
-                        <FAQItem
-                            question="Is my data private?"
-                            answer="Absolutely. All your personal data is stored locally on your device."
-                        />
-                    </GlassCard>
-
-                    <View style={styles.contactSection}>
-                        <Text style={[styles.sectionTitle, { color: colors.text }]}>Need more help?</Text>
-                        <PrimaryButton
-                            title="Contact Support"
-                            onPress={handleContactSupport}
-                            style={styles.contactButton}
-                        />
-                    </View>
-
-                    <Text style={[styles.version, { color: colors.icon }]}>Version 1.0.0</Text>
-                </ScrollView>
-            </SafeAreaView>
-        </ThemedBackground>
+                <Text style={[styles.version, { color: colors.icon }]}>Version 1.0.0</Text>
+            </ScrollView>
+        </ScreenWrapper>
     );
 }
 

@@ -11,7 +11,7 @@ import {
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
-import { ThemedBackground } from '@/components/ThemedBackground';
+import { ScreenWrapper } from '@/components/ScreenWrapper';
 import { GlassCard } from '@/components/GlassCard';
 
 export default function NotificationsScreen() {
@@ -44,25 +44,23 @@ export default function NotificationsScreen() {
     );
 
     return (
-        <ThemedBackground>
-            <SafeAreaView style={styles.container}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color={colors.text} />
-                    </TouchableOpacity>
-                    <Text style={[styles.headerTitle, { color: colors.text }]}>Notifications</Text>
-                </View>
+        <ScreenWrapper style={styles.container}>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                    <Ionicons name="arrow-back" size={24} color={colors.text} />
+                </TouchableOpacity>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>Notifications</Text>
+            </View>
 
-                <View style={styles.content}>
-                    <GlassCard style={styles.card}>
-                        <SettingItem label="Meal Reminders" settingKey="mealReminders" />
-                        <SettingItem label="Weekly Progress Reports" settingKey="weeklyProgress" />
-                        <SettingItem label="Daily Health Tips" settingKey="tips" />
-                        <SettingItem label="App Updates" settingKey="updates" />
-                    </GlassCard>
-                </View>
-            </SafeAreaView>
-        </ThemedBackground>
+            <View style={styles.content}>
+                <GlassCard style={styles.card}>
+                    <SettingItem label="Meal Reminders" settingKey="mealReminders" />
+                    <SettingItem label="Weekly Progress Reports" settingKey="weeklyProgress" />
+                    <SettingItem label="Daily Health Tips" settingKey="tips" />
+                    <SettingItem label="App Updates" settingKey="updates" />
+                </GlassCard>
+            </View>
+        </ScreenWrapper>
     );
 }
 

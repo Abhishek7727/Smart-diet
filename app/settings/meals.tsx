@@ -1,3 +1,4 @@
+import { ScreenWrapper } from '@/components/ScreenWrapper';
 import { GlassCard } from '@/components/GlassCard';
 import { GlassInput } from '@/components/GlassInput';
 import { PrimaryButton } from '@/components/PrimaryButton';
@@ -104,75 +105,73 @@ export default function MealsManagementScreen() {
     };
 
     return (
-        <ThemedBackground>
-            <SafeAreaView style={styles.container}>
-                <View style={[styles.header, { borderBottomColor: colors.border }]}>
-                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color={colors.text} />
-                    </TouchableOpacity>
-                    <Text style={[styles.title, { color: colors.text }]}>Manage Meals</Text>
-                    <View style={{ width: 40 }} />
+        <ScreenWrapper style={styles.container}>
+            <View style={[styles.header, { borderBottomColor: colors.border }]}>
+                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                    <Ionicons name="arrow-back" size={24} color={colors.text} />
+                </TouchableOpacity>
+                <Text style={[styles.title, { color: colors.text }]}>Manage Meals</Text>
+                <View style={{ width: 40 }} />
+            </View>
+
+            {meals.length === 0 ? (
+                <View style={styles.emptyState}>
+                    <Ionicons name="restaurant-outline" size={48} color={colors.icon} />
+                    <Text style={[styles.emptyText, { color: colors.icon }]}>No meals saved yet.</Text>
                 </View>
+            ) : (
+                <FlatList
+                    data={meals}
+                    keyExtractor={(item) => item.id}
+                    renderItem={renderItem}
+                    contentContainerStyle={styles.listContent}
+                />
+            )}
 
-                {meals.length === 0 ? (
-                    <View style={styles.emptyState}>
-                        <Ionicons name="restaurant-outline" size={48} color={colors.icon} />
-                        <Text style={[styles.emptyText, { color: colors.icon }]}>No meals saved yet.</Text>
-                    </View>
-                ) : (
-                    <FlatList
-                        data={meals}
-                        keyExtractor={(item) => item.id}
-                        renderItem={renderItem}
-                        contentContainerStyle={styles.listContent}
-                    />
-                )}
+            <Modal
+                visible={editModalVisible}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setEditModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={[styles.modalContent, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                        <Text style={[styles.modalTitle, { color: colors.text }]}>Edit Meal</Text>
 
-                <Modal
-                    visible={editModalVisible}
-                    transparent
-                    animationType="slide"
-                    onRequestClose={() => setEditModalVisible(false)}
-                >
-                    <View style={styles.modalOverlay}>
-                        <View style={[styles.modalContent, { backgroundColor: colors.background, borderColor: colors.border }]}>
-                            <Text style={[styles.modalTitle, { color: colors.text }]}>Edit Meal</Text>
+                        <Text style={[styles.label, { color: colors.text }]}>Meal Name</Text>
+                        <GlassInput
+                            value={editName}
+                            onChangeText={setEditName}
+                            placeholder="Meal Name"
+                            icon="restaurant"
+                        />
 
-                            <Text style={[styles.label, { color: colors.text }]}>Meal Name</Text>
-                            <GlassInput
-                                value={editName}
-                                onChangeText={setEditName}
-                                placeholder="Meal Name"
-                                icon="restaurant"
+                        <Text style={[styles.label, { color: colors.text }]}>Calories</Text>
+                        <GlassInput
+                            value={editCalories}
+                            onChangeText={setEditCalories}
+                            placeholder="Calories"
+                            icon="flame"
+                            keyboardType="numeric"
+                        />
+
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity
+                                style={[styles.cancelButton, { borderColor: colors.border }]}
+                                onPress={() => setEditModalVisible(false)}
+                            >
+                                <Text style={{ color: colors.text }}>Cancel</Text>
+                            </TouchableOpacity>
+                            <PrimaryButton
+                                title="Save Changes"
+                                onPress={saveEdit}
+                                style={{ flex: 1 }}
                             />
-
-                            <Text style={[styles.label, { color: colors.text }]}>Calories</Text>
-                            <GlassInput
-                                value={editCalories}
-                                onChangeText={setEditCalories}
-                                placeholder="Calories"
-                                icon="flame"
-                                keyboardType="numeric"
-                            />
-
-                            <View style={styles.modalButtons}>
-                                <TouchableOpacity
-                                    style={[styles.cancelButton, { borderColor: colors.border }]}
-                                    onPress={() => setEditModalVisible(false)}
-                                >
-                                    <Text style={{ color: colors.text }}>Cancel</Text>
-                                </TouchableOpacity>
-                                <PrimaryButton
-                                    title="Save Changes"
-                                    onPress={saveEdit}
-                                    style={{ flex: 1 }}
-                                />
-                            </View>
                         </View>
                     </View>
-                </Modal>
-            </SafeAreaView>
-        </ThemedBackground>
+                </View>
+            </Modal>
+        </ScreenWrapper>
     );
 }
 

@@ -14,7 +14,7 @@ import { useRouter } from 'expo-router';
 import { useDispatch } from 'react-redux';
 import { updateProfile, setOnboardingCompleted } from '@/store/userSlice';
 import { Colors } from '@/constants/Colors';
-import { ThemedBackground } from '@/components/ThemedBackground';
+import { ScreenWrapper } from '@/components/ScreenWrapper';
 import { GlassInput } from '@/components/GlassInput';
 import { GlassDropdown } from '@/components/GlassDropdown';
 import { PrimaryButton } from '@/components/PrimaryButton';
@@ -120,141 +120,133 @@ export default function OnboardingScreen() {
     );
 
     return (
-        <ThemedBackground>
-            <SafeAreaWithAndroidPadding style={styles.container}>
-                <View style={styles.header}>
-                    <Text style={[styles.title, { color: colors.text }]}>Setup Profile</Text>
-                    <Text style={[styles.subtitle, { color: colors.icon }]}>Personalize your diet plan</Text>
-                </View>
+        <ScreenWrapper style={styles.container}>
+            <View style={styles.header}>
+                <Text style={[styles.title, { color: colors.text }]}>Setup Profile</Text>
+                <Text style={[styles.subtitle, { color: colors.icon }]}>Personalize your diet plan</Text>
+            </View>
 
-                <KeyboardAvoidingView
-                    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                    style={{ flex: 1 }}
-                >
-                    <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                style={{ flex: 1 }}
+            >
+                <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
-                        {/* Section 1: Stats */}
-                        <Text style={[styles.sectionHeader, { color: colors.text }]}>Physical Details</Text>
+                    {/* Section 1: Stats */}
+                    <Text style={[styles.sectionHeader, { color: colors.text }]}>Physical Details</Text>
 
-                        <View style={styles.row}>
-                            <View style={{ flex: 1, marginRight: 8 }}>
-                                <GlassInput
-                                    placeholder="Age"
-                                    value={formData.age}
-                                    onChangeText={(t) => updateField('age', t)}
-                                    icon="calendar-outline"
+                    <View style={styles.row}>
+                        <View style={{ flex: 1, marginRight: 8 }}>
+                            <GlassInput
+                                placeholder="Age"
+                                value={formData.age}
+                                onChangeText={(t) => updateField('age', t)}
+                                icon="calendar-outline"
+                            />
+                        </View>
+                        <View style={{ flex: 1, marginLeft: 8 }}>
+                            <GlassDropdown
+                                label="Gender"
+                                value={formData.gender}
+                                options={[
+                                    { label: 'Male', value: 'Male' },
+                                    { label: 'Female', value: 'Female' },
+                                    { label: 'Other', value: 'Other' },
+                                ]}
+                                onSelect={(v) => updateField('gender', v)}
+                                icon="person-outline"
+                            />
+                        </View>
+                    </View>
+
+                    <View style={styles.row}>
+                        <View style={{ flex: 1, marginRight: 8 }}>
+                            <GlassInput
+                                placeholder="Weight (kg)"
+                                value={formData.weight}
+                                onChangeText={(t) => updateField('weight', t)}
+                                icon="fitness-outline"
+                            />
+                        </View>
+                        <View style={{ flex: 1, marginLeft: 8 }}>
+                            <GlassInput
+                                placeholder="Height (cm)"
+                                value={formData.height}
+                                onChangeText={(t) => updateField('height', t)}
+                                icon="resize-outline"
+                            />
+                        </View>
+                    </View>
+
+                    {/* Section 2: Goals */}
+                    <Text style={[styles.sectionHeader, { color: colors.text, marginTop: 12 }]}>Goals & Lifestyle</Text>
+
+                    <GlassDropdown
+                        label="Your Goal"
+                        value={formData.goal}
+                        icon="trophy-outline"
+                        options={[
+                            { label: 'Lose Weight', value: 'lose_weight' },
+                            { label: 'Maintain Weight', value: 'maintain_weight' },
+                            { label: 'Build Muscle', value: 'build_muscle' },
+                            { label: 'Gain Weight', value: 'gain_weight' },
+                            { label: 'Improve Health', value: 'improve_health' },
+                        ]}
+                        onSelect={(v) => updateField('goal', v)}
+                    />
+
+                    <GlassDropdown
+                        label="Activity Level"
+                        value={formData.activityLevel}
+                        icon="walk-outline"
+                        options={[
+                            { label: 'Sedentary', value: 'sedentary', subtitle: 'Little to no exercise' },
+                            { label: 'Lightly Active', value: 'lightly_active', subtitle: 'Exercise 1-3 times/week' },
+                            { label: 'Moderately Active', value: 'moderately_active', subtitle: 'Exercise 3-5 times/week' },
+                            { label: 'Very Active', value: 'very_active', subtitle: 'Exercise 6-7 times/week' },
+                            { label: 'Extra Active', value: 'extra_active', subtitle: 'Very intense exercise daily' },
+                        ]}
+                        onSelect={(v) => updateField('activityLevel', v)}
+                    />
+
+                    {/* Section 3: Preferences */}
+                    <Text style={[styles.sectionHeader, { color: colors.text, marginTop: 12 }]}>Preferences</Text>
+
+                    <Text style={[styles.label, { color: colors.icon }]}>Dietary Restrictions</Text>
+                    <View style={styles.chipContainer}>
+                        {['Vegetarian', 'Vegan', 'Keto', 'Paleo', 'Pescatarian'].map(diet => (
+                            <View key={diet}>
+                                <SelectableChip
+                                    label={diet}
+                                    selected={formData.dietaryRestrictions.includes(diet)}
+                                    onPress={() => toggleSelection('dietaryRestrictions', diet)}
                                 />
                             </View>
-                            <View style={{ flex: 1, marginLeft: 8 }}>
-                                <GlassDropdown
-                                    label="Gender"
-                                    value={formData.gender}
-                                    options={[
-                                        { label: 'Male', value: 'Male' },
-                                        { label: 'Female', value: 'Female' },
-                                        { label: 'Other', value: 'Other' },
-                                    ]}
-                                    onSelect={(v) => updateField('gender', v)}
-                                    icon="person-outline"
+                        ))}
+                    </View>
+
+                    <Text style={[styles.label, { color: colors.icon, marginTop: 16 }]}>Allergies</Text>
+                    <View style={styles.chipContainer}>
+                        {['Nuts', 'Dairy', 'Gluten', 'Eggs', 'Soy', 'Shellfish'].map(allergy => (
+                            <View key={allergy}>
+                                <SelectableChip
+                                    label={allergy}
+                                    selected={formData.allergies.includes(allergy)}
+                                    onPress={() => toggleSelection('allergies', allergy)}
                                 />
                             </View>
-                        </View>
+                        ))}
+                    </View>
 
-                        <View style={styles.row}>
-                            <View style={{ flex: 1, marginRight: 8 }}>
-                                <GlassInput
-                                    placeholder="Weight (kg)"
-                                    value={formData.weight}
-                                    onChangeText={(t) => updateField('weight', t)}
-                                    icon="fitness-outline"
-                                />
-                            </View>
-                            <View style={{ flex: 1, marginLeft: 8 }}>
-                                <GlassInput
-                                    placeholder="Height (cm)"
-                                    value={formData.height}
-                                    onChangeText={(t) => updateField('height', t)}
-                                    icon="resize-outline"
-                                />
-                            </View>
-                        </View>
+                    <View style={{ height: 40 }} />
+                    <PrimaryButton title="Create Profile" onPress={handleFinish} />
+                    <View style={{ height: 100 }} />
 
-                        {/* Section 2: Goals */}
-                        <Text style={[styles.sectionHeader, { color: colors.text, marginTop: 12 }]}>Goals & Lifestyle</Text>
-
-                        <GlassDropdown
-                            label="Your Goal"
-                            value={formData.goal}
-                            icon="trophy-outline"
-                            options={[
-                                { label: 'Lose Weight', value: 'lose_weight' },
-                                { label: 'Maintain Weight', value: 'maintain_weight' },
-                                { label: 'Build Muscle', value: 'build_muscle' },
-                                { label: 'Gain Weight', value: 'gain_weight' },
-                                { label: 'Improve Health', value: 'improve_health' },
-                            ]}
-                            onSelect={(v) => updateField('goal', v)}
-                        />
-
-                        <GlassDropdown
-                            label="Activity Level"
-                            value={formData.activityLevel}
-                            icon="walk-outline"
-                            options={[
-                                { label: 'Sedentary', value: 'sedentary', subtitle: 'Little to no exercise' },
-                                { label: 'Lightly Active', value: 'lightly_active', subtitle: 'Exercise 1-3 times/week' },
-                                { label: 'Moderately Active', value: 'moderately_active', subtitle: 'Exercise 3-5 times/week' },
-                                { label: 'Very Active', value: 'very_active', subtitle: 'Exercise 6-7 times/week' },
-                                { label: 'Extra Active', value: 'extra_active', subtitle: 'Very intense exercise daily' },
-                            ]}
-                            onSelect={(v) => updateField('activityLevel', v)}
-                        />
-
-                        {/* Section 3: Preferences */}
-                        <Text style={[styles.sectionHeader, { color: colors.text, marginTop: 12 }]}>Preferences</Text>
-
-                        <Text style={[styles.label, { color: colors.icon }]}>Dietary Restrictions</Text>
-                        <View style={styles.chipContainer}>
-                            {['Vegetarian', 'Vegan', 'Keto', 'Paleo', 'Pescatarian'].map(diet => (
-                                <View key={diet}>
-                                    <SelectableChip
-                                        label={diet}
-                                        selected={formData.dietaryRestrictions.includes(diet)}
-                                        onPress={() => toggleSelection('dietaryRestrictions', diet)}
-                                    />
-                                </View>
-                            ))}
-                        </View>
-
-                        <Text style={[styles.label, { color: colors.icon, marginTop: 16 }]}>Allergies</Text>
-                        <View style={styles.chipContainer}>
-                            {['Nuts', 'Dairy', 'Gluten', 'Eggs', 'Soy', 'Shellfish'].map(allergy => (
-                                <View key={allergy}>
-                                    <SelectableChip
-                                        label={allergy}
-                                        selected={formData.allergies.includes(allergy)}
-                                        onPress={() => toggleSelection('allergies', allergy)}
-                                    />
-                                </View>
-                            ))}
-                        </View>
-
-                        <View style={{ height: 40 }} />
-                        <PrimaryButton title="Create Profile" onPress={handleFinish} />
-                        <View style={{ height: 100 }} />
-
-                    </ScrollView>
-                </KeyboardAvoidingView>
-            </SafeAreaWithAndroidPadding>
-        </ThemedBackground>
+                </ScrollView>
+            </KeyboardAvoidingView >
+        </ScreenWrapper >
     );
 }
-
-const SafeAreaWithAndroidPadding = ({ style, children }: any) => (
-    <View style={[style, { paddingTop: Platform.OS === 'android' ? 40 : 0 }]}>
-        {children}
-    </View>
-);
 
 const styles = StyleSheet.create({
     container: {

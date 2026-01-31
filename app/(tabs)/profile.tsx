@@ -1,4 +1,5 @@
 import { useMealPlan } from '@/components/MealPlanContext';
+import { ScreenWrapper } from '@/components/ScreenWrapper';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
@@ -108,125 +109,123 @@ const ProfileScreen = () => {
   );
 
   return (
-    <ThemedBackground>
-      <SafeAreaView style={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={[styles.headerTitle, { color: colors.text }]}>Profile</Text>
-            <TouchableOpacity
-              style={[styles.headerButton, { backgroundColor: colors.surfaceHighlight }]}
-              onPress={() => router.push('/(tabs)/settings')}
-            >
-              <Ionicons name="settings-outline" size={24} color={colors.text} />
-            </TouchableOpacity>
-          </View>
+    <ScreenWrapper style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Profile</Text>
+          <TouchableOpacity
+            style={[styles.headerButton, { backgroundColor: colors.surfaceHighlight }]}
+            onPress={() => router.push('/(tabs)/settings')}
+          >
+            <Ionicons name="settings-outline" size={24} color={colors.text} />
+          </TouchableOpacity>
+        </View>
 
-          {/* User Info */}
-          <View style={styles.userSection}>
-            <GlassCard style={styles.avatarContainer}>
-              <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-                <Text style={[styles.avatarText, { color: 'white' }]}>{userData.name?.[0] || 'U'}</Text>
-              </View>
-              <View style={styles.userInfo}>
-                <Text style={[styles.userName, { color: colors.text }]}>{userData.name || 'User'}</Text>
-                <Text style={[styles.userEmail, { color: colors.icon }]}>{userData.email || 'user@example.com'}</Text>
-              </View>
-            </GlassCard>
-          </View>
-
-          {/* Stats Overview */}
-          <View style={styles.statsSection}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Stats</Text>
-            <View style={styles.statsGrid}>
-              <ProfileCard
-                icon="flame"
-                color={colors.warning}
-                title="Total Calories"
-                value={`${totalNutrition.calories} kcal`}
-                subtitle={`${Math.round((totalNutrition.calories / nutritionalData.calories) * 100)}% of goal`}
-              />
-              <ProfileCard
-                icon="trophy"
-                color="#FFD700"
-                title="Streak"
-                value="7 days"
-                subtitle="Current streak"
-              />
-              <ProfileCard
-                icon="checkmark-circle"
-                color={colors.success}
-                title="Meals Completed"
-                value="3/4"
-                subtitle="Today's progress"
-              />
-              <ProfileCard
-                icon="trending-up"
-                color="#2196F3"
-                title="Weekly Average"
-                value="85%"
-                subtitle="Goal completion"
-              />
+        {/* User Info */}
+        <View style={styles.userSection}>
+          <GlassCard style={styles.avatarContainer}>
+            <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
+              <Text style={[styles.avatarText, { color: 'white' }]}>{userData.name?.[0] || 'U'}</Text>
             </View>
-          </View>
-
-          {/* Achievements */}
-          <View style={styles.achievementsSection}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Achievements</Text>
-            <AchievementCard
-              icon="star"
-              title="First Week"
-              description="Complete 7 days of meal planning"
-              achieved={true}
-            />
-            <AchievementCard
-              icon="nutrition"
-              title="Protein Master"
-              description="Meet protein goals for 5 consecutive days"
-              achieved={true}
-            />
-            <AchievementCard
-              icon="leaf"
-              title="Healthy Eater"
-              description="Stay within calorie goals for 10 days"
-              achieved={false}
-            />
-            <AchievementCard
-              icon="fitness"
-              title="Consistency King"
-              description="Plan meals for 30 consecutive days"
-              achieved={false}
-            />
-          </View>
-
-          {/* Quick Actions */}
-          <View style={styles.actionsSection}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Actions</Text>
-            <View style={styles.actionButtons}>
-              {[
-                { icon: 'person-outline', label: 'Edit Profile' },
-                { icon: 'notifications-outline', label: 'Notifications' },
-                { icon: 'help-circle-outline', label: 'Help & Support' },
-                { icon: 'share-outline', label: 'Share Progress' },
-              ].map((action, index) => (
-                <TouchableOpacity
-                  key={index}
-                  activeOpacity={0.8}
-                  onPress={() => handleAction(action.label)}
-                >
-                  <GlassCard style={styles.actionButton}>
-                    <Ionicons name={action.icon as any} size={20} color={colors.primary} />
-                    <Text style={[styles.actionText, { color: colors.text }]}>{action.label}</Text>
-                    <Ionicons name="chevron-forward" size={20} color={colors.icon} style={{ marginLeft: 'auto' }} />
-                  </GlassCard>
-                </TouchableOpacity>
-              ))}
+            <View style={styles.userInfo}>
+              <Text style={[styles.userName, { color: colors.text }]}>{userData.name || 'User'}</Text>
+              <Text style={[styles.userEmail, { color: colors.icon }]}>{userData.email || 'user@example.com'}</Text>
             </View>
+          </GlassCard>
+        </View>
+
+        {/* Stats Overview */}
+        <View style={styles.statsSection}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Stats</Text>
+          <View style={styles.statsGrid}>
+            <ProfileCard
+              icon="flame"
+              color={colors.warning}
+              title="Total Calories"
+              value={`${totalNutrition.calories} kcal`}
+              subtitle={`${Math.round((totalNutrition.calories / nutritionalData.calories) * 100)}% of goal`}
+            />
+            <ProfileCard
+              icon="trophy"
+              color="#FFD700"
+              title="Streak"
+              value="7 days"
+              subtitle="Current streak"
+            />
+            <ProfileCard
+              icon="checkmark-circle"
+              color={colors.success}
+              title="Meals Completed"
+              value="3/4"
+              subtitle="Today's progress"
+            />
+            <ProfileCard
+              icon="trending-up"
+              color="#2196F3"
+              title="Weekly Average"
+              value="85%"
+              subtitle="Goal completion"
+            />
           </View>
-          <View style={{ height: 40 }} />
-        </ScrollView>
-      </SafeAreaView>
-    </ThemedBackground>
+        </View>
+
+        {/* Achievements */}
+        <View style={styles.achievementsSection}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Achievements</Text>
+          <AchievementCard
+            icon="star"
+            title="First Week"
+            description="Complete 7 days of meal planning"
+            achieved={true}
+          />
+          <AchievementCard
+            icon="nutrition"
+            title="Protein Master"
+            description="Meet protein goals for 5 consecutive days"
+            achieved={true}
+          />
+          <AchievementCard
+            icon="leaf"
+            title="Healthy Eater"
+            description="Stay within calorie goals for 10 days"
+            achieved={false}
+          />
+          <AchievementCard
+            icon="fitness"
+            title="Consistency King"
+            description="Plan meals for 30 consecutive days"
+            achieved={false}
+          />
+        </View>
+
+        {/* Quick Actions */}
+        <View style={styles.actionsSection}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Actions</Text>
+          <View style={styles.actionButtons}>
+            {[
+              { icon: 'person-outline', label: 'Edit Profile' },
+              { icon: 'notifications-outline', label: 'Notifications' },
+              { icon: 'help-circle-outline', label: 'Help & Support' },
+              { icon: 'share-outline', label: 'Share Progress' },
+            ].map((action, index) => (
+              <TouchableOpacity
+                key={index}
+                activeOpacity={0.8}
+                onPress={() => handleAction(action.label)}
+              >
+                <GlassCard style={styles.actionButton}>
+                  <Ionicons name={action.icon as any} size={20} color={colors.primary} />
+                  <Text style={[styles.actionText, { color: colors.text }]}>{action.label}</Text>
+                  <Ionicons name="chevron-forward" size={20} color={colors.icon} style={{ marginLeft: 'auto' }} />
+                </GlassCard>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+        <View style={{ height: 40 }} />
+      </ScrollView>
+    </ScreenWrapper>
   );
 };
 

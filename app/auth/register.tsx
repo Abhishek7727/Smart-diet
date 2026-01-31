@@ -13,7 +13,7 @@ import { useRouter } from 'expo-router';
 import { useDispatch } from 'react-redux';
 import { register } from '@/store/userSlice';
 import { Colors } from '@/constants/Colors';
-import { ThemedBackground } from '@/components/ThemedBackground';
+import { ScreenWrapper } from '@/components/ScreenWrapper';
 import { GlassInput } from '@/components/GlassInput';
 import { PrimaryButton } from '@/components/PrimaryButton';
 
@@ -42,7 +42,7 @@ export default function RegisterScreen() {
     };
 
     return (
-        <ThemedBackground>
+        <ScreenWrapper style={{ flex: 1 }}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.container}
@@ -87,7 +87,7 @@ export default function RegisterScreen() {
                     </View>
                 </View>
             </KeyboardAvoidingView>
-        </ThemedBackground>
+        </ScreenWrapper>
     );
 }
 

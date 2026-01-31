@@ -1,3 +1,4 @@
+import { ScreenWrapper } from '@/components/ScreenWrapper';
 import AIFoodRecommendation from '@/components/AIFoodRecommendation';
 import { useMealPlan } from '@/components/MealPlanContext';
 import { Colors } from '@/constants/Colors';
@@ -344,103 +345,99 @@ const MealsScreen = () => {
 
   if (contextLoading) {
     return (
-      <ThemedBackground>
-        <SafeAreaView style={styles.container}>
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={[styles.loadingText, { color: colors.icon }]}>Loading your meals...</Text>
-          </View>
-        </SafeAreaView>
-      </ThemedBackground>
+      <ScreenWrapper style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.loadingText, { color: colors.icon }]}>Loading your meals...</Text>
+        </View>
+      </ScreenWrapper>
     );
   }
 
   return (
-    <ThemedBackground>
-      <SafeAreaView style={styles.container}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-        >
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={[styles.headerTitle, { color: colors.text }]}>Meal Tracking</Text>
-            <View style={styles.headerActions}>
-              <TouchableOpacity
-                style={[styles.headerButton, { backgroundColor: colors.surfaceHighlight }]}
-                onPress={handleClearAllMeals}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="trash-outline" size={20} color={colors.danger} />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Nutrition Summary */}
-          <NutritionSummary />
-
-          {/* Meals List */}
-          <View style={styles.mealsContainer}>
-            <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Detailed Breakdown</Text>
-            </View>
-            {meals.map((meal) => (
-              <MealItem key={meal.id} meal={meal} />
-            ))}
-          </View>
-
-          {/* Floating Action Buttons / Quick Actions */}
-          <View style={styles.quickActions}>
+    <ScreenWrapper style={styles.container}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Meal Tracking</Text>
+          <View style={styles.headerActions}>
             <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={handleAIRecommendations}
-              style={{ flex: 1 }}
+              style={[styles.headerButton, { backgroundColor: colors.surfaceHighlight }]}
+              onPress={handleClearAllMeals}
+              activeOpacity={0.7}
             >
-              <GlassCard style={styles.actionButton}>
-                <View style={[styles.actionIcon, { backgroundColor: colors.primary + '20' }]}>
-                  <Ionicons name="sparkles" size={20} color={colors.primary} />
-                </View>
-                <Text style={[styles.actionText, { color: colors.text }]}>
-                  {!hasCompletedSetup ? 'Start Setup' : 'AI Assistant'}
-                </Text>
-              </GlassCard>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => {
-                setSelectedMealId('breakfast'); // Default to breakfast
-                setShowCustomMealModal(true);
-              }}
-              style={{ flex: 1 }}
-            >
-              <GlassCard style={styles.actionButton}>
-                <View style={[styles.actionIcon, { backgroundColor: colors.secondary + '20' }]}>
-                  <Ionicons name="create-outline" size={20} color={colors.secondary} />
-                </View>
-                <Text style={[styles.actionText, { color: colors.text }]}>Manual Entry</Text>
-              </GlassCard>
+              <Ionicons name="trash-outline" size={20} color={colors.danger} />
             </TouchableOpacity>
           </View>
+        </View>
 
-          <View style={styles.bottomSpacer} />
-        </ScrollView>
+        {/* Nutrition Summary */}
+        <NutritionSummary />
 
-        {/* AI Food Recommendation Modal */}
-        <AIFoodRecommendation
-          visible={showAIRecommendations}
-          onClose={() => {
-            setShowAIRecommendations(false);
-            setSelectedMealId(null);
-          }}
-          onSelectFood={handleSelectFood}
-          selectedMealType={selectedMealId || 'breakfast'}
-        />
+        {/* Meals List */}
+        <View style={styles.mealsContainer}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Detailed Breakdown</Text>
+          </View>
+          {meals.map((meal) => (
+            <MealItem key={meal.id} meal={meal} />
+          ))}
+        </View>
 
-        {/* Custom Meal Modal */}
-        <CustomMealModal />
-      </SafeAreaView>
-    </ThemedBackground>
+        {/* Floating Action Buttons / Quick Actions */}
+        <View style={styles.quickActions}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={handleAIRecommendations}
+            style={{ flex: 1 }}
+          >
+            <GlassCard style={styles.actionButton}>
+              <View style={[styles.actionIcon, { backgroundColor: colors.primary + '20' }]}>
+                <Ionicons name="sparkles" size={20} color={colors.primary} />
+              </View>
+              <Text style={[styles.actionText, { color: colors.text }]}>
+                {!hasCompletedSetup ? 'Start Setup' : 'AI Assistant'}
+              </Text>
+            </GlassCard>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => {
+              setSelectedMealId('breakfast'); // Default to breakfast
+              setShowCustomMealModal(true);
+            }}
+            style={{ flex: 1 }}
+          >
+            <GlassCard style={styles.actionButton}>
+              <View style={[styles.actionIcon, { backgroundColor: colors.secondary + '20' }]}>
+                <Ionicons name="create-outline" size={20} color={colors.secondary} />
+              </View>
+              <Text style={[styles.actionText, { color: colors.text }]}>Manual Entry</Text>
+            </GlassCard>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.bottomSpacer} />
+      </ScrollView>
+
+      {/* AI Food Recommendation Modal */}
+      <AIFoodRecommendation
+        visible={showAIRecommendations}
+        onClose={() => {
+          setShowAIRecommendations(false);
+          setSelectedMealId(null);
+        }}
+        onSelectFood={handleSelectFood}
+        selectedMealType={selectedMealId || 'breakfast'}
+      />
+
+      {/* Custom Meal Modal */}
+      <CustomMealModal />
+    </ScreenWrapper>
   );
 };
 

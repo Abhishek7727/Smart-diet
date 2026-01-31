@@ -1,3 +1,6 @@
+import { ScreenWrapper } from '@/components/ScreenWrapper';
+import { GlassCard } from '@/components/GlassCard';
+import { PrimaryButton } from '@/components/PrimaryButton';
 import { useMealPlan } from '@/components/MealPlanContext';
 import { Colors } from '@/constants/Colors';
 import StorageService from '@/services/StorageService';
@@ -279,115 +282,84 @@ const SettingsScreen = () => {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+    <ScreenWrapper style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
         <View style={styles.header}>
           <Text style={[styles.headerTitle, { color: colors.text }]}>Settings</Text>
         </View>
 
+        {/* User Profile Section */}
+        <TouchableOpacity onPress={() => router.push('/profile/edit')}>
+          <GlassCard style={styles.profileCard}>
+            <View style={styles.profileHeader}>
+              <View style={[styles.avatarContainer, { backgroundColor: colors.primary }]}>
+                <Text style={styles.avatarText}>
+                  {userData.name ? userData.name.charAt(0).toUpperCase() : "U"}
+                </Text>
+              </View>
+              <View style={styles.profileInfo}>
+                <Text style={[styles.profileName, { color: colors.text }]}>
+                  {userData.name || "Guest User"}
+                </Text>
+                <Text style={[styles.profileEmail, { color: colors.icon }]}>
+                  {userData.email || "No email linked"}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color={colors.icon} />
+            </View>
+          </GlassCard>
+        </TouchableOpacity>
+
         {/* AI Configuration */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>AI Configuration</Text>
-          <SettingsGroup>
-            <SettingItem
-              icon="key"
-              title="Gemini API Key"
-              subtitle={userData.apiKey ? "API key configured" : "Required for AI recommendations"}
-              onPress={() => setShowApiKeyModal(true)}
-              isLast={!userData.apiKey}
-            />
-            {userData.apiKey && (
-              <SettingItem
-                icon="trash-outline"
-                title="Clear API Key"
-                subtitle="Remove stored API key"
-                onPress={handleClearApiKey}
-                isLast={true}
-              />
-            )}
-          </SettingsGroup>
-        </View>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>AI Configuration</Text>
+        <SettingsGroup>
+          <SettingItem
+            icon="key"
+            title="Gemini API Key"
+            subtitle={geminiApiKey ? "••••••••••••••••" : "Not set"}
+            onPress={() => setShowApiKeyModal(true)}
+            isLast={true}
+          />
+        </SettingsGroup>
 
         {/* App Settings */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>App Settings</Text>
-          <SettingsGroup>
-            <SettingItem
-              icon="notifications"
-              title="Notifications"
-              subtitle="Get reminders for meals"
-              showSwitch={true}
-              switchValue={notificationsEnabled}
-              onSwitchChange={setNotificationsEnabled}
-              showArrow={false}
-              isLast={true}
-            />
-          </SettingsGroup>
-        </View>
-
-        {/* Data Management */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Data Management</Text>
-          <SettingsGroup>
-            <SettingItem
-              icon="person"
-              title="Personal Information"
-              subtitle={userData.name ? "Edit Profile" : "No profile data"}
-              onPress={() => router.push('/profile/edit')}
-            />
-            <SettingItem
-              icon="restaurant"
-              title="Meal Data"
-              subtitle={`${meals.length} meals saved`}
-              onPress={() => router.push('/settings/meals')}
-              isLast={true}
-            />
-          </SettingsGroup>
-        </View>
-
-        {/* Redux State Statistics */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Redux State (Persisted)</Text>
-          <View style={[styles.statsContainer, { ...colors.glass, ...colors.shadow }]}>
-            <View style={styles.statItem}>
-              <Text style={[styles.statLabel, { color: colors.icon }]}>Auth Status</Text>
-              <Text style={[styles.statValue, { color: userData.isAuthenticated ? colors.success : colors.danger }]}>
-                {userData.isAuthenticated ? 'Logged In' : 'Logged Out'}
-              </Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>App Settings</Text>
+        <SettingsGroup>
+          <GlassCard style={styles.settingItem}>
+            <View style={styles.settingRow}>
+              <View style={styles.settingLeft}>
+                <View style={[styles.iconContainer, { backgroundColor: colors.surfaceHighlight }]}>
+                  <Ionicons name="moon" size={20} color={colors.text} />
+                </View>
+                <View style={styles.settingTextContainer}>
+                  <Text style={[styles.settingTitle, { color: colors.text }]}>Dark Mode</Text>
+                  <Text style={[styles.settingSubtitle, { color: colors.icon }]}>
+                    {colorScheme === 'dark' ? 'On' : 'Off'} (System)
+                  </Text>
+                </View>
+              </View>
+              <Switch
+                value={colorScheme === 'dark'}
+                onValueChange={() => {
+                  Alert.alert('System Theme', 'Please change your system theme in device settings.');
+                }}
+                trackColor={{ false: '#767577', true: colors.primary }}
+                thumbColor={colors.text}
+              />
             </View>
-            <View style={styles.statItem}>
-              <Text style={[styles.statLabel, { color: colors.icon }]}>Onboarding</Text>
-              <Text style={[styles.statValue, { color: userData.isOnboarded ? colors.success : colors.warning }]}>
-                {userData.isOnboarded ? 'Completed' : 'Pending'}
-              </Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={[styles.statLabel, { color: colors.icon }]}>Profile Name</Text>
-              <Text style={[styles.statValue, { color: colors.text }]}>
-                {userData.name || 'N/A'}
-              </Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={[styles.statLabel, { color: colors.icon }]}>Total Meals</Text>
-              <Text style={[styles.statValue, { color: colors.text }]}>
-                {meals.length}
-              </Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={[styles.statLabel, { color: colors.icon }]}>API Key</Text>
-              <Text style={[styles.statValue, { color: userData.apiKey ? colors.success : colors.danger }]}>
-                {userData.apiKey ? 'Present' : 'Missing'}
-              </Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={[styles.statLabel, { color: colors.icon }]}>Target Calories</Text>
-              <Text style={[styles.statValue, { color: colors.text }]}>
-                {userData.targetCalories ? `${userData.targetCalories} kcal` : 'N/A'}
-              </Text>
-            </View>
-          </View>
-        </View>
+          </GlassCard>
+          <SettingItem
+            icon="notifications"
+            title="Notifications"
+            subtitle="Manage alerts"
+            onPress={() => router.push('/profile/notifications')}
+            isLast={true}
+          />
+        </SettingsGroup>
 
         {/* Danger Zone */}
         <View style={styles.section}>
@@ -647,5 +619,64 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+  },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+  profileCard: {
+    padding: 16,
+    marginBottom: 24,
+    marginHorizontal: 20,
+    marginTop: 10,
+    borderRadius: 20,
+  },
+  profileHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatarContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  avatarText: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  profileName: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  profileEmail: {
+    fontSize: 14,
+  },
+  settingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+  },
+  settingLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  settingTextContainer: {
+    justifyContent: 'center',
   },
 });

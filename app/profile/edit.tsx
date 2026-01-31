@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateProfile } from '@/store/userSlice';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
-import { ThemedBackground } from '@/components/ThemedBackground';
+import { ScreenWrapper } from '@/components/ScreenWrapper';
 import { GlassInput } from '@/components/GlassInput';
 import { GlassDropdown } from '@/components/GlassDropdown';
 import { PrimaryButton } from '@/components/PrimaryButton';
@@ -70,113 +70,111 @@ export default function EditProfileScreen() {
     };
 
     return (
-        <ThemedBackground>
-            <SafeAreaView style={styles.container}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => router.back()} style={styles.closeButton}>
-                        <Ionicons name="close" size={24} color={colors.text} />
-                    </TouchableOpacity>
-                    <Text style={[styles.headerTitle, { color: colors.text }]}>Edit Profile</Text>
-                    <TouchableOpacity onPress={handleSave}>
-                        <Text style={[styles.saveButtonText, { color: colors.primary }]}>Save</Text>
-                    </TouchableOpacity>
-                </View>
+        <ScreenWrapper style={styles.container}>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => router.back()} style={styles.closeButton}>
+                    <Ionicons name="close" size={24} color={colors.text} />
+                </TouchableOpacity>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>Edit Profile</Text>
+                <TouchableOpacity onPress={handleSave}>
+                    <Text style={[styles.saveButtonText, { color: colors.primary }]}>Save</Text>
+                </TouchableOpacity>
+            </View>
 
-                <KeyboardAvoidingView
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                    style={styles.keyboardView}
-                >
-                    <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-                        <GlassInput
-                            placeholder="Full Name"
-                            value={formData.name}
-                            onChangeText={(text) => handleChange('name', text)}
-                            icon="person-outline"
-                        />
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={styles.keyboardView}
+            >
+                <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+                    <GlassInput
+                        placeholder="Full Name"
+                        value={formData.name}
+                        onChangeText={(text) => handleChange('name', text)}
+                        icon="person-outline"
+                    />
 
-                        <View style={styles.row}>
-                            <View style={styles.halfWidth}>
-                                <GlassInput
-                                    placeholder="Age"
-                                    value={formData.age}
-                                    onChangeText={(text) => handleChange('age', text)}
-                                // icon="calendar-outline"
-                                />
-                            </View>
-                            <View style={styles.halfWidth}>
-                                <GlassDropdown
-                                    label="Gender"
-                                    value={formData.gender}
-                                    options={[
-                                        { label: 'Male', value: 'Male' },
-                                        { label: 'Female', value: 'Female' },
-                                        { label: 'Other', value: 'Other' },
-                                    ]}
-                                    onSelect={(v) => handleChange('gender', v)}
-                                // icon="person-outline"
-                                />
-                            </View>
+                    <View style={styles.row}>
+                        <View style={styles.halfWidth}>
+                            <GlassInput
+                                placeholder="Age"
+                                value={formData.age}
+                                onChangeText={(text) => handleChange('age', text)}
+                            // icon="calendar-outline"
+                            />
                         </View>
-
-                        <View style={styles.row}>
-                            <View style={styles.halfWidth}>
-                                <GlassInput
-                                    placeholder="Weight (kg)"
-                                    value={formData.weight}
-                                    onChangeText={(text) => handleChange('weight', text)}
-                                />
-                            </View>
-                            <View style={styles.halfWidth}>
-                                <GlassInput
-                                    placeholder="Height (cm)"
-                                    value={formData.height}
-                                    onChangeText={(text) => handleChange('height', text)}
-                                />
-                            </View>
+                        <View style={styles.halfWidth}>
+                            <GlassDropdown
+                                label="Gender"
+                                value={formData.gender}
+                                options={[
+                                    { label: 'Male', value: 'Male' },
+                                    { label: 'Female', value: 'Female' },
+                                    { label: 'Other', value: 'Other' },
+                                ]}
+                                onSelect={(v) => handleChange('gender', v)}
+                            // icon="person-outline"
+                            />
                         </View>
+                    </View>
 
-                        <GlassInput
-                            placeholder="Target Calories (kcal)"
-                            value={formData.targetCalories}
-                            onChangeText={(text) => handleChange('targetCalories', text)}
-                            icon="flame-outline"
-                        />
+                    <View style={styles.row}>
+                        <View style={styles.halfWidth}>
+                            <GlassInput
+                                placeholder="Weight (kg)"
+                                value={formData.weight}
+                                onChangeText={(text) => handleChange('weight', text)}
+                            />
+                        </View>
+                        <View style={styles.halfWidth}>
+                            <GlassInput
+                                placeholder="Height (cm)"
+                                value={formData.height}
+                                onChangeText={(text) => handleChange('height', text)}
+                            />
+                        </View>
+                    </View>
 
-                        <GlassDropdown
-                            label="Your Goal"
-                            value={formData.goal}
-                            icon="trophy-outline"
-                            options={[
-                                { label: 'Lose Weight', value: 'lose_weight' },
-                                { label: 'Maintain Weight', value: 'maintain_weight' },
-                                { label: 'Build Muscle', value: 'build_muscle' },
-                                { label: 'Gain Weight', value: 'gain_weight' },
-                                { label: 'Improve Health', value: 'improve_health' },
-                            ]}
-                            onSelect={(v) => handleChange('goal', v)}
-                        />
+                    <GlassInput
+                        placeholder="Target Calories (kcal)"
+                        value={formData.targetCalories}
+                        onChangeText={(text) => handleChange('targetCalories', text)}
+                        icon="flame-outline"
+                    />
 
-                        <GlassDropdown
-                            label="Activity Level"
-                            value={formData.activityLevel}
-                            icon="walk-outline"
-                            options={[
-                                { label: 'Sedentary', value: 'sedentary', subtitle: 'Little to no exercise' },
-                                { label: 'Lightly Active', value: 'lightly_active', subtitle: 'Exercise 1-3 times/week' },
-                                { label: 'Moderately Active', value: 'moderately_active', subtitle: 'Exercise 3-5 times/week' },
-                                { label: 'Very Active', value: 'very_active', subtitle: 'Exercise 6-7 times/week' },
-                                { label: 'Extra Active', value: 'extra_active', subtitle: 'Very intense exercise daily' },
-                            ]}
-                            onSelect={(v) => handleChange('activityLevel', v)}
-                        />
+                    <GlassDropdown
+                        label="Your Goal"
+                        value={formData.goal}
+                        icon="trophy-outline"
+                        options={[
+                            { label: 'Lose Weight', value: 'lose_weight' },
+                            { label: 'Maintain Weight', value: 'maintain_weight' },
+                            { label: 'Build Muscle', value: 'build_muscle' },
+                            { label: 'Gain Weight', value: 'gain_weight' },
+                            { label: 'Improve Health', value: 'improve_health' },
+                        ]}
+                        onSelect={(v) => handleChange('goal', v)}
+                    />
 
-                        <PrimaryButton title="Save Changes" onPress={handleSave} style={styles.saveButton} />
+                    <GlassDropdown
+                        label="Activity Level"
+                        value={formData.activityLevel}
+                        icon="walk-outline"
+                        options={[
+                            { label: 'Sedentary', value: 'sedentary', subtitle: 'Little to no exercise' },
+                            { label: 'Lightly Active', value: 'lightly_active', subtitle: 'Exercise 1-3 times/week' },
+                            { label: 'Moderately Active', value: 'moderately_active', subtitle: 'Exercise 3-5 times/week' },
+                            { label: 'Very Active', value: 'very_active', subtitle: 'Exercise 6-7 times/week' },
+                            { label: 'Extra Active', value: 'extra_active', subtitle: 'Very intense exercise daily' },
+                        ]}
+                        onSelect={(v) => handleChange('activityLevel', v)}
+                    />
 
-                        <View style={{ height: 40 }} />
-                    </ScrollView>
-                </KeyboardAvoidingView>
-            </SafeAreaView>
-        </ThemedBackground>
+                    <PrimaryButton title="Save Changes" onPress={handleSave} style={styles.saveButton} />
+
+                    <View style={{ height: 40 }} />
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </ScreenWrapper>
     );
 }
 

@@ -13,7 +13,7 @@ import { useRouter } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginSuccess } from '@/store/userSlice';
 import { Colors } from '@/constants/Colors';
-import { ThemedBackground } from '@/components/ThemedBackground';
+import { ScreenWrapper } from '@/components/ScreenWrapper';
 import { GlassInput } from '@/components/GlassInput';
 import { PrimaryButton } from '@/components/PrimaryButton';
 
@@ -46,7 +46,7 @@ export default function LoginScreen() {
     };
 
     return (
-        <ThemedBackground>
+        <ScreenWrapper style={{ flex: 1 }}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.container}
@@ -92,7 +92,7 @@ export default function LoginScreen() {
                     </View>
                 </View>
             </KeyboardAvoidingView>
-        </ThemedBackground>
+        </ScreenWrapper>
     );
 }
 
