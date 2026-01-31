@@ -40,8 +40,9 @@ class GeminiService {
 
     this.apiKey = apiKey.trim();
     this.genAI = new GoogleGenerativeAI(this.apiKey);
-    // Use gemini-1.5-flash model which is fast and stable
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // Use gemini-pro as a stable default available in v1beta
+    // Note: If you have access to newer models, you can update this string
+    this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
   }
 
   async generateMealRecommendations(

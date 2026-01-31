@@ -49,28 +49,31 @@ const userSlice = createSlice({
             state.apiKey = action.payload;
         },
         updateProfile: (state, action: PayloadAction<Partial<UserState>>) => {
-            const newState = { ...state, ...action.payload };
+            // Update basic fields
+            Object.assign(state, action.payload);
 
-            // Track weight history if weight has changed or it's a new entry
-            if (action.payload.weight && action.payload.weight !== state.weight) {
+            // Track weight history if weight has changed
+            // Note: action.payload.weight might be undefined, so check strictly
+            if (action.payload.weight) {
+                const currentWeight = parseFloat(state.weight || '0');
                 const newWeight = parseFloat(action.payload.weight);
-                if (!isNaN(newWeight)) {
-                    // Create new array if it doesn't exist (migrations)
-                    if (!newState.weightHistory) newState.weightHistory = [];
+
+                // Only add history if it's a valid number and (it changed OR it's a new entry and we have no history)
+                if (!isNaN(newWeight) && (newWeight !== currentWeight || state.weightHistory.length === 0)) {
+                    if (!state.weightHistory) state.weightHistory = [];
 
                     const today = new Date().toISOString().split('T')[0];
-                    const existingEntryIndex = newState.weightHistory.findIndex(h => h.date === today);
+                    const existingEntryIndex = state.weightHistory.findIndex(h => h.date === today);
 
                     if (existingEntryIndex >= 0) {
                         // Update today's entry
-                        newState.weightHistory[existingEntryIndex].weight = newWeight;
+                        state.weightHistory[existingEntryIndex].weight = newWeight;
                     } else {
                         // Add new entry
-                        newState.weightHistory.push({ date: today, weight: newWeight });
+                        state.weightHistory.push({ date: today, weight: newWeight });
                     }
                 }
             }
-            return newState;
         },
         register: (state, action: PayloadAction<Partial<UserState>>) => {
             return { ...state, ...action.payload, isAuthenticated: true, isOnboarded: false };
