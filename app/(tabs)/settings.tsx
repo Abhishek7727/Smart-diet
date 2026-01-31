@@ -33,7 +33,6 @@ const SettingsScreen = () => {
   const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
   const [geminiApiKey, setGeminiApiKey] = useState('');
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [storageStats, setStorageStats] = useState({
     hasPersonalInfo: false,
     hasMeals: false,
@@ -79,29 +78,6 @@ const SettingsScreen = () => {
     }
   };
 
-  const handleClearApiKey = async () => {
-    Alert.alert(
-      'Clear API Key',
-      'Are you sure you want to clear your Gemini API key? This will disable AI recommendations.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Clear',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              dispatch(setApiKey(''));
-              setGeminiApiKey('');
-              Alert.alert('Success', 'API key cleared successfully!');
-            } catch (error) {
-              console.error('Error clearing API key:', error);
-              Alert.alert('Error', 'Failed to clear API key.');
-            }
-          }
-        },
-      ]
-    );
-  };
 
   const handleClearAllData = async () => {
     Alert.alert(
@@ -311,19 +287,8 @@ const SettingsScreen = () => {
       <View style={[styles.statsContainer, { backgroundColor: colors.surfaceHighlight }]}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
           <Ionicons name="stats-chart" size={20} color={colors.primary} style={{ marginRight: 8 }} />
-          <Text style={[styles.sectionTitle, { marginBottom: 0, fontSize: 16 }]}>Nutrition Goals</Text>
+          <Text style={[styles.sectionTitle, { marginBottom: 0, fontSize: 16 }]}>Data Status</Text>
         </View>
-        <View style={styles.statItem}>
-          <Text style={[styles.statLabel, { color: colors.text }]}>Daily Calories</Text>
-          <Text style={[styles.statValue, { color: colors.primary }]}>{total.calories} / {nutritionalData.calories}</Text>
-        </View>
-        <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
-          <View style={[styles.progressFill, { width: `${Math.min((total.calories / nutritionalData.calories) * 100, 100)}%`, backgroundColor: colors.primary }]} />
-        </View>
-
-        <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 12 }} />
-
-        <Text style={[styles.sectionTitle, { marginBottom: 8, fontSize: 14, color: colors.icon }]}>Data Status</Text>
         <StatusRow label="Personal Info" isSaved={hasPersonalInfo} />
         <StatusRow label="All Meals" isSaved={hasMeals} />
         <StatusRow label="Gemini API" isSaved={hasApiKey} />
