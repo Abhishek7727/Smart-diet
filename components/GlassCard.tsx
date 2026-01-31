@@ -62,6 +62,7 @@ export function GlassCard({ children, style }: GlassCardProps) {
                 borderRadius: borderRadius,
             }]}>
                 {Platform.OS !== 'web' ? (
+                    // @ts-ignore
                     <BlurView intensity={20} tint={colorScheme === 'dark' ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
                 ) : null}
                 <View style={[styles.content, contentStyle]}>
@@ -76,8 +77,8 @@ const styles = StyleSheet.create({
     shadowContainer: {
         marginBottom: 16, // Default margin, override-able
         backgroundColor: 'transparent',
-        borderColor: "#d9a9f062",
-        borderWidth: 1,
+        // borderColor: removed here, handled by final style
+        borderWidth: 0,
         borderRadius: 4,
     },
     overflowContainer: {

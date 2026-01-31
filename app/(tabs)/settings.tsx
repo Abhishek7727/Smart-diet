@@ -34,11 +34,11 @@ const SettingsScreen = () => {
     hasApiKey: false,
     isFirstTime: true,
   });
+
   const userData = useSelector((state: any) => state.user);
+  const meals = useSelector((state: any) => state.meals.meals);
+
   const dispatch = useDispatch();
-  const { clearPersonalInfo } = useMealPlan(); // Keeping context usage for now if it wraps logic, but ideally direct dispatch
-  // Actually, clearPersonalInfo in context does nothing important now? 
-  // Let's use Redux actions directly where possible.
 
   useEffect(() => {
     loadSettings();
@@ -150,8 +150,6 @@ const SettingsScreen = () => {
           style: 'destructive',
           onPress: async () => {
             dispatch(logout()); // Sets isAuthenticated = false
-            // We do NOT clear data here, as logout should preserve data on device.
-            // If user wants to clear data, they use "Clear All Data".
           }
         }
       ]
@@ -292,11 +290,11 @@ const SettingsScreen = () => {
             <SettingItem
               icon="key"
               title="Gemini API Key"
-              subtitle={storageStats.hasApiKey ? "API key configured" : "Required for AI recommendations"}
+              subtitle={userData.apiKey ? "API key configured" : "Required for AI recommendations"}
               onPress={() => setShowApiKeyModal(true)}
-              isLast={!storageStats.hasApiKey}
+              isLast={!userData.apiKey}
             />
-            {storageStats.hasApiKey && (
+            {userData.apiKey && (
               <SettingItem
                 icon="trash-outline"
                 title="Clear API Key"
@@ -332,68 +330,58 @@ const SettingsScreen = () => {
             <SettingItem
               icon="person"
               title="Personal Information"
-              subtitle={userData.name ? "Profile completed" : "No profile data"}
+              subtitle={userData.name ? "Profile active" : "No profile data"}
               onPress={() => { }}
             />
             <SettingItem
               icon="restaurant"
               title="Meal Data"
-              subtitle={storageStats.hasMeals ? "Meals saved" : "No meal data"}
+              subtitle={`${meals.length} meals saved`}
               onPress={() => { }}
               isLast={true}
             />
           </SettingsGroup>
         </View>
 
-        {/* Storage Statistics */}
+        {/* Redux State Statistics */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Storage Statistics</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Redux State (Persisted)</Text>
           <View style={[styles.statsContainer, { ...colors.glass, ...colors.shadow }]}>
             <View style={styles.statItem}>
-              <Text style={[styles.statLabel, { color: colors.icon }]}>Personal Info</Text>
-              <Text style={[styles.statValue, { color: storageStats.hasPersonalInfo ? colors.success : colors.danger }]}>
-                {storageStats.hasPersonalInfo ? 'Saved' : 'Not Set'}
+              <Text style={[styles.statLabel, { color: colors.icon }]}>Auth Status</Text>
+              <Text style={[styles.statValue, { color: userData.isAuthenticated ? colors.success : colors.danger }]}>
+                {userData.isAuthenticated ? 'Logged In' : 'Logged Out'}
               </Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={[styles.statLabel, { color: colors.icon }]}>Meals</Text>
-              <Text style={[styles.statValue, { color: storageStats.hasMeals ? colors.success : colors.danger }]}>
-                {storageStats.hasMeals ? 'Saved' : 'None'}
+              <Text style={[styles.statLabel, { color: colors.icon }]}>Onboarding</Text>
+              <Text style={[styles.statValue, { color: userData.isOnboarded ? colors.success : colors.warning }]}>
+                {userData.isOnboarded ? 'Completed' : 'Pending'}
+              </Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={[styles.statLabel, { color: colors.icon }]}>Profile Name</Text>
+              <Text style={[styles.statValue, { color: colors.text }]}>
+                {userData.name || 'N/A'}
+              </Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={[styles.statLabel, { color: colors.icon }]}>Total Meals</Text>
+              <Text style={[styles.statValue, { color: colors.text }]}>
+                {meals.length}
               </Text>
             </View>
             <View style={styles.statItem}>
               <Text style={[styles.statLabel, { color: colors.icon }]}>API Key</Text>
-              <Text style={[styles.statValue, { color: storageStats.hasApiKey ? colors.success : colors.danger }]}>
-                {storageStats.hasApiKey ? 'Configured' : 'Not Set'}
+              <Text style={[styles.statValue, { color: userData.apiKey ? colors.success : colors.danger }]}>
+                {userData.apiKey ? 'Present' : 'Missing'}
               </Text>
             </View>
-          </View>
-
-          {/* localStorage Details */}
-          <View style={[styles.localStorageContainer, { ...colors.glass, ...colors.shadow }]}>
-            <Text style={[styles.localStorageTitle, { color: colors.text }]}>localStorage Contents</Text>
-            <Text style={[styles.localStorageDescription, { color: colors.icon }]}>
-              This shows what data is currently stored in your device's localStorage:
-            </Text>
-            <View style={styles.localStorageItems}>
-              <View style={styles.localStorageItem}>
-                <Ionicons name="person" size={16} color={colors.primary} />
-                <Text style={[styles.localStorageItemText, { color: colors.text }]}>
-                  Personal Information: {storageStats.hasPersonalInfo ? '✓' : '✗'}
-                </Text>
-              </View>
-              <View style={styles.localStorageItem}>
-                <Ionicons name="restaurant" size={16} color={colors.primary} />
-                <Text style={[styles.localStorageItemText, { color: colors.text }]}>
-                  Meal Data: {storageStats.hasMeals ? '✓' : '✗'}
-                </Text>
-              </View>
-              <View style={styles.localStorageItem}>
-                <Ionicons name="key" size={16} color={colors.primary} />
-                <Text style={[styles.localStorageItemText, { color: colors.text }]}>
-                  API Keys: {storageStats.hasApiKey ? '✓' : '✗'}
-                </Text>
-              </View>
+            <View style={styles.statItem}>
+              <Text style={[styles.statLabel, { color: colors.icon }]}>Target Calories</Text>
+              <Text style={[styles.statValue, { color: colors.text }]}>
+                {userData.targetCalories ? `${userData.targetCalories} kcal` : 'N/A'}
+              </Text>
             </View>
           </View>
         </View>
@@ -657,4 +645,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-}); 
+});
