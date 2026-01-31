@@ -1,6 +1,6 @@
 import { Colors } from '@/constants/Colors';
 import { BlurView } from 'expo-blur';
-import { View, StyleSheet, useColorScheme, Platform, ViewStyle, StyleProp } from 'react-native';
+import { Platform, StyleProp, StyleSheet, useColorScheme, View, ViewStyle } from 'react-native';
 
 interface GlassCardProps {
     children: React.ReactNode;
@@ -76,13 +76,9 @@ const styles = StyleSheet.create({
     shadowContainer: {
         marginBottom: 16, // Default margin, override-able
         backgroundColor: 'transparent',
-        // Shadow for iOS
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 10,
-        // Shadow for Android
-        elevation: 5,
+        borderColor: "#d9a9f062",
+        borderWidth: 1,
+        borderRadius: 4,
     },
     overflowContainer: {
         flex: 1,
