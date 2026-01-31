@@ -17,8 +17,9 @@ import {
   View,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { setApiKey, setUser } from '@/store/userSlice';
+import { setApiKey, setUser, deleteAccount, logout } from '@/store/userSlice';
 import { clearAllMeals } from '@/store/mealsSlice';
+import { persistor } from '@/store/store';
 
 
 const SettingsScreen = () => {
@@ -98,8 +99,8 @@ const SettingsScreen = () => {
 
   const handleClearAllData = async () => {
     Alert.alert(
-      'Clear All localStorage Data',
-      'This will permanently delete ALL data stored in your device:\n\n• Personal information\n• Meal data\n• API keys\n• App settings\n\nThis action cannot be undone and will reset the app to its initial state.',
+      'Clear All Data',
+      'This will permanently delete ALL data including your profile, meals, and secure storage. This action cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -107,34 +108,52 @@ const SettingsScreen = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              Alert.alert(
-                'Clearing Data...',
-                'Please wait while we clear all localStorage data.',
-                [],
-                { cancelable: false }
-              );
-
-              // Clear all Redux data
+              // 1. Clear Redux State
               dispatch(clearAllMeals());
-              dispatch(setUser({ apiKey: null, name: '', email: '', targetCalories: '', age: '', weight: '', height: '' }));
+              dispatch(deleteAccount());
 
+              // 2. Clear Secure Storage (StorageService)
+              await StorageService.clearAllData();
+
+              // 3. Clear Redux Persistence (AsyncStorage)
+              await persistor.purge();
+
+              // 4. Reset Local State
               setGeminiApiKey('');
+              setStorageStats({
+                hasPersonalInfo: false,
+                hasMeals: false,
+                hasApiKey: false,
+                isFirstTime: true,
+              });
 
-              Alert.alert(
-                'Data Cleared Successfully!',
-                'All localStorage data has been permanently deleted. The app has been reset to its initial state.',
-                [{ text: 'OK' }]
-              );
+              Alert.alert('Success', 'App has been reset to factory settings.');
+              // router.replace('/auth/register'); // Optional: Force redirect
             } catch (error) {
-              console.error('Error clearing all data:', error);
-              Alert.alert(
-                'Error',
-                'Failed to clear all data. Please try again.',
-                [{ text: 'OK' }]
-              );
+              console.error('Error clearing data:', error);
+              Alert.alert('Error', 'Failed to clear data completely.');
             }
           }
         },
+      ]
+    );
+  };
+
+  const handleLogout = async () => {
+    Alert.alert(
+      'Log Out',
+      'Are you sure you want to log out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Log Out',
+          style: 'destructive',
+          onPress: async () => {
+            dispatch(logout()); // Sets isAuthenticated = false
+            // We do NOT clear data here, as logout should preserve data on device.
+            // If user wants to clear data, they use "Clear All Data".
+          }
+        }
       ]
     );
   };
@@ -399,6 +418,26 @@ const SettingsScreen = () => {
           </TouchableOpacity>
         </View>
 
+        {/* Account Actions */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Account</Text>
+          <TouchableOpacity
+            style={[styles.dangerButton, { backgroundColor: colors.surface }]}
+            onPress={handleLogout}
+          >
+            <View style={styles.dangerButtonContent}>
+              <Ionicons name="log-out-outline" size={24} color={colors.primary} />
+              <View style={styles.dangerButtonText}>
+                <Text style={[styles.dangerButtonTitle, { color: colors.primary }]}>Log Out</Text>
+                <Text style={[styles.dangerButtonSubtitle, { color: colors.icon }]}>
+                  Sign out of your account
+                </Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.icon} />
+          </TouchableOpacity>
+        </View>
+
         {/* App Info */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>App Information</Text>
@@ -423,11 +462,11 @@ const SettingsScreen = () => {
           </SettingsGroup>
         </View>
         <View style={{ height: 40 }} />
-      </ScrollView>
+      </ScrollView >
 
       {/* API Key Modal */}
-      <ApiKeyModal />
-    </SafeAreaView>
+      < ApiKeyModal />
+    </SafeAreaView >
   );
 };
 
