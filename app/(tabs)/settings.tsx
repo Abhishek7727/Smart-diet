@@ -429,7 +429,7 @@ const SettingsScreen = () => {
 
       {/* API Key Modal */}
       < ApiKeyModal />
-    </SafeAreaView >
+    </ScreenWrapper >
   );
 };
 
