@@ -18,6 +18,7 @@ import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedBackground } from '@/components/ThemedBackground';
 import { GlassInput } from '@/components/GlassInput';
+import { GlassDropdown } from '@/components/GlassDropdown';
 import { PrimaryButton } from '@/components/PrimaryButton';
 
 export default function EditProfileScreen() {
@@ -30,10 +31,12 @@ export default function EditProfileScreen() {
     const [formData, setFormData] = useState({
         name: '',
         age: '',
+        gender: '',
         weight: '',
         height: '',
         targetCalories: '',
         goal: '',
+        activityLevel: '',
     });
 
     useEffect(() => {
@@ -41,10 +44,12 @@ export default function EditProfileScreen() {
             setFormData({
                 name: userData.name || '',
                 age: userData.age || '',
+                gender: userData.gender || 'Male',
                 weight: userData.weight || '',
                 height: userData.height || '',
                 targetCalories: userData.targetCalories || '',
-                goal: userData.goal || '',
+                goal: userData.goal || 'lose_weight',
+                activityLevel: userData.activityLevel || 'moderately_active',
             });
         }
     }, [userData]);
@@ -81,7 +86,7 @@ export default function EditProfileScreen() {
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                     style={styles.keyboardView}
                 >
-                    <ScrollView contentContainerStyle={styles.content}>
+                    <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
                         <GlassInput
                             placeholder="Full Name"
                             value={formData.name}
@@ -95,14 +100,20 @@ export default function EditProfileScreen() {
                                     placeholder="Age"
                                     value={formData.age}
                                     onChangeText={(text) => handleChange('age', text)}
-                                // keyboardType="numeric" // GlassInput needs prop update for this, strictly strings for now or update component
+                                // icon="calendar-outline"
                                 />
                             </View>
                             <View style={styles.halfWidth}>
-                                <GlassInput
-                                    placeholder="Goal (kcal)"
-                                    value={formData.targetCalories}
-                                    onChangeText={(text) => handleChange('targetCalories', text)}
+                                <GlassDropdown
+                                    label="Gender"
+                                    value={formData.gender}
+                                    options={[
+                                        { label: 'Male', value: 'Male' },
+                                        { label: 'Female', value: 'Female' },
+                                        { label: 'Other', value: 'Other' },
+                                    ]}
+                                    onSelect={(v) => handleChange('gender', v)}
+                                // icon="person-outline"
                                 />
                             </View>
                         </View>
@@ -125,14 +136,43 @@ export default function EditProfileScreen() {
                         </View>
 
                         <GlassInput
-                            placeholder="Fitness Goal"
+                            placeholder="Target Calories (kcal)"
+                            value={formData.targetCalories}
+                            onChangeText={(text) => handleChange('targetCalories', text)}
+                            icon="flame-outline"
+                        />
+
+                        <GlassDropdown
+                            label="Your Goal"
                             value={formData.goal}
-                            onChangeText={(text) => handleChange('goal', text)}
                             icon="trophy-outline"
+                            options={[
+                                { label: 'Lose Weight', value: 'lose_weight' },
+                                { label: 'Maintain Weight', value: 'maintain_weight' },
+                                { label: 'Build Muscle', value: 'build_muscle' },
+                                { label: 'Gain Weight', value: 'gain_weight' },
+                                { label: 'Improve Health', value: 'improve_health' },
+                            ]}
+                            onSelect={(v) => handleChange('goal', v)}
+                        />
+
+                        <GlassDropdown
+                            label="Activity Level"
+                            value={formData.activityLevel}
+                            icon="walk-outline"
+                            options={[
+                                { label: 'Sedentary', value: 'sedentary', subtitle: 'Little to no exercise' },
+                                { label: 'Lightly Active', value: 'lightly_active', subtitle: 'Exercise 1-3 times/week' },
+                                { label: 'Moderately Active', value: 'moderately_active', subtitle: 'Exercise 3-5 times/week' },
+                                { label: 'Very Active', value: 'very_active', subtitle: 'Exercise 6-7 times/week' },
+                                { label: 'Extra Active', value: 'extra_active', subtitle: 'Very intense exercise daily' },
+                            ]}
+                            onSelect={(v) => handleChange('activityLevel', v)}
                         />
 
                         <PrimaryButton title="Save Changes" onPress={handleSave} style={styles.saveButton} />
 
+                        <View style={{ height: 40 }} />
                     </ScrollView>
                 </KeyboardAvoidingView>
             </SafeAreaView>

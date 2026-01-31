@@ -16,7 +16,7 @@ import { updateProfile, setOnboardingCompleted } from '@/store/userSlice';
 import { Colors } from '@/constants/Colors';
 import { ThemedBackground } from '@/components/ThemedBackground';
 import { GlassInput } from '@/components/GlassInput';
-import { GlassCard } from '@/components/GlassCard';
+import { GlassDropdown } from '@/components/GlassDropdown';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -31,7 +31,6 @@ export default function OnboardingScreen() {
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
 
-    const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         age: '',
         gender: 'Male' as Gender,
@@ -43,33 +42,11 @@ export default function OnboardingScreen() {
         allergies: [] as string[],
     });
 
-    const totalSteps = 3;
-
-    const handleNext = () => {
-        if (step === 1) {
-            if (!formData.age || !formData.weight || !formData.height) {
-                Alert.alert('Missing Info', 'Please fill in all physical details.');
-                return;
-            }
-        }
-        if (step < totalSteps) {
-            setStep(step + 1);
-        } else {
-            finishOnboarding();
-        }
-    };
-
-    const handleBack = () => {
-        if (step > 1) {
-            setStep(step - 1);
-        }
-    };
-
     const calculateTargetCalories = () => {
         // Basic BMR Calculation (Mifflin-St Jeor)
-        const weight = parseFloat(formData.weight); // kg
-        const height = parseFloat(formData.height); // cm
-        const age = parseFloat(formData.age);
+        const weight = parseFloat(formData.weight) || 70;
+        const height = parseFloat(formData.height) || 170;
+        const age = parseFloat(formData.age) || 25;
 
         let bmr = 10 * weight + 6.25 * height - 5 * age;
         if (formData.gender === 'Male') bmr += 5;
@@ -84,7 +61,7 @@ export default function OnboardingScreen() {
             extra_active: 1.9,
         };
 
-        let tdee = bmr * multipliers[formData.activityLevel];
+        let tdee = bmr * (multipliers[formData.activityLevel] || 1.2);
 
         // Goal Adjustment
         if (formData.goal === 'lose_weight') tdee -= 500;
@@ -93,13 +70,17 @@ export default function OnboardingScreen() {
         return Math.round(tdee).toString();
     };
 
-    const finishOnboarding = () => {
+    const handleFinish = () => {
+        if (!formData.age || !formData.weight || !formData.height) {
+            Alert.alert('Missing Info', 'Please fill in your Age, Weight, and Height.');
+            return;
+        }
+
         const targetCalories = calculateTargetCalories();
 
         dispatch(updateProfile({
             ...formData,
             targetCalories,
-            // For arrays, ensure we pass them correctly if the slice expects them
             dietaryRestrictions: formData.dietaryRestrictions,
             allergies: formData.allergies,
         }));
@@ -123,35 +104,18 @@ export default function OnboardingScreen() {
         });
     };
 
-    const SelectionCard = ({
-        title,
-        selected,
-        onPress,
-        subtitle
-    }: {
-        title: string;
-        selected: boolean;
-        onPress: () => void;
-        subtitle?: string;
-    }) => (
-        <TouchableOpacity onPress={onPress}>
-            <GlassCard style={{
-                backgroundColor: selected ? colors.primary + '20' : undefined,
-                borderColor: selected ? colors.primary : colors.border,
+    const SelectableChip = ({ label, selected, onPress }: { label: string, selected: boolean, onPress: () => void }) => (
+        <TouchableOpacity
+            style={[styles.chip, {
+                backgroundColor: selected ? colors.primary : colors.surfaceHighlight,
+                borderColor: selected ? colors.primary : colors.glass.borderColor,
                 borderWidth: 1,
-            }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <View style={{ flex: 1 }}>
-                        <Text style={{
-                            color: selected ? colors.primary : colors.text,
-                            fontWeight: '600',
-                            fontSize: 16
-                        }}>{title}</Text>
-                        {subtitle && <Text style={{ color: colors.icon, fontSize: 12, marginTop: 4 }}>{subtitle}</Text>}
-                    </View>
-                    {selected && <Ionicons name="checkmark-circle" size={24} color={colors.primary} />}
-                </View>
-            </GlassCard>
+            }]}
+            onPress={onPress}
+        >
+            <Text style={[styles.chipText, { color: selected ? '#fff' : colors.text }]}>
+                {label}
+            </Text>
         </TouchableOpacity>
     );
 
@@ -159,58 +123,53 @@ export default function OnboardingScreen() {
         <ThemedBackground>
             <SafeAreaWithAndroidPadding style={styles.container}>
                 <View style={styles.header}>
-                    {step > 1 && (
-                        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-                            <Ionicons name="arrow-back" size={24} color={colors.text} />
-                        </TouchableOpacity>
-                    )}
-                    <View>
-                        <Text style={[styles.title, { color: colors.text }]}>Let's get to know you</Text>
-                        <Text style={[styles.subtitle, { color: colors.icon }]}>Step {step} of {totalSteps}</Text>
-                    </View>
+                    <Text style={[styles.title, { color: colors.text }]}>Setup Profile</Text>
+                    <Text style={[styles.subtitle, { color: colors.icon }]}>Personalize your diet plan</Text>
                 </View>
 
-                <ScrollView contentContainerStyle={styles.content}>
-                    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                    style={{ flex: 1 }}
+                >
+                    <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
-                        {/* Step 1: Physical Stats */}
-                        {step === 1 && (
-                            <View style={styles.stepContainer}>
-                                <Text style={[styles.sectionTitle, { color: colors.text }]}>Physical Details</Text>
+                        {/* Section 1: Stats */}
+                        <Text style={[styles.sectionHeader, { color: colors.text }]}>Physical Details</Text>
 
-                                <View style={styles.row}>
-                                    <View style={{ flex: 1, marginRight: 8 }}>
-                                        <GlassInput
-                                            placeholder="Age"
-                                            value={formData.age}
-                                            onChangeText={(t) => updateField('age', t)}
-                                            icon="calendar-outline"
-                                        />
-                                    </View>
-                                    <View style={{ flex: 1, marginLeft: 8 }}>
-                                        <Text style={{ color: colors.text, marginBottom: 8, fontWeight: '600' }}>Gender</Text>
-                                        <View style={{ flexDirection: 'row', gap: 8 }}>
-                                            {(['Male', 'Female'] as const).map(g => (
-                                                <TouchableOpacity
-                                                    key={g}
-                                                    onPress={() => updateField('gender', g)}
-                                                    style={[styles.genderButton, {
-                                                        backgroundColor: formData.gender === g ? colors.primary : colors.surfaceHighlight,
-                                                    }]}
-                                                >
-                                                    <Text style={{ color: formData.gender === g ? 'white' : colors.text }}>{g[0]}</Text>
-                                                </TouchableOpacity>
-                                            ))}
-                                        </View>
-                                    </View>
-                                </View>
+                        <View style={styles.row}>
+                            <View style={{ flex: 1, marginRight: 8 }}>
+                                <GlassInput
+                                    placeholder="Age"
+                                    value={formData.age}
+                                    onChangeText={(t) => updateField('age', t)}
+                                    icon="calendar-outline"
+                                />
+                            </View>
+                            <View style={{ flex: 1, marginLeft: 8 }}>
+                                <GlassDropdown
+                                    label="Gender"
+                                    value={formData.gender}
+                                    options={[
+                                        { label: 'Male', value: 'Male' },
+                                        { label: 'Female', value: 'Female' },
+                                        { label: 'Other', value: 'Other' },
+                                    ]}
+                                    onSelect={(v) => updateField('gender', v)}
+                                    icon="person-outline"
+                                />
+                            </View>
+                        </View>
 
+                        <View style={styles.row}>
+                            <View style={{ flex: 1, marginRight: 8 }}>
                                 <GlassInput
                                     placeholder="Weight (kg)"
                                     value={formData.weight}
                                     onChangeText={(t) => updateField('weight', t)}
                                     icon="fitness-outline"
                                 />
+                            </View>
+                            <View style={{ flex: 1, marginLeft: 8 }}>
                                 <GlassInput
                                     placeholder="Height (cm)"
                                     value={formData.height}
@@ -218,102 +177,79 @@ export default function OnboardingScreen() {
                                     icon="resize-outline"
                                 />
                             </View>
-                        )}
+                        </View>
 
-                        {/* Step 2: Goal & Activity */}
-                        {step === 2 && (
-                            <View style={styles.stepContainer}>
-                                <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Goal</Text>
-                                <View style={styles.optionsGrid}>
-                                    <SelectionCard
-                                        title="Lose Weight"
-                                        selected={formData.goal === 'lose_weight'}
-                                        onPress={() => updateField('goal', 'lose_weight')}
-                                    />
-                                    <SelectionCard
-                                        title="Maintain Weight"
-                                        selected={formData.goal === 'maintain_weight'}
-                                        onPress={() => updateField('goal', 'maintain_weight')}
-                                    />
-                                    <SelectionCard
-                                        title="Gain Muscle"
-                                        selected={formData.goal === 'build_muscle'}
-                                        onPress={() => updateField('goal', 'build_muscle')}
+                        {/* Section 2: Goals */}
+                        <Text style={[styles.sectionHeader, { color: colors.text, marginTop: 12 }]}>Goals & Lifestyle</Text>
+
+                        <GlassDropdown
+                            label="Your Goal"
+                            value={formData.goal}
+                            icon="trophy-outline"
+                            options={[
+                                { label: 'Lose Weight', value: 'lose_weight' },
+                                { label: 'Maintain Weight', value: 'maintain_weight' },
+                                { label: 'Build Muscle', value: 'build_muscle' },
+                                { label: 'Gain Weight', value: 'gain_weight' },
+                                { label: 'Improve Health', value: 'improve_health' },
+                            ]}
+                            onSelect={(v) => updateField('goal', v)}
+                        />
+
+                        <GlassDropdown
+                            label="Activity Level"
+                            value={formData.activityLevel}
+                            icon="walk-outline"
+                            options={[
+                                { label: 'Sedentary', value: 'sedentary', subtitle: 'Little to no exercise' },
+                                { label: 'Lightly Active', value: 'lightly_active', subtitle: 'Exercise 1-3 times/week' },
+                                { label: 'Moderately Active', value: 'moderately_active', subtitle: 'Exercise 3-5 times/week' },
+                                { label: 'Very Active', value: 'very_active', subtitle: 'Exercise 6-7 times/week' },
+                                { label: 'Extra Active', value: 'extra_active', subtitle: 'Very intense exercise daily' },
+                            ]}
+                            onSelect={(v) => updateField('activityLevel', v)}
+                        />
+
+                        {/* Section 3: Preferences */}
+                        <Text style={[styles.sectionHeader, { color: colors.text, marginTop: 12 }]}>Preferences</Text>
+
+                        <Text style={[styles.label, { color: colors.icon }]}>Dietary Restrictions</Text>
+                        <View style={styles.chipContainer}>
+                            {['Vegetarian', 'Vegan', 'Keto', 'Paleo', 'Pescatarian'].map(diet => (
+                                <View key={diet}>
+                                    <SelectableChip
+                                        label={diet}
+                                        selected={formData.dietaryRestrictions.includes(diet)}
+                                        onPress={() => toggleSelection('dietaryRestrictions', diet)}
                                     />
                                 </View>
+                            ))}
+                        </View>
 
-                                <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 24 }]}>Activity Level</Text>
-                                <View style={styles.optionsGrid}>
-                                    <SelectionCard
-                                        title="Sedentary"
-                                        subtitle="Office job, little exercise"
-                                        selected={formData.activityLevel === 'sedentary'}
-                                        onPress={() => updateField('activityLevel', 'sedentary')}
-                                    />
-                                    <SelectionCard
-                                        title="Moderately Active"
-                                        subtitle="Exercise 3-5 times/week"
-                                        selected={formData.activityLevel === 'moderately_active'}
-                                        onPress={() => updateField('activityLevel', 'moderately_active')}
-                                    />
-                                    <SelectionCard
-                                        title="Very Active"
-                                        subtitle="Daily exercise/Physical job"
-                                        selected={formData.activityLevel === 'very_active'}
-                                        onPress={() => updateField('activityLevel', 'very_active')}
+                        <Text style={[styles.label, { color: colors.icon, marginTop: 16 }]}>Allergies</Text>
+                        <View style={styles.chipContainer}>
+                            {['Nuts', 'Dairy', 'Gluten', 'Eggs', 'Soy', 'Shellfish'].map(allergy => (
+                                <View key={allergy}>
+                                    <SelectableChip
+                                        label={allergy}
+                                        selected={formData.allergies.includes(allergy)}
+                                        onPress={() => toggleSelection('allergies', allergy)}
                                     />
                                 </View>
-                            </View>
-                        )}
+                            ))}
+                        </View>
 
-                        {/* Step 3: Dietary Preferences */}
-                        {step === 3 && (
-                            <View style={styles.stepContainer}>
-                                <Text style={[styles.sectionTitle, { color: colors.text }]}>Dietary Requirements</Text>
+                        <View style={{ height: 40 }} />
+                        <PrimaryButton title="Create Profile" onPress={handleFinish} />
+                        <View style={{ height: 100 }} />
 
-                                <Text style={[styles.subTitle, { color: colors.icon }]}>Diet Type</Text>
-                                <View style={styles.optionsGrid}>
-                                    {['Vegetarian', 'Vegan', 'Keto', 'Paleo'].map(diet => (
-                                        <View key={diet}>
-                                            <SelectionCard
-                                                title={diet}
-                                                selected={formData.dietaryRestrictions.includes(diet)}
-                                                onPress={() => toggleSelection('dietaryRestrictions', diet)}
-                                            />
-                                        </View>
-                                    ))}
-                                </View>
-
-                                <Text style={[styles.subTitle, { color: colors.icon, marginTop: 16 }]}>Allergies</Text>
-                                <View style={styles.optionsGrid}>
-                                    {['Nuts', 'Dairy', 'Gluten', 'Eggs', 'Soy'].map(allergy => (
-                                        <View key={allergy}>
-                                            <SelectionCard
-                                                title={allergy}
-                                                selected={formData.allergies.includes(allergy)}
-                                                onPress={() => toggleSelection('allergies', allergy)}
-                                            />
-                                        </View>
-                                    ))}
-                                </View>
-                            </View>
-                        )}
-
-                    </KeyboardAvoidingView>
-                </ScrollView>
-
-                <View style={styles.footer}>
-                    <PrimaryButton
-                        title={step === totalSteps ? "Finish Setup" : "Next Step"}
-                        onPress={handleNext}
-                    />
-                </View>
+                    </ScrollView>
+                </KeyboardAvoidingView>
             </SafeAreaWithAndroidPadding>
         </ThemedBackground>
     );
 }
 
-// Wrapper for SafeArea spacing on Android
 const SafeAreaWithAndroidPadding = ({ style, children }: any) => (
     <View style={[style, { paddingTop: Platform.OS === 'android' ? 40 : 0 }]}>
         {children}
@@ -327,14 +263,10 @@ const styles = StyleSheet.create({
     header: {
         paddingHorizontal: 24,
         marginBottom: 20,
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    backButton: {
-        marginRight: 16,
+        marginTop: 20,
     },
     title: {
-        fontSize: 28,
+        fontSize: 32,
         fontWeight: '800',
         marginBottom: 4,
     },
@@ -343,40 +275,33 @@ const styles = StyleSheet.create({
     },
     content: {
         paddingHorizontal: 24,
-        paddingBottom: 100,
     },
-    stepContainer: {
-        gap: 16,
-    },
-    sectionTitle: {
-        fontSize: 20,
+    sectionHeader: {
+        fontSize: 18,
         fontWeight: '700',
-        marginBottom: 12,
-    },
-    subTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        marginBottom: 8,
+        marginBottom: 16,
     },
     row: {
         flexDirection: 'row',
-        marginBottom: 16,
     },
-    genderButton: {
-        flex: 1,
-        height: 56,
-        borderRadius: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
+    label: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 12,
+        marginLeft: 4,
     },
-    optionsGrid: {
-        gap: 12,
+    chipContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
     },
-    footer: {
-        padding: 24,
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-    }
+    chip: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 20,
+    },
+    chipText: {
+        fontSize: 14,
+        fontWeight: '500',
+    },
 });
