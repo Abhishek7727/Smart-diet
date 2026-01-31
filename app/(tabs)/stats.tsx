@@ -13,33 +13,51 @@ import {
 } from 'react-native';
 import { ScreenWrapper } from '@/components/ScreenWrapper';
 import { LineChart } from 'react-native-chart-kit';
+import { useSelector } from 'react-redux';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
 // Stats Screen Component
 const StatsScreen = () => {
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
   const [selectedView, setSelectedView] = useState('Grid');
   const { nutritionalData, getTotalNutrition } = useMealPlan();
+  const userData = useSelector((state: any) => state.user);
   const totalNutrition = getTotalNutrition();
 
+  // Process weight history for the chart
+  const weightHistory = userData?.weightHistory || [];
+
+  // Get last 7 entries or all if less than 7
+  const recentHistory = weightHistory.slice(-7);
+
   const chartData = {
-    labels: ['22 Mar', '23 Mar', '24 Mar', '25 Mar', '26 Mar'],
+    labels: recentHistory.length > 0
+      ? recentHistory.map((h: { date: string }) => {
+        const d = new Date(h.date);
+        return `${d.getDate()}/${d.getMonth() + 1}`;
+      })
+      : ['Now'],
     datasets: [
       {
-        data: [72, 64, 58, 98, 80],
+        data: recentHistory.length > 0
+          ? recentHistory.map((h: { weight: number }) => h.weight)
+          : [userData?.weight ? parseFloat(userData.weight) : 0],
         strokeWidth: 3,
         color: (opacity = 1) => colors.primary,
       },
     ],
+    legend: ['Weight (kg)']
   };
 
   const chartConfig = {
     backgroundColor: 'transparent',
-    backgroundGradientFrom: 'transparent',
-    backgroundGradientTo: 'transparent',
-    decimalPlaces: 0,
+    backgroundGradientFrom: 'transparent', // colors.surface,
+    backgroundGradientTo: 'transparent', // colors.surface,
+    decimalPlaces: 1,
     color: (opacity = 1) => colors.primary,
     labelColor: (opacity = 1) => colors.icon,
     style: {
@@ -81,14 +99,45 @@ const StatsScreen = () => {
 
   return (
     <ScreenWrapper style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Text style={[styles.headerTitle, { color: colors.text }]}>Your Stats</Text>
           </View>
-          <TouchableOpacity>
-            <Ionicons name="person-outline" size={24} color={colors.text} />
+          <TouchableOpacity onPress={() => router.push('/profile/edit')}>
+            <Ionicons name="pencil" size={24} color={colors.text} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Update Weight Shortcut */}
+        <View style={{ paddingHorizontal: 20, marginBottom: 20 }}>
+          <TouchableOpacity
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              backgroundColor: colors.surfaceHighlight,
+              padding: 16,
+              borderRadius: 16,
+              gap: 12
+            }}
+            onPress={() => router.push('/profile/edit')}
+          >
+            <View style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: colors.primary + '20',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}>
+              <Ionicons name="scale-outline" size={20} color={colors.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text }}>Update Weight</Text>
+              <Text style={{ fontSize: 13, color: colors.icon }}>Track your progress</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.icon} />
           </TouchableOpacity>
         </View>
 

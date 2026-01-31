@@ -284,6 +284,7 @@ const SettingsScreen = () => {
   return (
     <ScreenWrapper style={styles.container}>
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >

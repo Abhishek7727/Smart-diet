@@ -16,6 +16,7 @@ export interface UserState {
     isAuthenticated: boolean;
     password?: string;
     apiKey: string | null;
+    weightHistory: { date: string; weight: number }[];
 }
 
 const initialState: UserState = {
@@ -34,6 +35,7 @@ const initialState: UserState = {
     isOnboarded: false,
     isAuthenticated: false,
     apiKey: null,
+    weightHistory: [],
 };
 
 const userSlice = createSlice({
@@ -47,7 +49,28 @@ const userSlice = createSlice({
             state.apiKey = action.payload;
         },
         updateProfile: (state, action: PayloadAction<Partial<UserState>>) => {
-            return { ...state, ...action.payload };
+            const newState = { ...state, ...action.payload };
+
+            // Track weight history if weight has changed or it's a new entry
+            if (action.payload.weight && action.payload.weight !== state.weight) {
+                const newWeight = parseFloat(action.payload.weight);
+                if (!isNaN(newWeight)) {
+                    // Create new array if it doesn't exist (migrations)
+                    if (!newState.weightHistory) newState.weightHistory = [];
+
+                    const today = new Date().toISOString().split('T')[0];
+                    const existingEntryIndex = newState.weightHistory.findIndex(h => h.date === today);
+
+                    if (existingEntryIndex >= 0) {
+                        // Update today's entry
+                        newState.weightHistory[existingEntryIndex].weight = newWeight;
+                    } else {
+                        // Add new entry
+                        newState.weightHistory.push({ date: today, weight: newWeight });
+                    }
+                }
+            }
+            return newState;
         },
         register: (state, action: PayloadAction<Partial<UserState>>) => {
             return { ...state, ...action.payload, isAuthenticated: true, isOnboarded: false };

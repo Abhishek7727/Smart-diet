@@ -357,6 +357,7 @@ const MealsScreen = () => {
   return (
     <ScreenWrapper style={styles.container}>
       <ScrollView
+        style={{ flex: 1 }}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >

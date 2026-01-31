@@ -37,6 +37,8 @@ export default function EditProfileScreen() {
         targetCalories: '',
         goal: '',
         activityLevel: '',
+        dietaryRestriction: '',
+        allergies: '',
     });
 
     useEffect(() => {
@@ -50,6 +52,8 @@ export default function EditProfileScreen() {
                 targetCalories: userData.targetCalories || '',
                 goal: userData.goal || 'lose_weight',
                 activityLevel: userData.activityLevel || 'moderately_active',
+                dietaryRestriction: userData.dietaryRestrictions?.[0] || 'None',
+                allergies: userData.allergies?.join(', ') || '',
             });
         }
     }, [userData]);
@@ -64,7 +68,21 @@ export default function EditProfileScreen() {
             return;
         }
 
-        dispatch(updateProfile(formData));
+        const allergiesArray = formData.allergies
+            ? formData.allergies.split(',').map((s) => s.trim()).filter(Boolean)
+            : [];
+
+        const dietaryRestrictionsArray = formData.dietaryRestriction && formData.dietaryRestriction !== 'None'
+            ? [formData.dietaryRestriction]
+            : [];
+
+        const { dietaryRestriction, allergies, ...rest } = formData;
+
+        dispatch(updateProfile({
+            ...rest,
+            allergies: allergiesArray,
+            dietaryRestrictions: dietaryRestrictionsArray
+        }));
         Alert.alert('Success', 'Profile updated successfully');
         router.back();
     };
@@ -167,6 +185,28 @@ export default function EditProfileScreen() {
                             { label: 'Extra Active', value: 'extra_active', subtitle: 'Very intense exercise daily' },
                         ]}
                         onSelect={(v) => handleChange('activityLevel', v)}
+                    />
+
+                    <GlassDropdown
+                        label="Dietary Preference"
+                        value={formData.dietaryRestriction}
+                        icon="restaurant-outline"
+                        options={[
+                            { label: 'No Restrictions', value: 'None' },
+                            { label: 'Vegetarian', value: 'Vegetarian' },
+                            { label: 'Vegan', value: 'Vegan' },
+                            { label: 'Eggetarian', value: 'Eggetarian' },
+                            { label: 'Non-Vegetarian', value: 'Non-Vegetarian' },
+                            { label: 'Gluten Free', value: 'Gluten Free' },
+                        ]}
+                        onSelect={(v) => handleChange('dietaryRestriction', v)}
+                    />
+
+                    <GlassInput
+                        placeholder="Allergies (comma separated)"
+                        value={formData.allergies}
+                        onChangeText={(text) => handleChange('allergies', text)}
+                        icon="warning-outline"
                     />
 
                     <PrimaryButton title="Save Changes" onPress={handleSave} style={styles.saveButton} />
