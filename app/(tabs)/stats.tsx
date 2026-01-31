@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
   Dimensions,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -12,6 +11,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import { ScreenWrapper } from '@/components/ScreenWrapper';
 import { LineChart } from 'react-native-chart-kit';
 
 const { width } = Dimensions.get('window');
@@ -80,7 +80,7 @@ const StatsScreen = () => {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <ScreenWrapper style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
@@ -107,7 +107,7 @@ const StatsScreen = () => {
             height={200}
             chartConfig={chartConfig}
             bezier
-            style={[styles.chart, colors.shadow]}
+            style={StyleSheet.flatten([styles.chart, colors.shadow])}
           />
         </View>
 
@@ -186,7 +186,7 @@ const StatsScreen = () => {
         </View>
         <View style={{ height: 40 }} />
       </ScrollView>
-    </SafeAreaView>
+    </ScreenWrapper>
   );
 };
 

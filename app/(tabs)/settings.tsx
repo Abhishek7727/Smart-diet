@@ -329,29 +329,28 @@ const SettingsScreen = () => {
         {/* App Settings */}
         <Text style={[styles.sectionTitle, { color: colors.text }]}>App Settings</Text>
         <SettingsGroup>
-          <GlassCard style={styles.settingItem}>
-            <View style={styles.settingRow}>
-              <View style={styles.settingLeft}>
-                <View style={[styles.iconContainer, { backgroundColor: colors.surfaceHighlight }]}>
-                  <Ionicons name="moon" size={20} color={colors.text} />
-                </View>
-                <View style={styles.settingTextContainer}>
-                  <Text style={[styles.settingTitle, { color: colors.text }]}>Dark Mode</Text>
-                  <Text style={[styles.settingSubtitle, { color: colors.icon }]}>
-                    {colorScheme === 'dark' ? 'On' : 'Off'} (System)
-                  </Text>
-                </View>
+          <View style={styles.settingRow}>
+            <View style={styles.settingLeft}>
+              <View style={[styles.iconContainer, { backgroundColor: colors.surfaceHighlight }]}>
+                <Ionicons name="moon" size={20} color={colors.primary} />
               </View>
-              <Switch
-                value={colorScheme === 'dark'}
-                onValueChange={() => {
-                  Alert.alert('System Theme', 'Please change your system theme in device settings.');
-                }}
-                trackColor={{ false: '#767577', true: colors.primary }}
-                thumbColor={colors.text}
-              />
+              <View style={styles.settingTextContainer}>
+                <Text style={[styles.settingTitle, { color: colors.text }]}>Dark Mode</Text>
+                <Text style={[styles.settingSubtitle, { color: colors.icon }]}>
+                  {colorScheme === 'dark' ? 'On' : 'Off'} (System)
+                </Text>
+              </View>
             </View>
-          </GlassCard>
+            <Switch
+              value={colorScheme === 'dark'}
+              onValueChange={() => {
+                Alert.alert('System Theme', 'Please change your system theme in device settings.');
+              }}
+              trackColor={{ false: '#767577', true: colors.primary }}
+              thumbColor={colors.text}
+            />
+          </View>
+          <View style={[styles.separator, { backgroundColor: colors.border }]} />
           <SettingItem
             icon="notifications"
             title="Notifications"
