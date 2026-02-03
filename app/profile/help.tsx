@@ -4,7 +4,7 @@ import { ScreenWrapper } from '@/components/ScreenWrapper';
 import { GlassCard } from '@/components/GlassCard';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useColorScheme } from 'react-native';
 
 const HelpScreen = () => {
@@ -32,10 +32,12 @@ const HelpScreen = () => {
     ];
 
     const handleEmailSupport = () => {
-        Linking.openURL('mailto:support@smartdiet.app');
+        Linking.openURL('mailto:anamdev168@gmail.com');
     };
 
     return (
+        <>
+         <Stack.Screen options={{headerShown: false}}/>
         <ScreenWrapper style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -71,6 +73,7 @@ const HelpScreen = () => {
                 <View style={{ height: 40 }} />
             </ScrollView>
         </ScreenWrapper>
+        </>
     );
 };
 

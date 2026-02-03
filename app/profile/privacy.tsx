@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text, View, TouchableOpacity } from 'react-nati
 import { ScreenWrapper } from '@/components/ScreenWrapper';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useColorScheme } from 'react-native';
 
 const PrivacyScreen = () => {
@@ -12,6 +12,8 @@ const PrivacyScreen = () => {
     const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
 
     return (
+        <>
+        <Stack.Screen options={{headerShown: false}}/>
         <ScreenWrapper style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -51,6 +53,7 @@ const PrivacyScreen = () => {
                 <View style={{ height: 40 }} />
             </ScrollView>
         </ScreenWrapper>
+        </>
     );
 };
 

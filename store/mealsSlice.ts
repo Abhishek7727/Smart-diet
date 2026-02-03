@@ -58,10 +58,11 @@ const mealsSlice = createSlice({
         setMeals: (state, action: PayloadAction<Meal[]>) => {
             state.meals = action.payload;
         },
-        updateMeal: (state, action: PayloadAction<{ id: string; food: FoodItem }>) => {
+        updateMeal: (state, action: PayloadAction<{ id: string; food: FoodItem, time: string }>) => {
             const meal = state.meals.find((m) => m.id === action.payload.id);
             if (meal) {
                 meal.food = action.payload.food;
+                meal.time = action.payload.time ?? meal.time;
                 meal.hasFood = true;
             }
         },

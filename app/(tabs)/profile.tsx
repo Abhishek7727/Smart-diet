@@ -2,26 +2,31 @@ import { useMealPlan } from '@/components/MealPlanContext';
 import { ScreenWrapper } from '@/components/ScreenWrapper';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   useColorScheme,
   View,
+  Share,
+  Alert
 } from 'react-native';
-import { Share, Alert } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'expo-router';
-import { ThemedBackground } from '@/components/ThemedBackground';
 import { GlassCard } from '@/components/GlassCard';
+import { Meal } from '@/store/mealsSlice';
 
-const ProfileScreen = () => {
+
+const getMealsStatus = (meals: Meal[]) => {
+    return `${meals.filter((val) => val.hasFood).length}/4`;
+}
+
+const ProfileScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
-  const { getTotalNutrition, nutritionalData } = useMealPlan();
+  const { getTotalNutrition, nutritionalData, meals } = useMealPlan();
   const totalNutrition = getTotalNutrition();
   const userData = useSelector((state: any) => state.user);
   const router = useRouter();
@@ -42,13 +47,13 @@ const ProfileScreen = () => {
           await Share.share({
             message: `Check out my progress on Smart Diet! I've burned ${totalNutrition.calories} calories today!`,
           });
-        } catch (error) {
+        } catch (error:any) {
+          console.log(error);
           Alert.alert('Error', 'Could not share content');
         }
         break;
     }
   };
-
 
   const ProfileCard = ({
     icon,
@@ -75,38 +80,6 @@ const ProfileScreen = () => {
     </GlassCard>
   );
 
-  const AchievementCard = ({
-    icon,
-    title,
-    description,
-    achieved
-  }: {
-    icon: string;
-    title: string;
-    description: string;
-    achieved: boolean;
-  }) => (
-    <GlassCard style={[
-      styles.achievementCard,
-      !achieved && { opacity: 0.7, borderWidth: 1, borderColor: colors.border, backgroundColor: 'transparent' }
-    ]}>
-      <View style={[
-        styles.achievementIcon,
-        { backgroundColor: achieved ? colors.surfaceHighlight : colors.border }
-      ]}>
-        <Ionicons name={icon as any} size={20} color={achieved ? colors.primary : colors.icon} />
-      </View>
-      <View style={styles.achievementContent}>
-        <Text style={[
-          styles.achievementTitle,
-          { color: achieved ? colors.text : colors.icon }
-        ]}>
-          {title}
-        </Text>
-        <Text style={[styles.achievementDescription, { color: colors.icon }]}>{description}</Text>
-      </View>
-    </GlassCard>
-  );
 
   return (
     <ScreenWrapper style={styles.container}>
@@ -116,7 +89,7 @@ const ProfileScreen = () => {
           <Text style={[styles.headerTitle, { color: colors.text }]}>Profile</Text>
           <TouchableOpacity
             style={[styles.headerButton, { backgroundColor: colors.surfaceHighlight }]}
-            onPress={() => router.push('/(tabs)/settings')}
+            onPress={() => onNavigate?.('settings')}
           >
             <Ionicons name="settings-outline" size={24} color={colors.text} />
           </TouchableOpacity>
@@ -147,57 +120,15 @@ const ProfileScreen = () => {
               subtitle={`${Math.round((totalNutrition.calories / nutritionalData.calories) * 100)}% of goal`}
             />
             <ProfileCard
-              icon="trophy"
-              color="#FFD700"
-              title="Streak"
-              value="7 days"
-              subtitle="Current streak"
-            />
-            <ProfileCard
               icon="checkmark-circle"
               color={colors.success}
               title="Meals Completed"
-              value="3/4"
+              value={getMealsStatus(meals)}
               subtitle="Today's progress"
-            />
-            <ProfileCard
-              icon="trending-up"
-              color="#2196F3"
-              title="Weekly Average"
-              value="85%"
-              subtitle="Goal completion"
             />
           </View>
         </View>
 
-        {/* Achievements */}
-        <View style={styles.achievementsSection}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Achievements</Text>
-          <AchievementCard
-            icon="star"
-            title="First Week"
-            description="Complete 7 days of meal planning"
-            achieved={true}
-          />
-          <AchievementCard
-            icon="nutrition"
-            title="Protein Master"
-            description="Meet protein goals for 5 consecutive days"
-            achieved={true}
-          />
-          <AchievementCard
-            icon="leaf"
-            title="Healthy Eater"
-            description="Stay within calorie goals for 10 days"
-            achieved={false}
-          />
-          <AchievementCard
-            icon="fitness"
-            title="Consistency King"
-            description="Plan meals for 30 consecutive days"
-            achieved={false}
-          />
-        </View>
 
         {/* Quick Actions */}
         <View style={styles.actionsSection}>
