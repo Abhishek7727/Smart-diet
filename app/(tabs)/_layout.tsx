@@ -14,9 +14,9 @@ export default function TabLayout() {
       case 'home':
         return <HomeScreen onNavigate={handleTabPress} />;
       case 'meals':
-        return <MealsScreen />;
-      case 'profile':
-        return <ProfileScreen />;
+        return <MealsScreen onNavigate={handleTabPress}/>;
+      case 'profile': 
+        return <ProfileScreen onNavigate={handleTabPress}/>;
       case 'settings':
         return <SettingsScreen />;
       default:

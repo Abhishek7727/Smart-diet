@@ -1,8 +1,8 @@
-import React, { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, ReactNode, useContext, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
-import { updateProfile } from '@/store/userSlice';
-import { setMeals, updateMeal as updateMealAction, removeMeal as removeMealAction, clearAllMeals as clearAllMealsAction, Meal, FoodItem } from '@/store/mealsSlice';
+import { logout, updateProfile } from '@/store/userSlice';
+import { updateMeal as updateMealAction, removeMeal as removeMealAction, clearAllMeals as clearAllMealsAction, Meal, FoodItem } from '@/store/mealsSlice';
 
 interface NutritionalData {
   calories: number;
@@ -125,7 +125,9 @@ export const MealPlanProvider: React.FC<MealPlanProviderProps> = ({ children }) 
   }, [personalInfo]);
 
   const updateMeal = (mealId: string, food: FoodItem) => {
-    dispatch(updateMealAction({ id: mealId, food }));
+    const currtime = Date.now();
+    const time = `${new Date(currtime).getHours()}:${new Date(currtime).getMinutes()}`;
+    dispatch(updateMealAction({ id: mealId,time, food }));
   };
 
   const removeMeal = (mealId: string) => {
@@ -133,8 +135,9 @@ export const MealPlanProvider: React.FC<MealPlanProviderProps> = ({ children }) 
   };
 
   const addCustomMeal = (mealId: string, foodName: string, calories: number, protein: number, carbs: number, fat: number) => {
+    const currtime = Date.now();
     const customFood: FoodItem = {
-      id: `custom-${Date.now()}`,
+      id: `custom-${currtime}`,
       name: foodName,
       calories,
       protein,
@@ -142,7 +145,8 @@ export const MealPlanProvider: React.FC<MealPlanProviderProps> = ({ children }) 
       fat,
       category: 'custom',
     };
-    dispatch(updateMealAction({ id: mealId, food: customFood }));
+    const time = `${new Date(currtime).getHours()}:${new Date(currtime).getMinutes()}`;
+    dispatch(updateMealAction({ id: mealId, time: time, food: customFood }));
   };
 
   const clearAllMeals = () => {
@@ -174,16 +178,10 @@ export const MealPlanProvider: React.FC<MealPlanProviderProps> = ({ children }) 
   };
 
   const clearPersonalInfo = async () => {
-    // Resetting to empty object or initial state
-    // For now we might just clear key fields if we had a clearProfile action, 
-    // but updateProfile with empty strings works too or we can implement logout
-    // dispatch(logout()); // If we want to clear everything
-    // Or just partial update:
-    /*
+    dispatch(logout());
     dispatch(updateProfile({
-      name: '', age: '', weight: '', height: '', targetCalories: '', ...
+      name: '', age: '', weight: '', height: '', targetCalories: ''
     }));
-    */
   };
 
   const hasCompletedSetup = async (): Promise<boolean> => {

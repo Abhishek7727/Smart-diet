@@ -3,13 +3,16 @@ import { View, TextInput, StyleSheet, useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Text } from 'react-native';
+import { AiIconButton } from './ui/AiIconButton';
 
 interface GlassInputProps extends React.ComponentProps<typeof TextInput> {
     icon?: string;
     label?: string;
+    aiEnabled?: boolean;
+    aiFunction?: () => Promise<void>;
 }
 
-export function GlassInput({ icon, label, style, ...props }: GlassInputProps) {
+export function GlassInput({ icon, label, aiEnabled, aiFunction, style, ...props }: GlassInputProps) {
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
 
@@ -31,6 +34,7 @@ export function GlassInput({ icon, label, style, ...props }: GlassInputProps) {
                     placeholderTextColor={colors.icon}
                     {...props}
                 />
+                {props.value?.trim() && aiEnabled && <AiIconButton aiFunction={aiFunction}/>}
             </View>
         </View>
     );

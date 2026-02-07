@@ -20,6 +20,7 @@ import PersonalInfoModal from "./PersonalInfoModal";
 import { ThemedBackground } from "@/components/ThemedBackground";
 import { GlassCard } from "@/components/GlassCard";
 import { PrimaryButton } from "@/components/PrimaryButton";
+import { CustomMealModal } from "./customMealModel";
 
 interface FoodItem {
   id: string;
@@ -57,8 +58,17 @@ const AIFoodRecommendation = ({
   onSelectFood,
   selectedMealType = "breakfast",
 }: AIFoodRecommendationProps) => {
+
+   const [customMealData, setCustomMealData] = useState({
+         name: '',
+         calories: '',
+         protein: '',
+         carbs: '',
+         fat: '',
+       });
   const [activeMealType, setActiveMealType] = useState(selectedMealType);
   const [showPersonalInfoModal, setShowPersonalInfoModal] = useState(false);
+  const [showCustomMealModal, setShowCustomMealModal] = useState(false);
   const [recommendations, setRecommendations] = useState<FoodItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo | null>(null);
@@ -66,7 +76,26 @@ const AIFoodRecommendation = ({
   const [hasCompletedSetup, setHasCompletedSetup] = useState(false);
 
   const userData = useSelector((state: any) => state.user);
-  const { meals } = useMealPlan();
+  const { meals, addCustomMeal } = useMealPlan();
+
+  const handleAddCustomMeal = () => {
+           if (!customMealData.name || !customMealData.calories) {
+             Alert.alert('Error', 'Please enter at least a meal name and calories.');
+             return;
+           }
+       
+           const calories = parseInt(customMealData.calories) || 0;
+           const protein = parseInt(customMealData.protein) || 0;
+           const carbs = parseInt(customMealData.carbs) || 0;
+           const fat = parseInt(customMealData.fat) || 0;
+             addCustomMeal(selectedMealType, customMealData.name, calories, protein, carbs, fat);
+             setShowCustomMealModal(false);
+             onClose();
+             setCustomMealData({ name: '', calories: '', protein: '', carbs: '', fat: '' });
+         };
+
+
+
 
   useEffect(() => {
     if (visible) {
@@ -96,55 +125,10 @@ const AIFoodRecommendation = ({
 
 
 
-  const handleGenerateRecommendations = async () => {
-    // First check if user has completed setup
-    if (!hasCompletedSetup || !personalInfo) {
-      Alert.alert(
-        "Profile Setup Required",
-        "Please complete your profile setup to get personalized AI recommendations.",
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Complete Setup",
-            onPress: () => setShowPersonalInfoModal(true),
-          },
-        ]
-      );
-      return;
-    }
-
-    // Then check if API key is set
-    if (!hasApiKey) {
-      Alert.alert(
-        "API Key Required",
-        "Please set your Gemini API key in Settings to use AI recommendations.",
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Go to Settings",
-            onPress: () => {
-              onClose();
-              // Navigate to settings (you'll need to implement this)
-            },
-          },
-        ]
-      );
-      return;
-    }
-
-    // Generate recommendations
-    await generateRecommendations();
-  };
 
   const handlePersonalInfoComplete = async (info: PersonalInfo) => {
     try {
-      // Save personal info is handled by dispatch in Modal now, 
-      // but if Modal passes it back, we can dispatch it here or assume it's done. 
-      // Actually PersonalInfoModal does dispatch(updateProfile(info)). 
-      // We just need to update local state for the UI to reflect immediately if not using selector for this part.
-
-      // Since our useEffect depends on userData, Redux update will trigger re-render and update personalInfo.
-      // But we can set it locally for instant feedback if needed.
+      
       setPersonalInfo(info);
       setHasCompletedSetup(true);
       setShowPersonalInfoModal(false);
@@ -493,6 +477,20 @@ const AIFoodRecommendation = ({
       );
     }
 
+    if(showCustomMealModal) {
+      return (
+         <CustomMealModal
+              visible={showCustomMealModal}
+              colors={colors}
+              customMealData={customMealData}
+              setCustomMealData={setCustomMealData}
+              onClose={() => setShowCustomMealModal(false)}
+              onSave={handleAddCustomMeal}
+          />
+      )
+    }
+
+
     if (isLoading) {
       return (
         <View style={styles.loadingContainer}>
@@ -561,7 +559,16 @@ const AIFoodRecommendation = ({
                 style={styles.generateButton}
               />
             </View>
+
+            
           )}
+          <View style={styles.setupSection}>
+            <PrimaryButton
+                  title="Enter Manual Data"
+                  onPress={() => setShowCustomMealModal(true)}
+                  style={styles.setupButton}
+            />
+          </View>
         </View>
       );
     }
@@ -589,13 +596,6 @@ const AIFoodRecommendation = ({
                 ]}
                 onPress={() => {
                   setActiveMealType(type);
-                  // Optional: Automatically regenerate when switching? 
-                  // Let's stick to manual regenerate to save API calls, 
-                  // or user can press the button below.
-                  // But we should probably clear current recommendations if they don't match?
-                  // No, allow user to keep seeing them, but highlight they might be for a different time.
-                  // BETTER: Re-fetch fallback immediately or clear list.
-                  // Let's keep it simple: Just update state. User hits "Generate".
                 }}
               >
                 <Text style={{
@@ -641,6 +641,13 @@ const AIFoodRecommendation = ({
             Generate New Recommendations ({activeMealType})
           </Text>
         </TouchableOpacity>
+          <View style={[styles.setupSection, {paddingHorizontal: 20}]}>
+            <PrimaryButton
+                  title="Enter Manual Data"
+                  onPress={() => setShowCustomMealModal(true)}
+                  style={[styles.setupButton, { borderRadius: 14}]}
+            />
+          </View>
         <View style={{ height: 40 }} />
       </ScrollView>
     );

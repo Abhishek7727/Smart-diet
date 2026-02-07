@@ -5,10 +5,9 @@ import {
     Switch,
     StyleSheet,
     TouchableOpacity,
-    SafeAreaView,
     useColorScheme,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenWrapper } from '@/components/ScreenWrapper';
@@ -44,6 +43,8 @@ export default function NotificationsScreen() {
     );
 
     return (
+        <>
+        <Stack.Screen options={{headerShown: false}} />
         <ScreenWrapper style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -61,6 +62,7 @@ export default function NotificationsScreen() {
                 </GlassCard>
             </View>
         </ScreenWrapper>
+        </>
     );
 }
 

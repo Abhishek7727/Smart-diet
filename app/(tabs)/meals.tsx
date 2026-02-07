@@ -2,16 +2,12 @@ import { ScreenWrapper } from '@/components/ScreenWrapper';
 import AIFoodRecommendation from '@/components/AIFoodRecommendation';
 import { useMealPlan } from '@/components/MealPlanContext';
 import { Colors } from '@/constants/Colors';
-import StorageService from '@/services/StorageService';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Dimensions,
-  Modal,
   Platform,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -19,15 +15,12 @@ import {
   useColorScheme,
   View
 } from 'react-native';
-import { ThemedBackground } from '@/components/ThemedBackground';
 import { GlassCard } from '@/components/GlassCard';
-import { GlassInput } from '@/components/GlassInput';
 import { useSelector } from 'react-redux';
-import { PrimaryButton } from '@/components/PrimaryButton';
+import { CustomMealModal } from '@/components/customMealModel';
 
-const { width } = Dimensions.get('window');
 
-const MealsScreen = () => {
+const MealsScreen = ( {onNavigate }: { onNavigate?: (tab: string) => void }) => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
   const [showAIRecommendations, setShowAIRecommendations] = useState(false);
@@ -40,7 +33,6 @@ const MealsScreen = () => {
     carbs: '',
     fat: '',
   });
-  const [isLoading, setIsLoading] = useState(false);
   const userData = useSelector((state: any) => state.user);
   const hasCompletedSetup = !!(userData.name && userData.targetCalories);
   const hasApiKey = !!userData.apiKey;
@@ -100,13 +92,11 @@ const MealsScreen = () => {
     const protein = parseInt(customMealData.protein) || 0;
     const carbs = parseInt(customMealData.carbs) || 0;
     const fat = parseInt(customMealData.fat) || 0;
-
-    if (selectedMealId) {
-      addCustomMeal(selectedMealId, customMealData.name, calories, protein, carbs, fat);
+    const smartId = getSmartMealId();
+      addCustomMeal(smartId, customMealData.name, calories, protein, carbs, fat);
       setShowCustomMealModal(false);
       setSelectedMealId(null);
       setCustomMealData({ name: '', calories: '', protein: '', carbs: '', fat: '' });
-    }
   };
 
   // Helper to determine meal type based on current time
@@ -140,7 +130,7 @@ const MealsScreen = () => {
           {
             text: 'Go to Settings', onPress: () => {
               // Navigate to settings (implementation pending)
-              // router.push('/settings'); 
+                onNavigate?.('settings');
             }
           },
         ]
@@ -229,7 +219,7 @@ const MealsScreen = () => {
 
   const NutritionSummary = () => (
     <GlassCard style={styles.nutritionSummary}>
-      <Text style={[styles.summaryTitle, { color: colors.text }]}>Today's Nutrition</Text>
+      <Text style={[styles.summaryTitle, { color: colors.text }]}>{"Today's Nutrition"}</Text>
       <View style={styles.summaryGrid}>
         <View style={styles.summaryItem}>
           <Text style={[styles.summaryLabel, { color: colors.icon }]}>Calories</Text>
@@ -270,82 +260,6 @@ const MealsScreen = () => {
     </GlassCard>
   );
 
-  const CustomMealModal = () => (
-    <Modal
-      visible={showCustomMealModal}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={() => setShowCustomMealModal(false)}
-    >
-      <ThemedBackground>
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
-            <TouchableOpacity onPress={() => setShowCustomMealModal(false)} style={styles.modalCloseButton}>
-              <Text style={{ color: colors.primary, fontSize: 16 }}>Cancel</Text>
-            </TouchableOpacity>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Add Custom Meal</Text>
-            <View style={{ width: 50 }} />
-          </View>
-
-          <ScrollView style={styles.modalContent} keyboardShouldPersistTaps="handled">
-            <GlassInput
-              placeholder="e.g. Grilled Chicken Salad"
-              value={customMealData.name}
-              onChangeText={(text) => setCustomMealData(prev => ({ ...prev, name: text }))}
-              label="Meal Name"
-            />
-
-            <GlassInput
-              placeholder="0"
-              value={customMealData.calories}
-              onChangeText={(text) => setCustomMealData(prev => ({ ...prev, calories: text }))}
-              label="Calories"
-            // keyboardType="numeric" // GlassInput needs update
-            />
-
-            <View style={styles.macroInputsContainer}>
-              <View style={{ flex: 1 }}>
-                <GlassInput
-                  placeholder="0"
-                  value={customMealData.protein}
-                  onChangeText={(text) => setCustomMealData(prev => ({ ...prev, protein: text }))}
-                  label="Protein (g)"
-                // keyboardType="numeric"
-                />
-              </View>
-
-              <View style={{ flex: 1 }}>
-                <GlassInput
-                  placeholder="0"
-                  value={customMealData.carbs}
-                  onChangeText={(text) => setCustomMealData(prev => ({ ...prev, carbs: text }))}
-                  label="Carbs (g)"
-                // keyboardType="numeric"
-                />
-              </View>
-
-              <View style={{ flex: 1 }}>
-                <GlassInput
-                  placeholder="0"
-                  value={customMealData.fat}
-                  onChangeText={(text) => setCustomMealData(prev => ({ ...prev, fat: text }))}
-                  label="Fat (g)"
-                // keyboardType="numeric"
-                />
-              </View>
-            </View>
-
-            <PrimaryButton
-              title="Save Meal"
-              onPress={handleAddCustomMeal}
-              style={styles.modalSaveButton}
-            />
-
-          </ScrollView>
-        </SafeAreaView>
-      </ThemedBackground>
-    </Modal>
-  );
 
   if (contextLoading) {
     return (
@@ -412,7 +326,7 @@ const MealsScreen = () => {
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => {
-              setSelectedMealId('breakfast'); // Default to breakfast
+              setSelectedMealId('breakfast');
               setShowCustomMealModal(true);
             }}
             style={{ flex: 1 }}
@@ -441,7 +355,14 @@ const MealsScreen = () => {
       />
 
       {/* Custom Meal Modal */}
-      <CustomMealModal />
+      <CustomMealModal
+        visible={showCustomMealModal}
+        colors={colors}
+        customMealData={customMealData}
+        setCustomMealData={setCustomMealData}
+        onClose={() => setShowCustomMealModal(false)}
+        onSave={handleAddCustomMeal}
+      />
     </ScreenWrapper>
   );
 };
@@ -649,44 +570,5 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 100,
-  },
-  // Modal styles
-  modalContainer: {
-    flex: 1,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-  },
-  modalCloseButton: {
-    padding: 8,
-  },
-  modalSaveButton: {
-    marginTop: 24,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  modalContent: {
-    flex: 1,
-    padding: 24,
-  },
-  inputGroup: {
-    marginBottom: 24,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
-    marginLeft: 4,
-  },
-  macroInputsContainer: {
-    flexDirection: 'row',
-    gap: 12,
   },
 });

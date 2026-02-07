@@ -23,15 +23,6 @@ const { width } = Dimensions.get("window");
 // Home Screen Component
 const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
   const colorScheme = useColorScheme();
-  // ... (keep existing hooks)
-
-  // Note: I am not including the entire component body in ReplacementContent to avoid huge output,
-  // but I must target the lines carefully.
-  // The tool requires EXACT target content. 
-  // I will replace the imports and the render wrapper.
-
-  // Let's do it in chunks.
-  // Chunk 1: Imports
 
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
   const [selectedView, setSelectedView] = useState("Daily");

@@ -219,10 +219,10 @@ const SettingsScreen = () => {
               2. Sign in with your Google account
             </Text>
             <Text style={[styles.modalText, { color: colors.icon }]}>
-              3. Click "Create API Key"
+              {"3. Click 'Create API Key'"}
             </Text>
             <Text style={[styles.modalText, { color: colors.icon }]}>
-              4. Copy the generated key (starts with "AIza") and paste it below.
+              {"4. Copy the generated key (starts with 'AIza') and paste it below."}
             </Text>
             <Text style={[styles.modalText, { color: colors.primary, marginTop: 8 }]}>
               Note: The AI features improve the more updated your profile is!
@@ -258,9 +258,7 @@ const SettingsScreen = () => {
   );
 
   /* Nutrition Summary Card */
-  const NutritionSummary = () => {
-    const { getTotalNutrition, nutritionalData } = useMealPlan();
-    const total = getTotalNutrition();
+  const DataStatus = () => {
 
     // Data Status Checks
     const hasPersonalInfo = !!(userData.name && userData.targetCalories);
@@ -287,7 +285,7 @@ const SettingsScreen = () => {
       <View style={[styles.statsContainer, { backgroundColor: colors.surfaceHighlight }]}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
           <Ionicons name="stats-chart" size={20} color={colors.primary} style={{ marginRight: 8 }} />
-          <Text style={[styles.sectionTitle, { marginBottom: 0, fontSize: 16 }]}>Data Status</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text,  marginBottom: 0, fontSize: 16 }]}>Data Status</Text>
         </View>
         <StatusRow label="Personal Info" isSaved={hasPersonalInfo} />
         <StatusRow label="All Meals" isSaved={hasMeals} />
@@ -332,10 +330,11 @@ const SettingsScreen = () => {
 
         {/* Nutrition Overview */}
         <View style={styles.section}>
-          <NutritionSummary />
+          <DataStatus />
         </View>
 
         {/* AI Configuration */}
+        <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>AI Configuration</Text>
         <SettingsGroup>
           <SettingItem
@@ -346,8 +345,10 @@ const SettingsScreen = () => {
             isLast={true}
           />
         </SettingsGroup>
+        </View>
 
         {/* App Settings */}
+        <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>App Settings</Text>
         <SettingsGroup>
           <SettingItem
@@ -358,6 +359,7 @@ const SettingsScreen = () => {
             isLast={true}
           />
         </SettingsGroup>
+        </View>
 
         {/* Danger Zone */}
         <View style={styles.section}>

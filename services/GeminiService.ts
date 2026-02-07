@@ -40,9 +40,118 @@ class GeminiService {
 
     this.apiKey = apiKey.trim();
     this.genAI = new GoogleGenerativeAI(this.apiKey);
-    // Use gemini-pro as a stable default available in v1beta
-    // Note: If you have access to newer models, you can update this string
     this.model = this.genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  }
+
+  async smartDataFill(
+    mealName: string,
+    apiKey?: string,
+  ) : Promise<any> {
+    try {
+      if (!this.apiKey || !this.model) {
+        try {
+          if(apiKey)
+          {
+            this.setApiKey(apiKey);
+          }
+        } catch(err)
+        {
+          console.log(err);
+          throw new Error(
+            "API key not configured. Please set your Gemini API key in Settings."
+          );
+        }
+      }
+
+      const prompt = `You are a professional nutritionist and chef specializing in healthy Indian cuisine. 
+      You have to identify rough estimate of the nutritional values of the given dish in double quotes "${mealName}" in the provided
+      response format. Try to give same and consistant result if you are provided with same dish/food item.
+      Consistency is the key.
+
+      IMPORTANT:
+      - don't overestimate, give a rough estimated nutritional value for given recipie / dist / food item.
+      - give output in required format only.
+
+      REQUIREMENTS:
+      1. If weight or serving size is also given as part of dish name, consider that and give nutritional value.
+      2. If only dish name or food item name is provided, assume it is made for only 1 serving and give the nutritional values accordingly.
+      3. If unable to estimate give default values as "0" to all fields given in required format.
+
+RESPONSE FORMAT:
+Return a JSON  data in this format only:
+{
+  "calories": number,
+  "protein": number,
+  "carbs": number,
+  "fat": number,
+    }
+
+Example for yogurt:
+  {
+    "calories": 320,
+    "protein": 18,
+    "carbs": 25,
+    "fat": 12,
+    }
+
+  Example got egg:
+  {
+   "calories": 100,
+    "protein": 12,
+    "carbs": 21,
+    "fat": 13,
+    }
+
+Only return the JSON  data (without even mentioning JSON in response, just return a json object), no additional text.`;
+
+      const parseData = (str: string) => {
+        const jsonMatch = str.match(/\{[\s\S]*?\}/);
+        if(!jsonMatch) return {calories: "0", protein: "0", carbs: "0", fat: "0"};
+        try{
+            const parsed = JSON.parse(jsonMatch[0]);
+            return {
+          calories:  `${parseInt(parsed.calories)}` || "0",
+          protein:`${parseInt(parsed.protein)}` || "0",
+          carbs: `${parseInt(parsed.carbs)}` || "0",
+          fat: `${parseInt(parsed.fat)}` || "0",
+        };
+        } catch(err)
+        {
+          console.log(err);
+          return {calories: "0", protein: "0", carbs: "0", fat: "0"};
+        }
+      }
+
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      const parsedResponse = parseData(text);
+      return parsedResponse;
+      } catch (error) {
+      console.error("Error generating meal recommendations:", error);
+
+      // Handle specific error types
+      if (error instanceof Error) {
+        if (error.message.includes("API key")) {
+          throw error;
+        }
+
+        // Handle model overload or service unavailable errors
+        if (
+          error.message.includes("overloaded") ||
+          error.message.includes("503") ||
+          error.message.includes("service unavailable") ||
+          error.message.includes("quota exceeded")
+        ) {
+          throw new Error(
+            "AI service is currently busy. Please try again in a few minutes, or use fallback recommendations."
+          );
+        }
+      }
+
+      // For other errors, return fallback recommendations
+      return {calories: "0", protein: "0", carbs: "0", fat: "0"};
+    }
   }
 
   async generateMealRecommendations(
