@@ -1,19 +1,21 @@
 {
   "expo": {
-    "name": "food",
-    "slug": "food",
+    "name": "Smart Diet",
+    "slug": "smart-diet",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "food",
+    "icon": "./assets/images/smart-diet-icon.png",
+    "scheme": "smart-diet",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.smartdiet.app"
     },
     "android": {
+      "package": "com.smartdiet.app",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/smart-diet-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true
