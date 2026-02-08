@@ -7,6 +7,8 @@ Notifications.setNotificationHandler({
         shouldShowAlert: true,
         shouldPlaySound: true,
         shouldSetBadge: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
     }),
 });
 
@@ -52,6 +54,7 @@ async function scheduleNotification(title: string, body: string, hour: number, m
             hour,
             minute,
             repeats: true,
+            type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
         },
     });
 }

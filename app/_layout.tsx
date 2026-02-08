@@ -3,7 +3,7 @@ import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
-import { Provider, useSelector, useDispatch } from 'react-redux';
+import { Provider, useSelector } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from '@/store/store';
 import React, { useEffect } from 'react';
@@ -11,14 +11,11 @@ import { View, ActivityIndicator } from 'react-native';
 
 import { MealPlanProvider } from '@/components/MealPlanContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { setLastLoginDate } from '@/store/userSlice';
-import { clearAllMeals } from '@/store/mealsSlice';
 
 function AuthProtection({ children }: { children: React.ReactNode }) {
-  const segments = useSegments();
+  const segments = useSegments() as string[];
   const router = useRouter();
-  const { isAuthenticated, isOnboarded, lastLoginDate } = useSelector((state: any) => state.user);
-  const dispatch = useDispatch();
+  const { isAuthenticated, isOnboarded } = useSelector((state: any) => state.user);
   const [isMounted, setIsMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -27,21 +24,6 @@ function AuthProtection({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     if (!isMounted) return;
-
-    // Check for new day and reset meals if needed
-    if (isAuthenticated) {
-      const today = new Date().toISOString().split('T')[0];
-
-      if (!lastLoginDate) {
-        // First run with this feature, set today to avoid clearing existing data immediately
-        dispatch(setLastLoginDate(today));
-      } else if (lastLoginDate !== today) {
-        // New day detected! Reset meals
-        console.log('New day detected. Resetting meals...');
-        dispatch(clearAllMeals());
-        dispatch(setLastLoginDate(today));
-      }
-    }
 
     const inAuthGroup = segments[0] === 'auth';
     const inOnboarding = segments.length > 1 && segments[0] === 'auth' && segments[1] === 'onboarding';
@@ -59,7 +41,7 @@ function AuthProtection({ children }: { children: React.ReactNode }) {
       // Handle case where user wiped data or fresh install but not in auth
       router.replace('/auth/register');
     }
-  }, [isAuthenticated, segments, isMounted, isOnboarded, lastLoginDate, dispatch]);
+  }, [isAuthenticated, segments, isMounted, isOnboarded]);
 
   if (!isMounted) {
     return (
@@ -94,7 +76,6 @@ export default function RootLayout() {
                 <Stack.Screen name="auth/register" options={{ headerShown: false }} />
                 <Stack.Screen name="auth/onboarding" options={{ headerShown: false }} />
                 <Stack.Screen name="profile/edit" options={{ headerShown: false, presentation: 'modal' }} />
-                <Stack.Screen name="profile/notifications" options={{ title: 'Notifications' }} />
                 <Stack.Screen name="profile/help" options={{ title: 'Help & Support' }} />
                 <Stack.Screen name="+not-found" />
               </Stack>
