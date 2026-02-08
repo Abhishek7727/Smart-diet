@@ -30,10 +30,10 @@ const THEME = {
     fat: ['#BF5AF2', '#FF375F'],     // Purple-Pink
 };
 
-const SVG_SIZE = 300; // Increased size to fit everything comfortably
+const SVG_SIZE = 250; // Reduced size from 300 to 250 to save space
 const CENTER = SVG_SIZE / 2;
-const STROKE_WIDTH = 20; // Thicker strokes for impact
-const GAP = 12; // Gap between rings
+const STROKE_WIDTH = 14; // Thinner strokes (was 20) for more elegance and inner space
+const GAP = 8; // Smaller gap (was 12)
 
 export const CalorieMeter: React.FC<CalorieMeterProps> = ({
     calories, target, protein, proteinTarget, carbs, carbsTarget, fat, fatTarget,
@@ -53,8 +53,6 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
     ];
 
     // Shared Values for Animation
-    // We can't map hooks in a loop in the same way if the array length was dynamic, but here it's static (4).
-    // However, hooks must be called at top level.
     const anim1 = useSharedValue(0);
     const anim2 = useSharedValue(0);
     const anim3 = useSharedValue(0);
@@ -77,15 +75,9 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
     // Helper to render rings
     const renderRings = () => {
         return data.map((item, index) => {
-            // Calculate radius for each ring from outside in
-            // Outer ring radius = (Size - Stroke) / 2
-            // Next ring = Previous - Stroke - Gap
             const radius = (SVG_SIZE - STROKE_WIDTH) / 2 - (index * (STROKE_WIDTH + GAP));
             const circumference = 2 * Math.PI * radius;
 
-            // We need to use useAnimatedProps outside the map? 
-            // No, we can use it inside a component.
-            // Let's create a sub-component for the ring to be safe with hooks.
             return (
                 <Ring
                     key={item.key}
@@ -109,11 +101,8 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
                 <Text style={[styles.dateText, { color: colors.icon }]}>Interactive Hub</Text>
             </View>
 
-            <LinearGradient
-                colors={colorScheme === 'dark' ? ['#1F293700', '#1F2937'] : ['#ffffff', '#f8f9fa']}
-                style={[styles.card, { borderColor: colors.border, borderWidth: 1 }]}
-            >
-                <View style={[StyleSheet.absoluteFill, { backgroundColor: colorScheme === 'dark' ? '#111827' : '#fff', opacity: 0.95 }]} />
+            {/* Changed background to transparent as requested */}
+            <View style={[styles.card, { backgroundColor: 'transparent' }]}>
 
                 <View style={styles.chartContainer}>
                     <TouchableOpacity
@@ -136,10 +125,10 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
 
                         </Svg>
 
-                        {/* Center Display */}
-                        <View style={[styles.centerOverlay, { width: SVG_SIZE / 2.2, height: SVG_SIZE / 2.2 }]}>
+                        {/* Center Display - Adjusted text sizes */}
+                        <View style={[styles.centerOverlay, { width: SVG_SIZE / 2.5, height: SVG_SIZE / 2.5 }]}>
                             <View style={styles.centerContent}>
-                                <Ionicons name={activeItem.icon as any} size={28} color={activeItem.colors[1]} style={{ marginBottom: 8 }} />
+                                <Ionicons name={activeItem.icon as any} size={24} color={activeItem.colors[1]} style={{ marginBottom: 4 }} />
                                 <Text style={[styles.centerValue, { color: colors.text }]}>
                                     {Math.round(activeItem.value)}
                                 </Text>
@@ -154,14 +143,16 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
                     </TouchableOpacity>
                 </View>
 
-                {/* Legend / Controls */}
-                <View style={[styles.legendRow, { borderTopColor: colors.border }]}>
+                {/* Legend / Controls - Adjusted padding */}
+                <View style={[styles.legendRow, { borderTopColor: 'transparent' }]}>
                     {data.map((item, index) => (
                         <TouchableOpacity
                             key={item.key}
                             style={[
                                 styles.legendItem,
-                                activeIndex === index && { backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }
+                                activeIndex === index && styles.activeLegendItem,
+                                // Subtle border for active item visibility on transparent bg
+                                { borderColor: activeIndex === index ? item.colors[1] : 'transparent', borderWidth: 1 }
                             ]}
                             onPress={() => setActiveIndex(index)}
                         >
@@ -171,7 +162,7 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 1 }}
                             >
-                                <Ionicons name={item.icon as any} size={16} color="white" />
+                                <Ionicons name={item.icon as any} size={14} color="white" />
                             </LinearGradient>
                             <Text style={[styles.legendLabel, { color: colors.icon }]}>{item.label}</Text>
                             <Text style={[styles.legendValue, { color: colors.text }]}>
@@ -181,7 +172,7 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
                     ))}
                 </View>
 
-            </LinearGradient>
+            </View>
         </View>
     );
 };
@@ -197,12 +188,12 @@ const Ring = ({ index, radius, circumference, strokeWidth, colorKey, animValue, 
 
     return (
         <G rotation="-90" origin={`${CENTER}, ${CENTER}`}>
-            {/* Background Track */}
+            {/* Background Track - Subtle Opacity */}
             <Circle
                 cx={CENTER} cy={CENTER} r={radius}
-                stroke={themeMode === 'dark' ? '#374151' : '#E5E7EB'}
+                stroke={themeMode === 'dark' ? '#ffffff' : '#000000'}
                 strokeWidth={strokeWidth}
-                strokeOpacity={0.3}
+                strokeOpacity={0.1}
             />
             {/* Progress Ring */}
             <AnimatedCircle
@@ -219,41 +210,37 @@ const Ring = ({ index, radius, circumference, strokeWidth, colorKey, animValue, 
 
 const styles = StyleSheet.create({
     container: {
-        marginHorizontal: 20,
-        marginBottom: 24,
+        marginHorizontal: 16, // Slightly reduced margins
+        marginBottom: 16,
     },
     headerRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'baseline',
-        marginBottom: 16,
+        marginBottom: 12, // Reduced margin
         paddingHorizontal: 4,
     },
     headerTitle: {
-        fontSize: 22,
+        fontSize: 20, // Slightly reduced font size
         fontWeight: '700',
         letterSpacing: -0.5,
     },
     dateText: {
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: '600',
         opacity: 0.6,
         textTransform: 'uppercase',
     },
     card: {
-        borderRadius: 32,
-        overflow: 'hidden',
+        borderRadius: 24,
+        overflow: 'visible', // Changed to visible so padding doesn't clip if used
         padding: 0,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 12 },
-        shadowOpacity: 0.12,
-        shadowRadius: 24,
-        elevation: 8,
+        // Removed heavy shadows/elevation since transparent bg was requested
     },
     chartContainer: {
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 40,
+        paddingVertical: 16, // Significantly reduced padding
         position: 'relative',
     },
     touchableArea: {
@@ -264,70 +251,71 @@ const styles = StyleSheet.create({
         position: 'absolute',
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: 999,
-        // Optional: Add a subtle blur or background to make text pop over rings if needed
-        // but here rings are outside.
+        // Make sure touches pass through to the touchable area if needed, 
+        // but since touchable wraps everything, it's fine.
     },
     centerContent: {
         alignItems: 'center',
         justifyContent: 'center',
     },
     centerValue: {
-        fontSize: 36,
+        fontSize: 28, // Reduced size (was 36)
         fontWeight: '800',
         fontVariant: ['tabular-nums'],
-        letterSpacing: -1,
-        lineHeight: 40,
+        letterSpacing: -0.5,
+        lineHeight: 32,
     },
     centerUnit: {
-        fontSize: 14,
+        fontSize: 12, // Reduced size
         fontWeight: '600',
-        marginBottom: 4,
+        marginBottom: 2,
         opacity: 0.8,
     },
     centerLabel: {
-        fontSize: 13,
+        fontSize: 11, // Reduced size
         fontWeight: '700',
-        letterSpacing: 1,
+        letterSpacing: 0.5,
         textTransform: 'uppercase',
     },
     legendRow: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        paddingVertical: 20,
-        paddingHorizontal: 16,
-        borderTopWidth: 1,
-        backgroundColor: 'rgba(120, 120, 120, 0.05)',
+        paddingVertical: 12, // Reduced padding
+        paddingHorizontal: 8,
+        // Removed background color for legend row
     },
     legendItem: {
         alignItems: 'center',
-        paddingVertical: 12,
-        paddingHorizontal: 8,
-        borderRadius: 20,
-        minWidth: 70,
+        paddingVertical: 8,
+        paddingHorizontal: 6,
+        borderRadius: 16,
+        minWidth: 60, // Smaller min width
+    },
+    activeLegendItem: {
+        backgroundColor: 'rgba(150, 150, 150, 0.1)', // Subtle highlight for active item
     },
     legendIcon: {
-        width: 32,
-        height: 32,
-        borderRadius: 12,
+        width: 28,
+        height: 28, // Smaller icons
+        borderRadius: 14,
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 8,
+        marginBottom: 4,
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 6,
-        elevation: 4,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 2,
     },
     legendLabel: {
-        fontSize: 11,
+        fontSize: 10,
         fontWeight: '600',
-        marginBottom: 2,
+        marginBottom: 0,
         textTransform: 'uppercase',
         opacity: 0.7,
     },
     legendValue: {
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: '700',
     },
 });
