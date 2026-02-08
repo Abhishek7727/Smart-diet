@@ -54,10 +54,10 @@ const CustomMealModal = React.memo(function CustomMealModal({
 
           <ScrollView style={styles.modalContent} keyboardShouldPersistTaps="handled">
             <GlassInput
-              aiEnabled={true}
+              aiEnabled={!!userData.apiKey}
               aiFunction={async () => {
-                  const data = await GeminiService.smartDataFill(customMealData.name, userData.apiKey);
-                  setCustomMealData((prev) => ({...prev, ...data}));
+                const data = await GeminiService.smartDataFill(customMealData.name, userData.apiKey);
+                setCustomMealData((prev) => ({ ...prev, ...data }));
               }}
               placeholder="e.g. Grilled Chicken Salad"
               value={customMealData.name}
@@ -109,7 +109,7 @@ const CustomMealModal = React.memo(function CustomMealModal({
   );
 });
 
-export {CustomMealModal};
+export { CustomMealModal };
 
 const styles = StyleSheet.create({
   modalContainer: {
