@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import Svg, { Circle, G } from 'react-native-svg';
+import Svg, { Circle, Defs, LinearGradient, Stop, G } from 'react-native-svg';
 import Animated, { useSharedValue, useAnimatedProps, withTiming, Easing, withDelay } from 'react-native-reanimated';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from 'react-native';
@@ -22,71 +22,18 @@ interface CalorieMeterProps {
 
 const { width } = Dimensions.get('window');
 
-// Vibrant Neon Palette
+// Modern App Theme - Clean & Vibrant
 const THEME = {
-    calories: '#FF0055', // Neon Pink
-    protein: '#00FFE0', // Neon Cyan
-    carbs: '#BD00FF', // Neon Purple
-    fat: '#FFD600', // Neon Yellow
-    track: 'rgba(255,255,255,0.1)'
+    calories: ['#FF4D4D', '#F9CB28'], // Red to Yellow gradient
+    protein: ['#00C6FB', '#005BEA'], // Light Blue to Dark Blue
+    carbs: ['#7F00FF', '#E100FF'], // Purple to Pink
+    fat: ['#F2994A', '#F2C94C'], // Orange to Yellow
 };
 
-// Ring Configuration
-const RINGS = {
-    calories: { radius: 70, stroke: 10, color: THEME.calories },
-    protein: { radius: 56, stroke: 10, color: THEME.protein },
-    carbs: { radius: 42, stroke: 10, color: THEME.carbs },
-    fat: { radius: 28, stroke: 10, color: THEME.fat },
-};
-
-const SVG_SIZE = 180;
-const CENTER = SVG_SIZE / 2;
-
-const Ring = ({ radius, stroke, color, progress, delay = 0 }: { radius: number, stroke: number, color: string, progress: number, delay?: number }) => {
-    const circumference = 2 * Math.PI * radius;
-    const animatedExample = useSharedValue(0);
-
-    useEffect(() => {
-        // Animate from 0 to progress
-        animatedExample.value = withDelay(delay, withTiming(progress, {
-            duration: 1500,
-            easing: Easing.out(Easing.exp),
-        }));
-    }, [progress]);
-
-    const animatedProps = useAnimatedProps(() => {
-        return {
-            strokeDashoffset: circumference * (1 - animatedExample.value),
-        };
-    });
-
-    return (
-        <G rotation="-90" origin={`${CENTER}, ${CENTER}`}>
-            {/* Background Track */}
-            <Circle
-                cx={CENTER}
-                cy={CENTER}
-                r={radius}
-                stroke={color}
-                strokeWidth={stroke}
-                strokeOpacity={0.15}
-                fill="transparent"
-            />
-            {/* Progress */}
-            <AnimatedCircle
-                cx={CENTER}
-                cy={CENTER}
-                r={radius}
-                stroke={color}
-                strokeWidth={stroke}
-                strokeDasharray={`${circumference} ${circumference}`}
-                animatedProps={animatedProps}
-                strokeLinecap="round"
-                fill="transparent"
-            />
-        </G>
-    );
-};
+const SVG_SIZE = 120;
+const STROKE_WIDTH = 12;
+const RADIUS = (SVG_SIZE - STROKE_WIDTH) / 2;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export const CalorieMeter: React.FC<CalorieMeterProps> = ({
     calories,
@@ -101,23 +48,61 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
 
-    // Cap progress at 1
+    // Progress Values
     const pCal = Math.min(calories / target, 1);
-    const pPro = Math.min(protein / proteinTarget, 1);
-    const pCarb = Math.min(carbs / carbsTarget, 1);
-    const pFat = Math.min(fat / fatTarget, 1);
+    const progress = useSharedValue(0);
 
-    const MacroPill = ({ label, value, target, color, icon }: any) => {
-        const percentage = Math.round((value / target) * 100);
+    useEffect(() => {
+        progress.value = withTiming(pCal, {
+            duration: 1500,
+            easing: Easing.out(Easing.exp),
+        });
+    }, [pCal]);
+
+    const animatedProps = useAnimatedProps(() => {
+        return {
+            strokeDashoffset: CIRCUMFERENCE * (1 - progress.value),
+        };
+    });
+
+    const MacroBar = ({ label, value, target, colors: gradientColors, delay }: any) => {
+        const p = Math.min(value / target, 1);
+        const barProgress = useSharedValue(0);
+
+        useEffect(() => {
+            barProgress.value = withDelay(delay, withTiming(p, {
+                duration: 1200,
+                easing: Easing.out(Easing.quad),
+            }));
+        }, [p]);
+
+        // We can't easily animate width with native driver layout props in simple views without Animated.View style props,
+        // but for simplicity in this structure we'll use a simple flex-based or width % approach inside an Animated component 
+        // OR just render it since it's a simple width. Let's stick to standard View with width % for now or Reanimated if we want smoothness.
+        // Let's use a simple Animated.View for the width.
+
+        const animatedStyle = useAnimatedProps(() => {
+            return {
+                width: `${barProgress.value * 100}%`
+            };
+        });
+
+        const AnimatedView = Animated.createAnimatedComponent(View);
+
         return (
-            <View style={[styles.macroPill, { borderColor: color + '50', backgroundColor: color + '10' }]}>
-                {/* Colored Dot */}
-                <View style={[styles.dot, { backgroundColor: color }]} />
-                <View style={styles.macroContent}>
-                    <Text style={[styles.macroLabel, { color: colors.icon }]}>{label}</Text>
-                    <Text style={[styles.macroValue, { color: colors.text }]}>
-                        {Math.round(value)}g <Text style={{ fontSize: 10, opacity: 0.7 }}>({percentage}%)</Text>
+            <View style={styles.macroRow}>
+                <View style={styles.macroHeader}>
+                    <Text style={[styles.macroLabel, { color: colors.text }]}>{label}</Text>
+                    <Text style={[styles.macroValue, { color: colors.icon }]}>
+                        {Math.round(value)}g <Text style={{ fontSize: 10, opacity: 0.6 }}>/ {target}g</Text>
                     </Text>
+                </View>
+                <View style={[styles.track, { backgroundColor: colors.surfaceHighlight }]}>
+                    {/* We need a gradient view, but react-native-linear-gradient acts up sometimes in Expo Go without config.
+                        We'll use a solid color fallback or just a colored view. 
+                        Actually, SVG LinearGradient inside a Rect fits best, but standard View + backgroundColor is safer.
+                        Let's use the second color of the tuple for now or a solid mix. */}
+                    <AnimatedView style={[styles.fill, { backgroundColor: gradientColors[1] }, { width: `${p * 100}%` }]} />
                 </View>
             </View>
         );
@@ -126,57 +111,73 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
     return (
         <View style={styles.container}>
             <View style={styles.headerRow}>
-                <Text style={[styles.headerTitle, { color: colors.text }]}>Daily Insight</Text>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>Daily Summary</Text>
                 <Text style={[styles.dateText, { color: colors.icon }]}>Today</Text>
             </View>
 
-            <GlassCard style={styles.card} variant="smoked">
-                <View style={styles.innerContainer}>
-                    {/* Top: Rings Graph */}
-                    <View style={styles.graphContainer}>
+            <GlassCard style={styles.card} variant="default">
+                <View style={styles.contentContainer}>
+                    {/* Left: Calorie Ring */}
+                    <View style={styles.leftColumn}>
                         <Svg width={SVG_SIZE} height={SVG_SIZE}>
-                            {/* Outer: Calories */}
-                            <Ring radius={RINGS.calories.radius} stroke={RINGS.calories.stroke} color={RINGS.calories.color} progress={pCal} delay={0} />
-
-                            {/* Mid: Protein */}
-                            <Ring radius={RINGS.protein.radius} stroke={RINGS.protein.stroke} color={RINGS.protein.color} progress={pPro} delay={200} />
-
-                            {/* Mid: Carbs */}
-                            <Ring radius={RINGS.carbs.radius} stroke={RINGS.carbs.stroke} color={RINGS.carbs.color} progress={pCarb} delay={400} />
-
-                            {/* Inner: Fat */}
-                            <Ring radius={RINGS.fat.radius} stroke={RINGS.fat.stroke} color={RINGS.fat.color} progress={pFat} delay={600} />
+                            <Defs>
+                                <LinearGradient id="calGradient" x1="0" y1="0" x2="1" y2="1">
+                                    <Stop offset="0" stopColor={THEME.calories[0]} />
+                                    <Stop offset="1" stopColor={THEME.calories[1]} />
+                                </LinearGradient>
+                            </Defs>
+                            {/* Track */}
+                            <Circle
+                                cx={SVG_SIZE / 2}
+                                cy={SVG_SIZE / 2}
+                                r={RADIUS}
+                                stroke={colors.glass.borderColor}
+                                strokeWidth={STROKE_WIDTH}
+                                strokeOpacity={0.5}
+                            />
+                            {/* Progress */}
+                            <AnimatedCircle
+                                cx={SVG_SIZE / 2}
+                                cy={SVG_SIZE / 2}
+                                r={RADIUS}
+                                stroke="url(#calGradient)"
+                                strokeWidth={STROKE_WIDTH}
+                                strokeLinecap="round"
+                                strokeDasharray={`${CIRCUMFERENCE} ${CIRCUMFERENCE}`}
+                                animatedProps={animatedProps}
+                                rotation="-90"
+                                origin={`${SVG_SIZE / 2}, ${SVG_SIZE / 2}`}
+                            />
                         </Svg>
-
-                        {/* Centered Calorie Text */}
-                        <View style={styles.centerTextContainer}>
-                            <Text style={[styles.centerValue, { color: colors.text }]}>{Math.round(calories)}</Text>
-                            <Text style={[styles.centerLabel, { color: colors.icon }]}>kcal</Text>
+                        <View style={styles.ringText}>
+                            <Ionicons name="flame" size={20} color={THEME.calories[0]} style={{ marginBottom: 2 }} />
+                            <Text style={[styles.ringValue, { color: colors.text }]}>{Math.round(calories)}</Text>
+                            <Text style={[styles.ringLabel, { color: colors.icon }]}>kcal</Text>
                         </View>
                     </View>
 
-                    {/* Bottom: Metrics Pills */}
-                    <View style={styles.metricsRow}>
-                        <MacroPill
+                    {/* Right: Macro List */}
+                    <View style={styles.rightColumn}>
+                        <MacroBar
                             label="Protein"
                             value={protein}
                             target={proteinTarget}
-                            color={THEME.protein}
-                            icon="fitness"
+                            colors={THEME.protein}
+                            delay={200}
                         />
-                        <MacroPill
+                        <MacroBar
                             label="Carbs"
                             value={carbs}
                             target={carbsTarget}
-                            color={THEME.carbs}
-                            icon="restaurant"
+                            colors={THEME.carbs}
+                            delay={400}
                         />
-                        <MacroPill
+                        <MacroBar
                             label="Fats"
                             value={fat}
                             target={fatTarget}
-                            color={THEME.fat}
-                            icon="water"
+                            colors={THEME.fat}
+                            delay={600}
                         />
                     </View>
                 </View>
@@ -198,7 +199,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 4,
     },
     headerTitle: {
-        fontSize: 22,
+        fontSize: 20,
         fontWeight: '700',
     },
     dateText: {
@@ -206,74 +207,62 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     card: {
-        paddingVertical: 24,
-        paddingHorizontal: 16,
-        borderRadius: 32,
+        padding: 20,
+        borderRadius: 24,
     },
-    innerContainer: {
+    contentContainer: {
+        flexDirection: 'row',
         alignItems: 'center',
         gap: 24,
     },
-    graphContainer: {
-        width: SVG_SIZE,
-        height: SVG_SIZE,
-        alignItems: 'center',
+    leftColumn: {
         justifyContent: 'center',
+        alignItems: 'center',
         position: 'relative',
     },
-    centerTextContainer: {
+    ringText: {
         position: 'absolute',
         alignItems: 'center',
         justifyContent: 'center',
     },
-    centerValue: {
-        fontSize: 32,
+    ringValue: {
+        fontSize: 28,
         fontWeight: '800',
-        letterSpacing: -1,
-        lineHeight: 34,
+        lineHeight: 32,
+        letterSpacing: -0.5,
     },
-    centerLabel: {
+    ringLabel: {
         fontSize: 12,
-        fontWeight: '600',
-        textTransform: 'uppercase',
-        opacity: 0.8,
+        fontWeight: '500',
     },
-    metricsRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        gap: 8,
-        width: '100%',
-    },
-    macroPill: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderRadius: 20,
-        borderWidth: 1,
-        minWidth: '30%',
+    rightColumn: {
         flex: 1,
-        justifyContent: 'center',
+        gap: 16,
     },
-    dot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        marginRight: 8,
+    macroRow: {
+        gap: 6,
     },
-    macroContent: {
-        alignItems: 'flex-start',
+    macroHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'baseline',
     },
     macroLabel: {
-        fontSize: 10,
+        fontSize: 13,
         fontWeight: '600',
-        lineHeight: 12,
-        marginBottom: 2,
     },
     macroValue: {
         fontSize: 13,
-        fontWeight: '700',
-        lineHeight: 16,
+        fontWeight: '500',
+    },
+    track: {
+        height: 6,
+        borderRadius: 3,
+        width: '100%',
+        overflow: 'hidden',
+    },
+    fill: {
+        height: '100%',
+        borderRadius: 3,
     },
 });
