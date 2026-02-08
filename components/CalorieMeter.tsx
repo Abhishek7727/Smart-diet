@@ -12,8 +12,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -40,7 +38,7 @@ const RING_COLORS = {
 
 const SVG_SIZE = 200;
 const CENTER = SVG_SIZE / 2;
-const STROKE_WIDTH = 10; // Thinner strokes
+const STROKE_WIDTH = 6; // Thinner strokes
 const GAP = 5; // Smaller gaps
 
 export const CalorieMeter: React.FC<CalorieMeterProps> = ({
@@ -195,7 +193,7 @@ const RingSegment = ({ radius, circumference, gradientId, animValue, isActive, c
             <AnimatedCircle
                 cx={CENTER} cy={CENTER} r={radius}
                 stroke={`url(#${gradientId})`}
-                strokeWidth={isActive ? STROKE_WIDTH + 2 : STROKE_WIDTH}
+                strokeWidth={isActive ? STROKE_WIDTH + 4 : STROKE_WIDTH}
                 strokeLinecap="round"
                 strokeDasharray={[circumference, circumference]}
                 animatedProps={animatedProps}
