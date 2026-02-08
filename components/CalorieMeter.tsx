@@ -36,7 +36,7 @@ const RING_COLORS = {
     fat: ['#F472B6', '#EC4899'],
 };
 
-const SVG_SIZE = 200;
+const SVG_SIZE = 180;
 const CENTER = SVG_SIZE / 2;
 const STROKE_WIDTH = 5; // Thinner strokes
 const GAP = 12; // Smaller gaps
