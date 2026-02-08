@@ -36,7 +36,7 @@ const RING_COLORS = {
     fat: ['#F472B6', '#EC4899'],
 };
 
-const SVG_SIZE = 200;
+const SVG_SIZE = 192;
 const CENTER = SVG_SIZE / 2;
 const STROKE_WIDTH = 5; // Thinner strokes
 const GAP = 10; // Smaller gaps
@@ -193,7 +193,7 @@ const RingSegment = ({ radius, circumference, gradientId, animValue, isActive, c
             <AnimatedCircle
                 cx={CENTER} cy={CENTER} r={radius}
                 stroke={`url(#${gradientId})`}
-                strokeWidth={isActive ? STROKE_WIDTH + 7 : STROKE_WIDTH}
+                strokeWidth={isActive ? STROKE_WIDTH + 5 : STROKE_WIDTH}
                 strokeLinecap="round"
                 strokeDasharray={[circumference, circumference]}
                 animatedProps={animatedProps}
