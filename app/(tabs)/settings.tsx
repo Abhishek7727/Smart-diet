@@ -23,6 +23,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setApiKey, setUser, deleteAccount, logout } from '@/store/userSlice';
 import { clearAllMeals } from '@/store/mealsSlice';
 import { persistor } from '@/store/store';
+import { scheduleDailyReminders, cancelAllReminders, areRemindersScheduled } from '@/utils/notifications';
 
 
 import { useRouter } from 'expo-router';
@@ -40,6 +41,8 @@ const SettingsScreen = () => {
     isFirstTime: true,
   });
 
+  const [areNotificationsOn, setAreNotificationsOn] = useState(false);
+
   const userData = useSelector((state: any) => state.user);
   const meals = useSelector((state: any) => state.meals.meals);
 
@@ -47,7 +50,24 @@ const SettingsScreen = () => {
 
   useEffect(() => {
     loadSettings();
+    checkNotificationStatus();
   }, []);
+
+  const checkNotificationStatus = async () => {
+    const isScheduled = await areRemindersScheduled();
+    setAreNotificationsOn(isScheduled);
+  };
+
+  const toggleNotifications = async (value: boolean) => {
+    if (value) {
+      const success = await scheduleDailyReminders();
+      if (success) setAreNotificationsOn(true);
+      else setAreNotificationsOn(false); // Revert if failed
+    } else {
+      await cancelAllReminders();
+      setAreNotificationsOn(false);
+    }
+  };
 
   const loadSettings = async () => {
     try {
@@ -285,7 +305,7 @@ const SettingsScreen = () => {
       <View style={[styles.statsContainer, { backgroundColor: colors.surfaceHighlight }]}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
           <Ionicons name="stats-chart" size={20} color={colors.primary} style={{ marginRight: 8 }} />
-          <Text style={[styles.sectionTitle, { color: colors.text,  marginBottom: 0, fontSize: 16 }]}>Data Status</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text, marginBottom: 0, fontSize: 16 }]}>Data Status</Text>
         </View>
         <StatusRow label="Personal Info" isSaved={hasPersonalInfo} />
         <StatusRow label="All Meals" isSaved={hasMeals} />
@@ -335,30 +355,32 @@ const SettingsScreen = () => {
 
         {/* AI Configuration */}
         <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>AI Configuration</Text>
-        <SettingsGroup>
-          <SettingItem
-            icon="key"
-            title="Gemini API Key"
-            subtitle={geminiApiKey ? "••••••••••••••••" : "Not set"}
-            onPress={() => setShowApiKeyModal(true)}
-            isLast={true}
-          />
-        </SettingsGroup>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>AI Configuration</Text>
+          <SettingsGroup>
+            <SettingItem
+              icon="key"
+              title="Gemini API Key"
+              subtitle={geminiApiKey ? "••••••••••••••••" : "Not set"}
+              onPress={() => setShowApiKeyModal(true)}
+              isLast={true}
+            />
+          </SettingsGroup>
         </View>
 
         {/* App Settings */}
         <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>App Settings</Text>
-        <SettingsGroup>
-          <SettingItem
-            icon="notifications"
-            title="Notifications"
-            subtitle="Manage alerts"
-            onPress={() => router.push('/profile/notifications')}
-            isLast={true}
-          />
-        </SettingsGroup>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>App Settings</Text>
+          <SettingsGroup>
+            <SettingItem
+              icon="notifications"
+              title="Daily Reminders"
+              subtitle={areNotificationsOn ? "On" : "Off"}
+              showSwitch={true}
+              switchValue={areNotificationsOn}
+              onSwitchChange={toggleNotifications}
+              isLast={true}
+            />
+          </SettingsGroup>
         </View>
 
         {/* Danger Zone */}

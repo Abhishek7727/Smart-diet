@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import Svg, { Circle, Defs, LinearGradient, Stop, G } from 'react-native-svg';
+import Svg, { Path, Defs, LinearGradient, Stop, G, Line } from 'react-native-svg';
 import Animated, { useSharedValue, useAnimatedProps, withTiming, Easing, useDerivedValue } from 'react-native-reanimated';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from 'react-native';
 import { GlassCard } from './GlassCard';
 import { Ionicons } from '@expo/vector-icons';
 
-// Create Animated Circle
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+// Create Animated Path
+const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 interface CalorieMeterProps {
     calories: number;
@@ -22,25 +22,14 @@ interface CalorieMeterProps {
 }
 
 const { width } = Dimensions.get('window');
-const CARD_PADDING = 20;
-// Make the meter nicely sized but not overwhelming
-const METER_SIZE = width * 0.52;
-const STROKE_WIDTH = 16;
-const RADIUS = (METER_SIZE - STROKE_WIDTH) / 2;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-
-// We want a 240-degree arc ( leaving 120 degrees open at bottom)
-// 240 degrees in radians = 4.1888
-// But easiest way with dasharray is to just calculating length.
-// A full circle is 360. We want 2/3 of it roughly? Or just open bottom.
-// Let's do a standard "Speedometer" style: 240 deg.
-// Start angle: 150 deg (bottom left), End angle: 390 deg (bottom right).
-// Or simpler: Rotate -120deg.
-// Let's stick to a simple semi-circle extended (220 deg) or the 270 deg open bottom.
-// Let's do 250 degrees for a nice encompassing feel.
-
-const METER_ARC_ANGLE = 260;
-const ARC_LENGTH = CIRCUMFERENCE * (METER_ARC_ANGLE / 360);
+// A wider, shorter meter
+const METER_WIDTH = width - 80; // Full width (width) - Margins (40) - Padding (32) - Extra (8)
+const STROKE_WIDTH = 20;
+// Semi-circle height is roughly half width
+const METER_HEIGHT = (METER_WIDTH / 2) + 20;
+const RADIUS = (METER_WIDTH - STROKE_WIDTH) / 2;
+// Arcs
+const ARC_LENGTH = Math.PI * RADIUS; // Length of a semi-circle
 
 export const CalorieMeter: React.FC<CalorieMeterProps> = ({
     calories,
@@ -57,7 +46,6 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
 
     // Animation Values
     const progress = useSharedValue(0);
-
     const percentage = Math.min(calories / target, 1);
 
     useEffect(() => {
@@ -68,45 +56,45 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
     }, [percentage]);
 
     const animatedProps = useAnimatedProps(() => {
-        const strokeDashoffset = CIRCUMFERENCE - (CIRCUMFERENCE * progress.value * (METER_ARC_ANGLE / 360));
+        const strokeDashoffset = ARC_LENGTH * (1 - progress.value);
         return {
             strokeDashoffset: strokeDashoffset,
         };
     });
 
-    // Background dash offset (fixed)
-    // We want to show only METER_ARC_ANGLE of the circle.
-    // The "empty" part of the strokeDasharray should be the gap.
-    // strokeDasharray = [visible_len, gap_len]
-    const gapLength = CIRCUMFERENCE - ARC_LENGTH;
-    const strokeDasharray = `${ARC_LENGTH} ${gapLength}`;
+    // Define the Arch Path (Half Circle from Left to Right, Arching Upwards)
+    // To get an Arch (Inverted U) in SVG (Y-down), we need Counter-Clockwise (Sweep 0) if going Left->Right.
+    // Start: (Left, Bottom) -> End: (Right, Bottom)
+    // M started_x, started_y A radius_x, radius_y x-axis-rotation large-arc-flag sweep-flag end_x, end_y
+    // WAIT. Previous analysis said Sweep 1 is Smile (Down). 
+    // Let's try Rotation 180? 
+    // Or just: M startX, startY A r,r 0 0 0 endX, endY. (Sweep 0).
+    // However, Reanimated might need consistent direction. 
+    // Let's use Right -> Left, Sweep 1. (Clockwise).
+    // Right (Width, Bottom) -> Left (0, Bottom).
+    // Clockwise from Right to Left goes UP.
+    const finalPath = `M ${METER_WIDTH - STROKE_WIDTH / 2},${RADIUS + STROKE_WIDTH / 2} A ${RADIUS},${RADIUS} 0 0 1 ${STROKE_WIDTH / 2},${RADIUS + STROKE_WIDTH / 2}`;
 
-    // Rotation to center the opening at the bottom
-    // Opening is `gapLength`. We want the center of the gap to be at 90deg (bottom).
-    // SVG standard start is 0deg (3 o'clock).
-    // The gap is (360 - METER_ARC_ANGLE) degrees wide.
-    // We need to rotate by 90 + (Gap/2).
-    const rotation = 90 + ((360 - METER_ARC_ANGLE) / 2);
+    // BUT we want it to fill Left to Right.
+    // So distinct path: Left->Right, Sweep 0? No, let's try Sweep 1 (CW) Left->Right = Smile.
+    // Left->Right, Sweep 0 (CCW) = Arch.
+    // So let's use:
+    const arcPath = `M ${STROKE_WIDTH / 2},${RADIUS + STROKE_WIDTH / 2} A ${RADIUS},${RADIUS} 0 0 0 ${METER_WIDTH - STROKE_WIDTH / 2},${RADIUS + STROKE_WIDTH / 2}`;
 
-
-    const MacroPill = ({ label, value, target, color, icon }: any) => {
+    const MacroStat = ({ label, value, target, color }: any) => {
         const p = Math.min(value / target, 1);
         return (
-            <View style={[styles.macroPill, { backgroundColor: colors.surfaceHighlight }]}>
-                {/* Icon Circle */}
-                <View style={[styles.iconCircle, { backgroundColor: color + '20' }]}>
-                    <Ionicons name={icon} size={14} color={color} />
+            <View style={styles.macroStat}>
+                <View style={[styles.macroIcon, { backgroundColor: color + '20' }]}>
+                    <Ionicons name="ellipse" size={8} color={color} />
                 </View>
-
-                <View style={styles.macroContent}>
+                <View>
                     <Text style={[styles.macroLabel, { color: colors.icon }]}>{label}</Text>
-                    <Text style={[styles.macroValue, { color: colors.text }]}>
-                        {Math.round(value)}g
-                    </Text>
-                    {/* Mini bar */}
-                    <View style={styles.miniBarBg}>
-                        <View style={[styles.miniBarFill, { width: `${p * 100}%`, backgroundColor: color }]} />
-                    </View>
+                    <Text style={[styles.macroValue, { color: colors.text }]}>{Math.round(value)}g</Text>
+                </View>
+                {/* Tiny vertical bar */}
+                <View style={[styles.verticalBarBg, { backgroundColor: colors.border }]}>
+                    <View style={[styles.verticalBarFill, { height: `${p * 100}%`, backgroundColor: color }]} />
                 </View>
             </View>
         )
@@ -114,90 +102,83 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
 
     return (
         <View style={styles.container}>
-            {/* Header Text baked into the standard design flow */}
             <View style={styles.headerRow}>
                 <Text style={[styles.headerTitle, { color: colors.text }]}>Daily Insight</Text>
                 <Text style={[styles.dateText, { color: colors.icon }]}>Today</Text>
             </View>
 
             <GlassCard style={styles.card} variant="smoked">
-                <View style={styles.meterWrapper}>
-                    {/* Main Gauge */}
-                    <Svg width={METER_SIZE} height={METER_SIZE} viewBox={`0 0 ${METER_SIZE} ${METER_SIZE}`}>
+                <View style={styles.meterContainer}>
+                    {/* The Arch */}
+                    <Svg width={METER_WIDTH} height={METER_HEIGHT} viewBox={`0 0 ${METER_WIDTH} ${METER_HEIGHT}`}>
                         <Defs>
-                            <LinearGradient id="ringGradient" x1="0" y1="1" x2="1" y2="0">
+                            <LinearGradient id="archGradient" x1="0" y1="0" x2="1" y2="0">
                                 <Stop offset="0" stopColor="#3B82F6" />
                                 <Stop offset="0.5" stopColor="#8B5CF6" />
                                 <Stop offset="1" stopColor="#EC4899" />
                             </LinearGradient>
-                            {/* Inner glow shadow could go here */}
                         </Defs>
 
-                        <G rotation={rotation} origin={`${METER_SIZE / 2}, ${METER_SIZE / 2}`}>
-                            {/* Track */}
-                            <Circle
-                                cx={METER_SIZE / 2}
-                                cy={METER_SIZE / 2}
-                                r={RADIUS}
-                                stroke={colors.glass.borderColor} // Very subtle track
-                                strokeWidth={STROKE_WIDTH}
-                                strokeDasharray={strokeDasharray}
-                                strokeLinecap="round"
-                                fill="transparent"
-                                strokeOpacity={0.5}
-                            />
+                        {/* Background Track */}
+                        <Path
+                            d={arcPath}
+                            stroke={colors.glass.borderColor}
+                            strokeWidth={STROKE_WIDTH}
+                            strokeLinecap="butt" // "Butt" allows cleaner segments if we wanted
+                            fill="none"
+                            strokeOpacity={0.3}
+                        />
 
-                            {/* Progress Ring */}
-                            <AnimatedCircle
-                                cx={METER_SIZE / 2}
-                                cy={METER_SIZE / 2}
-                                r={RADIUS}
-                                stroke="url(#ringGradient)"
-                                strokeWidth={STROKE_WIDTH}
-                                strokeDasharray={strokeDasharray}
-                                animatedProps={animatedProps} // Animated Dashoffset
-                                strokeLinecap="round"
-                                fill="transparent"
-                            />
-                        </G>
+                        {/* Progress Arch */}
+                        <AnimatedPath
+                            d={arcPath}
+                            stroke="url(#archGradient)"
+                            strokeWidth={STROKE_WIDTH}
+                            strokeLinecap="round" // Round ends look better
+                            fill="none"
+                            strokeDasharray={ARC_LENGTH}
+                            animatedProps={animatedProps}
+                        />
                     </Svg>
 
-                    {/* Center Text Overlaid */}
-                    <View style={styles.innerContent}>
-                        <View style={[styles.iconBlur, { backgroundColor: colors.primary + '10' }]}>
-                            <Ionicons name="flame" size={32} color={colors.primary} />
+                    {/* Central Data Block */}
+                    <View style={styles.centralData}>
+                        <Text style={[styles.mainValue, { color: colors.text }]}>
+                            {Math.round(calories)}
+                            <Text style={[styles.unitLabel, { color: colors.icon }]}> kcal</Text>
+                        </Text>
+                        <Text style={[styles.targetLabel, { color: colors.icon }]}>
+                            / {target} goal
+                        </Text>
+                    </View>
+
+                    {/* Architectural "Pillars" (Macros) */}
+                    <View style={styles.pillarsRow}>
+                        <View style={[styles.pillar, { backgroundColor: colors.surfaceHighlight }]}>
+                            <Text style={[styles.pillarLabel, { color: colors.icon }]}>Protein</Text>
+                            <Text style={[styles.pillarValue, { color: colors.text }]}>{Math.round(protein)}g</Text>
+                            <View style={styles.barContainer}>
+                                <View style={[styles.barFill, { width: `${Math.min(protein / proteinTarget, 1) * 100}%`, backgroundColor: '#10B981' }]} />
+                            </View>
                         </View>
-                        <Text style={[styles.mainValue, { color: colors.text }]}>{Math.round(calories)}</Text>
-                        <Text style={[styles.subLabel, { color: colors.icon }]}>kcal consumed</Text>
-                        <Text style={[styles.targetLabel, { color: colors.icon }]}>of {target} goal</Text>
+
+                        <View style={[styles.pillar, { backgroundColor: colors.surfaceHighlight }]}>
+                            <Text style={[styles.pillarLabel, { color: colors.icon }]}>Carbs</Text>
+                            <Text style={[styles.pillarValue, { color: colors.text }]}>{Math.round(carbs)}g</Text>
+                            <View style={styles.barContainer}>
+                                <View style={[styles.barFill, { width: `${Math.min(carbs / carbsTarget, 1) * 100}%`, backgroundColor: '#3B82F6' }]} />
+                            </View>
+                        </View>
+
+                        <View style={[styles.pillar, { backgroundColor: colors.surfaceHighlight }]}>
+                            <Text style={[styles.pillarLabel, { color: colors.icon }]}>Fats</Text>
+                            <Text style={[styles.pillarValue, { color: colors.text }]}>{Math.round(fat)}g</Text>
+                            <View style={styles.barContainer}>
+                                <View style={[styles.barFill, { width: `${Math.min(fat / fatTarget, 1) * 100}%`, backgroundColor: '#F59E0B' }]} />
+                            </View>
+                        </View>
                     </View>
                 </View>
-
-                {/* Macros Row - Clean Pills */}
-                <View style={styles.macrosRow}>
-                    <MacroPill
-                        label="Protein"
-                        value={protein}
-                        target={proteinTarget}
-                        color="#10B981"
-                        icon="fitness"
-                    />
-                    <MacroPill
-                        label="Carbs"
-                        value={carbs}
-                        target={carbsTarget}
-                        color="#3B82F6"
-                        icon="restaurant"
-                    />
-                    <MacroPill
-                        label="Fats"
-                        value={fat}
-                        target={fatTarget}
-                        color="#F59E0B"
-                        icon="water" // water droplet looks a bit like oil/fat drop
-                    />
-                </View>
-
             </GlassCard>
         </View>
     );
@@ -224,93 +205,75 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     card: {
-        padding: 24,
-        borderRadius: 36,
-        // Ensure shadows for depth
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.1,
-        shadowRadius: 20,
-        elevation: 10,
+        paddingVertical: 24,
+        paddingHorizontal: 16,
+        borderRadius: 32,
+        overflow: 'hidden',
     },
-    meterWrapper: {
+    meterContainer: {
         alignItems: 'center',
-        justifyContent: 'center',
-        height: METER_SIZE,
-        marginBottom: 24,
+        position: 'relative',
+        // We push the content up because drawing the semi-circle leaves space below in the viewbox if not careful, 
+        // but here we sized METER_HEIGHT perfectly.
     },
-    innerContent: {
+    centralData: {
         position: 'absolute',
+        top: METER_HEIGHT - 60, // Position strictly relative to the Arch
         alignItems: 'center',
-        justifyContent: 'center',
-    },
-    iconBlur: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 8,
     },
     mainValue: {
-        fontSize: 40,
+        fontSize: 42,
         fontWeight: '800',
-        letterSpacing: -1.5,
-        lineHeight: 44,
+        letterSpacing: -1,
     },
-    subLabel: {
-        fontSize: 14,
+    unitLabel: {
+        fontSize: 18,
         fontWeight: '600',
-        marginBottom: 2,
     },
     targetLabel: {
-        fontSize: 12,
-        opacity: 0.7,
+        fontSize: 14,
+        marginTop: 4,
+        fontWeight: '500',
     },
-    macrosRow: {
+    pillarsRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        width: '100%',
+        marginTop: 32, // Space between arch and pillars
         gap: 12,
     },
-    macroPill: {
+    pillar: {
         flex: 1,
-        borderRadius: 20,
-        padding: 10,
-        // backgroundColor handled inline for theme
-    },
-    iconCircle: {
-        width: 28,
-        height: 28,
-        borderRadius: 14,
+        borderRadius: 16,
+        padding: 12,
         alignItems: 'center',
-        justifyContent: 'center',
+    },
+    pillarLabel: {
+        fontSize: 12,
+        marginBottom: 4,
+        fontWeight: '600',
+    },
+    pillarValue: {
+        fontSize: 16,
+        fontWeight: '800',
         marginBottom: 8,
     },
-    macroContent: {
-        gap: 4,
-    },
-    macroLabel: {
-        fontSize: 11,
-        fontWeight: '600',
-        opacity: 0.8,
-    },
-    macroValue: {
-        fontSize: 16,
-        fontWeight: '700',
-    },
-    miniBarBg: {
-        height: 4,
-        backgroundColor: 'rgba(0,0,0,0.05)',
-        borderRadius: 2,
+    barContainer: {
         width: '100%',
-        marginTop: 4,
+        height: 6,
+        backgroundColor: 'rgba(0,0,0,0.05)',
+        borderRadius: 3,
+        overflow: 'hidden',
     },
-    miniBarFill: {
+    barFill: {
         height: '100%',
-        borderRadius: 2,
+        borderRadius: 3,
     },
-    caloriesTarget: {
-        fontSize: 12,
-        opacity: 0.7,
-    },
+    // Unused but kept for reference if needed
+    macroStat: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    macroIcon: { width: 16, height: 16, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+    macroLabel: { fontSize: 12, fontWeight: '500' },
+    macroValue: { fontSize: 13, fontWeight: '700' },
+    verticalBarBg: { width: 4, height: 24, borderRadius: 2, marginLeft: 'auto' },
+    verticalBarFill: { width: '100%', borderRadius: 2, position: 'absolute', bottom: 0 },
 });

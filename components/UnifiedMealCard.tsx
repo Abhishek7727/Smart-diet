@@ -87,7 +87,6 @@ const styles = StyleSheet.create({
     container: {
         marginHorizontal: 20,
         padding: 20,
-        marginBottom: 100, // Space for bottom tab
         borderRadius: 32,
     },
     cardTitle: {

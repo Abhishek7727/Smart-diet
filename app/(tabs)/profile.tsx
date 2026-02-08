@@ -12,13 +12,12 @@ import {
   View,
   Share,
   Alert,
-  Switch
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'expo-router';
 import { GlassCard } from '@/components/GlassCard';
 import { Meal } from '@/store/mealsSlice';
-import { scheduleDailyReminders, cancelAllReminders, areRemindersScheduled } from '@/utils/notifications';
+
 
 
 const getMealsStatus = (meals: Meal[]) => {
@@ -32,28 +31,6 @@ const ProfileScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) =
   const totalNutrition = getTotalNutrition();
   const userData = useSelector((state: any) => state.user);
   const router = useRouter();
-
-  const [areNotificationsOn, setAreNotificationsOn] = React.useState(false);
-
-  useEffect(() => {
-    checkNotificationStatus();
-  }, []);
-
-  const checkNotificationStatus = async () => {
-    const isScheduled = await areRemindersScheduled();
-    setAreNotificationsOn(isScheduled);
-  };
-
-  const toggleNotifications = async (value: boolean) => {
-    if (value) {
-      const success = await scheduleDailyReminders();
-      if (success) setAreNotificationsOn(true);
-      else setAreNotificationsOn(false); // Revert if failed
-    } else {
-      await cancelAllReminders();
-      setAreNotificationsOn(false);
-    }
-  };
 
   const handleAction = async (action: string) => {
     switch (action) {
@@ -163,19 +140,6 @@ const ProfileScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) =
                 <Ionicons name="chevron-forward" size={20} color={colors.icon} style={{ marginLeft: 'auto' }} />
               </GlassCard>
             </TouchableOpacity>
-
-            {/* Notifications Toggle */}
-            <GlassCard style={styles.actionButton}>
-              <Ionicons name="notifications-outline" size={20} color={colors.primary} />
-              <Text style={[styles.actionText, { color: colors.text, flex: 1 }]}>Daily Reminders</Text>
-              <Switch
-                trackColor={{ false: "#767577", true: colors.primary }}
-                thumbColor={areNotificationsOn ? "#fff" : "#f4f3f4"}
-                ios_backgroundColor="#3e3e3e"
-                onValueChange={toggleNotifications}
-                value={areNotificationsOn}
-              />
-            </GlassCard>
 
             {/* Help & Support */}
             <TouchableOpacity activeOpacity={0.8} onPress={() => handleAction('Help & Support')}>

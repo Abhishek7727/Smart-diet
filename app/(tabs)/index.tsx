@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   useColorScheme,
   View,
+  Image
 } from "react-native";
 import { useSelector } from 'react-redux';
 import { ScreenWrapper } from "@/components/ScreenWrapper";
@@ -92,18 +93,24 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
             </Text>
           </View>
           <TouchableOpacity
-            style={[styles.profileButton, { backgroundColor: colors.surfaceHighlight }]}
+            style={[styles.profileButton, { backgroundColor: colors.surfaceHighlight, overflow: 'hidden' }]}
             onPress={() => onNavigate?.("profile")}
           >
-            <Ionicons
-              name={
-                (userData.gender?.toLowerCase() === 'male') ? 'man' :
-                  (userData.gender?.toLowerCase() === 'female') ? 'woman' :
-                    'person'
-              }
-              size={24}
-              color={colors.primary}
-            />
+            {userData.gender?.toLowerCase() === 'male' ? (
+              <Image
+                source={require('@/assets/images/avatar_male.png')}
+                style={{ width: '100%', height: '100%' }}
+                resizeMode="cover"
+              />
+            ) : userData.gender?.toLowerCase() === 'female' ? (
+              <Image
+                source={require('@/assets/images/avatar_female.png')}
+                style={{ width: '100%', height: '100%' }}
+                resizeMode="cover"
+              />
+            ) : (
+              <Ionicons name="person" size={20} color={colors.text} />
+            )}
           </TouchableOpacity>
         </View>
 
