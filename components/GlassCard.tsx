@@ -1,6 +1,6 @@
 import { Colors } from '@/constants/Colors';
 import { BlurView } from 'expo-blur';
-import { Platform, StyleProp, StyleSheet, useColorScheme, View, ViewStyle } from 'react-native';
+import { Platform, StyleProp, StyleSheet, useColorScheme, View, ViewStyle, TouchableOpacity } from 'react-native';
 
 interface GlassCardProps {
     children: React.ReactNode;
@@ -8,7 +8,7 @@ interface GlassCardProps {
     onPress?: () => void;
 }
 
-export function GlassCard({ children, style }: GlassCardProps) {
+export function GlassCard({ children, style, onPress }: GlassCardProps) {
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
 
@@ -52,8 +52,11 @@ export function GlassCard({ children, style }: GlassCardProps) {
         borderRadius,
     };
 
+    const Container = onPress ? TouchableOpacity : View;
+
     return (
-        <View style={[styles.shadowContainer, finalContainerStyle]}>
+        // @ts-ignore
+        <Container style={[styles.shadowContainer, finalContainerStyle]} onPress={onPress} activeOpacity={0.7}>
             {/* Overflow Container clips the BlurView and Content */}
             <View style={[styles.overflowContainer, {
                 backgroundColor: colors.glass.backgroundColor,
@@ -69,9 +72,10 @@ export function GlassCard({ children, style }: GlassCardProps) {
                     {children}
                 </View>
             </View>
-        </View>
+        </Container>
     );
 }
+
 
 const styles = StyleSheet.create({
     shadowContainer: {

@@ -174,7 +174,7 @@ const AIFoodRecommendation = ({
     try {
       const recommendations = await GeminiService.generateMealRecommendations(
         userData.name ? userData : personalInfo,
-        selectedMealType,
+        activeMealType,
         meals
       );
 
