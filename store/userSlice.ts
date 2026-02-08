@@ -17,6 +17,7 @@ export interface UserState {
     password?: string;
     apiKey: string | null;
     weightHistory: { date: string; weight: number }[];
+    lastLoginDate?: string;
 }
 
 const initialState: UserState = {
@@ -36,6 +37,7 @@ const initialState: UserState = {
     isAuthenticated: false,
     apiKey: null,
     weightHistory: [],
+    lastLoginDate: undefined,
 };
 
 const userSlice = createSlice({
@@ -88,10 +90,13 @@ const userSlice = createSlice({
         setOnboardingCompleted: (state) => {
             state.isOnboarded = true;
         },
+        setLastLoginDate: (state, action: PayloadAction<string>) => {
+            state.lastLoginDate = action.payload;
+        },
         deleteAccount: () => initialState,
     },
 });
 
-export const { setUser, setApiKey, updateProfile, logout, register, loginSuccess, deleteAccount, setOnboardingCompleted } = userSlice.actions;
+export const { setUser, setApiKey, updateProfile, logout, register, loginSuccess, deleteAccount, setOnboardingCompleted, setLastLoginDate } = userSlice.actions;
 
 export default userSlice.reducer;
