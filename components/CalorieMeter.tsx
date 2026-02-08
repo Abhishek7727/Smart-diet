@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
-import Svg, { Circle, G, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
+import { View, Text, StyleSheet, Pressable, Platform } from 'react-native';
+import Svg, { Circle, G, Defs, LinearGradient as SvgLinearGradient, Stop, Rect } from 'react-native-svg';
 import Animated, {
     useSharedValue,
     useAnimatedProps,
@@ -9,7 +9,6 @@ import Animated, {
     withSpring,
     Easing,
     withDelay,
-    interpolateColor
 } from 'react-native-reanimated';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from 'react-native';
@@ -31,18 +30,18 @@ interface CalorieMeterProps {
     fatTarget: number;
 }
 
-// Premium Theme matching app colors
+// Premium colors matching app theme
 const RING_COLORS = {
-    calories: ['#FF6B6B', '#FF8E53'], // Warm coral-orange
-    protein: ['#4ECDC4', '#45B7AA'],  // Teal
-    carbs: ['#A78BFA', '#8B5CF6'],    // Purple (matches app theme)
-    fat: ['#F472B6', '#EC4899'],      // Pink (matches app secondary)
+    calories: ['#FF6B6B', '#FF8E53'],
+    protein: ['#4ECDC4', '#45B7AA'],
+    carbs: ['#A78BFA', '#8B5CF6'],
+    fat: ['#F472B6', '#EC4899'],
 };
 
-const SVG_SIZE = 220;
+const SVG_SIZE = 240;
 const CENTER = SVG_SIZE / 2;
-const STROKE_WIDTH = 12;
-const GAP = 6;
+const STROKE_WIDTH = 16;
+const GAP = 8;
 
 export const CalorieMeter: React.FC<CalorieMeterProps> = ({
     calories, target, protein, proteinTarget, carbs, carbsTarget, fat, fatTarget,
@@ -52,13 +51,12 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
     const [activeIndex, setActiveIndex] = useState(0);
 
     const data = [
-        { key: 'calories', label: 'Calories', value: calories, target: target, unit: 'kcal', colors: RING_COLORS.calories, icon: 'flame' },
-        { key: 'protein', label: 'Protein', value: protein, target: proteinTarget, unit: 'g', colors: RING_COLORS.protein, icon: 'barbell' },
-        { key: 'carbs', label: 'Carbs', value: carbs, target: carbsTarget, unit: 'g', colors: RING_COLORS.carbs, icon: 'nutrition' },
-        { key: 'fat', label: 'Fat', value: fat, target: fatTarget, unit: 'g', colors: RING_COLORS.fat, icon: 'water' },
+        { key: 'calories', label: 'Calories', value: calories, target: target, unit: 'kcal', colors: RING_COLORS.calories, icon: 'flame-outline' },
+        { key: 'protein', label: 'Protein', value: protein, target: proteinTarget, unit: 'g', colors: RING_COLORS.protein, icon: 'barbell-outline' },
+        { key: 'carbs', label: 'Carbs', value: carbs, target: carbsTarget, unit: 'g', colors: RING_COLORS.carbs, icon: 'nutrition-outline' },
+        { key: 'fat', label: 'Fat', value: fat, target: fatTarget, unit: 'g', colors: RING_COLORS.fat, icon: 'water-outline' },
     ];
 
-    // Animation values
     const anim1 = useSharedValue(0);
     const anim2 = useSharedValue(0);
     const anim3 = useSharedValue(0);
@@ -77,9 +75,8 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
         });
     }, [calories, protein, carbs, fat, target]);
 
-    // Pulse animation on tap
     const handlePress = () => {
-        pulseScale.value = withSpring(0.97, { damping: 15 }, () => {
+        pulseScale.value = withSpring(0.96, { damping: 15 }, () => {
             pulseScale.value = withSpring(1, { damping: 10 });
         });
         setActiveIndex((prev) => (prev + 1) % data.length);
@@ -96,22 +93,39 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
         <View style={styles.container}>
             <View style={styles.headerRow}>
                 <Text style={[styles.headerTitle, { color: colors.text }]}>Today's Progress</Text>
-                <View style={[styles.badge, { backgroundColor: colors.primary + '20' }]}>
+                <View style={[styles.badge, { backgroundColor: colors.primary + '20', borderColor: colors.primary + '30' }]}>
+                    <View style={[styles.liveDot, { backgroundColor: colors.primary }]} />
                     <Text style={[styles.badgeText, { color: colors.primary }]}>Live</Text>
                 </View>
             </View>
 
             <AnimatedPressable onPress={handlePress} style={containerAnimatedStyle}>
-                <View style={[styles.card, colors.glass, { borderColor: colors.border }]}>
+                <BlurView
+                    intensity={colorScheme === 'dark' ? 50 : 80}
+                    tint={colorScheme === 'dark' ? 'dark' : 'light'}
+                    style={[styles.glassCard, { borderColor: colors.border }]}
+                >
+                    {/* Additional glass layer for depth */}
+                    <View style={[styles.glassOverlay, {
+                        backgroundColor: colorScheme === 'dark'
+                            ? 'rgba(31, 41, 55, 0.4)'
+                            : 'rgba(255, 255, 255, 0.6)'
+                    }]} />
+
                     <View style={styles.chartArea}>
                         <Svg width={SVG_SIZE} height={SVG_SIZE}>
                             <Defs>
                                 {data.map((item) => (
                                     <SvgLinearGradient key={`grad-${item.key}`} id={`grad-${item.key}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <Stop offset="0%" stopColor={item.colors[0]} />
-                                        <Stop offset="100%" stopColor={item.colors[1]} />
+                                        <Stop offset="0%" stopColor={item.colors[0]} stopOpacity="1" />
+                                        <Stop offset="100%" stopColor={item.colors[1]} stopOpacity="0.95" />
                                     </SvgLinearGradient>
                                 ))}
+                                {/* Shadow gradient for rings */}
+                                <SvgLinearGradient id="shadowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <Stop offset="0%" stopColor="#000" stopOpacity="0.05" />
+                                    <Stop offset="100%" stopColor="#000" stopOpacity="0.15" />
+                                </SvgLinearGradient>
                             </Defs>
 
                             {data.map((item, index) => {
@@ -131,27 +145,53 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
                             })}
                         </Svg>
 
-                        {/* Center Content */}
+                        {/* Center Content with better contrast */}
                         <View style={styles.centerContent}>
-                            <LinearGradient
-                                colors={activeItem.colors}
-                                style={styles.iconBadge}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 1 }}
+                            <BlurView
+                                intensity={60}
+                                tint={colorScheme === 'dark' ? 'dark' : 'light'}
+                                style={styles.centerBlur}
                             >
-                                <Ionicons name={activeItem.icon as any} size={20} color="#fff" />
-                            </LinearGradient>
-                            <Text style={[styles.centerValue, { color: colors.text }]}>
-                                {Math.round(activeItem.value)}
-                            </Text>
-                            <Text style={[styles.centerUnit, { color: colors.icon }]}>
-                                / {activeItem.target} {activeItem.unit}
-                            </Text>
-                            <View style={[styles.progressPill, { backgroundColor: activeItem.colors[0] + '20' }]}>
-                                <Text style={[styles.progressText, { color: activeItem.colors[0] }]}>
-                                    {progressPercent}%
+                                <LinearGradient
+                                    colors={activeItem.colors}
+                                    style={styles.iconBadge}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                >
+                                    <Ionicons name={activeItem.icon as any} size={22} color="#fff" />
+                                </LinearGradient>
+
+                                <Text style={[styles.centerValue, {
+                                    color: colors.text,
+                                    textShadowColor: colorScheme === 'dark' ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.8)',
+                                    textShadowOffset: { width: 0, height: 1 },
+                                    textShadowRadius: 2,
+                                }]}>
+                                    {Math.round(activeItem.value)}
                                 </Text>
-                            </View>
+
+                                <Text style={[styles.centerUnit, {
+                                    color: colors.icon,
+                                    fontWeight: '600',
+                                }]}>
+                                    of {activeItem.target} {activeItem.unit}
+                                </Text>
+
+                                <View style={[styles.progressPill, {
+                                    backgroundColor: activeItem.colors[0],
+                                }]}>
+                                    <Text style={[styles.progressText, { color: '#FFFFFF' }]}>
+                                        {progressPercent}% Complete
+                                    </Text>
+                                </View>
+
+                                <Text style={[styles.centerLabel, {
+                                    color: activeItem.colors[0],
+                                    fontWeight: '700'
+                                }]}>
+                                    {activeItem.label}
+                                </Text>
+                            </BlurView>
                         </View>
                     </View>
 
@@ -161,35 +201,51 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
                             <Pressable
                                 key={item.key}
                                 onPress={() => setActiveIndex(index)}
-                                style={[
+                                style={({ pressed }) => [
                                     styles.legendItem,
                                     activeIndex === index && {
-                                        backgroundColor: item.colors[0] + '15',
-                                        borderColor: item.colors[0] + '40',
-                                    }
+                                        backgroundColor: colorScheme === 'dark'
+                                            ? 'rgba(255,255,255,0.12)'
+                                            : 'rgba(0,0,0,0.08)',
+                                    },
+                                    pressed && { opacity: 0.7 }
                                 ]}
                             >
-                                <View style={[styles.legendDot, { backgroundColor: item.colors[0] }]} />
-                                <Text style={[styles.legendLabel, { color: colors.icon }]}>{item.label}</Text>
-                                <Text style={[styles.legendValue, { color: colors.text }]}>
+                                <View style={[styles.legendDot, {
+                                    backgroundColor: item.colors[0],
+                                    shadowColor: item.colors[0],
+                                    shadowOffset: { width: 0, height: 2 },
+                                    shadowOpacity: 0.4,
+                                    shadowRadius: 3,
+                                    elevation: 3,
+                                }]} />
+                                <Text style={[styles.legendLabel, {
+                                    color: colors.text,
+                                    fontWeight: '600'
+                                }]}>
+                                    {item.label}
+                                </Text>
+                                <Text style={[styles.legendValue, {
+                                    color: item.colors[0],
+                                    fontWeight: '800'
+                                }]}>
                                     {Math.round(item.value / (item.target || 1) * 100)}%
                                 </Text>
                             </Pressable>
                         ))}
                     </View>
-                </View>
+                </BlurView>
             </AnimatedPressable>
         </View>
     );
 };
 
-// Ring Segment Component
 const RingSegment = ({ radius, circumference, gradientId, animValue, isActive, colorScheme }: any) => {
     const animatedProps = useAnimatedProps(() => ({
         strokeDashoffset: circumference * (1 - animValue.value),
     }));
 
-    const trackColor = colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+    const trackColor = colorScheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
 
     return (
         <G rotation="-90" origin={`${CENTER}, ${CENTER}`}>
@@ -200,15 +256,16 @@ const RingSegment = ({ radius, circumference, gradientId, animValue, isActive, c
                 strokeWidth={STROKE_WIDTH}
                 fill="transparent"
             />
-            {/* Progress */}
+            {/* Progress with glow effect */}
             <AnimatedCircle
                 cx={CENTER} cy={CENTER} r={radius}
                 stroke={`url(#${gradientId})`}
-                strokeWidth={isActive ? STROKE_WIDTH + 2 : STROKE_WIDTH}
+                strokeWidth={isActive ? STROKE_WIDTH + 3 : STROKE_WIDTH}
                 strokeLinecap="round"
                 strokeDasharray={[circumference, circumference]}
                 animatedProps={animatedProps}
                 fill="transparent"
+                opacity={isActive ? 1 : 0.85}
             />
         </G>
     );
@@ -223,32 +280,46 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 12,
+        marginBottom: 14,
         paddingHorizontal: 4,
     },
     headerTitle: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: '700',
+        letterSpacing: -0.3,
     },
     badge: {
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        paddingHorizontal: 12,
+        paddingVertical: 5,
+        borderRadius: 14,
+        borderWidth: 1,
+    },
+    liveDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
     },
     badgeText: {
-        fontSize: 11,
+        fontSize: 12,
         fontWeight: '700',
         letterSpacing: 0.5,
     },
-    card: {
-        borderRadius: 28,
+    glassCard: {
+        borderRadius: 32,
         overflow: 'hidden',
         borderWidth: 1,
+    },
+    glassOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        borderRadius: 32,
     },
     chartArea: {
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 24,
+        paddingVertical: 28,
         position: 'relative',
     },
     centerContent: {
@@ -256,64 +327,84 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    centerBlur: {
+        paddingHorizontal: 20,
+        paddingVertical: 16,
+        borderRadius: 24,
+        alignItems: 'center',
+        overflow: 'hidden',
+    },
     iconBadge: {
-        width: 36,
-        height: 36,
-        borderRadius: 12,
+        width: 40,
+        height: 40,
+        borderRadius: 14,
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 5,
     },
     centerValue: {
-        fontSize: 28,
-        fontWeight: '800',
+        fontSize: 32,
+        fontWeight: '900',
         fontVariant: ['tabular-nums'],
-        letterSpacing: -1,
+        letterSpacing: -1.5,
     },
     centerUnit: {
-        fontSize: 12,
-        fontWeight: '500',
+        fontSize: 13,
         marginTop: 2,
+        marginBottom: 10,
     },
     progressPill: {
-        marginTop: 8,
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 10,
+        paddingHorizontal: 14,
+        paddingVertical: 6,
+        borderRadius: 12,
+        marginBottom: 6,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
+        elevation: 3,
     },
     progressText: {
-        fontSize: 11,
-        fontWeight: '700',
+        fontSize: 12,
+        fontWeight: '800',
+        letterSpacing: 0.3,
+    },
+    centerLabel: {
+        fontSize: 13,
+        letterSpacing: 0.8,
+        textTransform: 'uppercase',
     },
     legendRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingVertical: 14,
+        paddingVertical: 16,
         paddingHorizontal: 12,
         borderTopWidth: 1,
+        gap: 6,
     },
     legendItem: {
         alignItems: 'center',
-        paddingVertical: 8,
-        paddingHorizontal: 6,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: 'transparent',
-        minWidth: 68,
+        paddingVertical: 10,
+        paddingHorizontal: 8,
+        borderRadius: 14,
+        flex: 1,
     },
     legendDot: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        marginBottom: 4,
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        marginBottom: 6,
     },
     legendLabel: {
-        fontSize: 10,
-        fontWeight: '600',
-        marginBottom: 2,
+        fontSize: 11,
+        marginBottom: 3,
     },
     legendValue: {
-        fontSize: 12,
-        fontWeight: '700',
+        fontSize: 14,
     },
 });
