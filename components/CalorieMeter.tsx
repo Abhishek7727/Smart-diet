@@ -193,7 +193,7 @@ const RingSegment = ({ radius, circumference, gradientId, animValue, isActive, c
             <AnimatedCircle
                 cx={CENTER} cy={CENTER} r={radius}
                 stroke={`url(#${gradientId})`}
-                strokeWidth={isActive ? STROKE_WIDTH + 5 : STROKE_WIDTH}
+                strokeWidth={isActive ? STROKE_WIDTH + 7 : STROKE_WIDTH}
                 strokeLinecap="round"
                 strokeDasharray={[circumference, circumference]}
                 animatedProps={animatedProps}
