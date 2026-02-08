@@ -38,8 +38,8 @@ const RING_COLORS = {
 
 const SVG_SIZE = 200;
 const CENTER = SVG_SIZE / 2;
-const STROKE_WIDTH = 6; // Thinner strokes
-const GAP = 5; // Smaller gaps
+const STROKE_WIDTH = 4; // Thinner strokes
+const GAP = 8; // Smaller gaps
 
 export const CalorieMeter: React.FC<CalorieMeterProps> = ({
     calories, target, protein, proteinTarget, carbs, carbsTarget, fat, fatTarget,
