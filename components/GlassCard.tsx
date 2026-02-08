@@ -57,9 +57,19 @@ export function GlassCard({ children, style, onPress, variant = 'default' }: Gla
 
     // Determine styles based on variant
     const isSmoked = variant === 'smoked';
-    const backgroundColor = isSmoked ? (colorScheme === 'dark' ? 'rgba(30, 30, 35, 0.6)' : 'rgba(255, 255, 255, 0.6)') : colors.glass.backgroundColor;
-    const borderColor = isSmoked ? (colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.4)') : colors.glass.borderColor;
-    const intensity = isSmoked ? 40 : 20;
+
+    // Apple-like "smoked" or "thick material" usually means higher opacity + blur
+    // For light mode: almost white (0.85)
+    // For dark mode: dark grey (0.6)
+    const backgroundColor = isSmoked
+        ? (colorScheme === 'dark' ? 'rgba(30, 30, 35, 0.7)' : 'rgba(255, 255, 255, 0.85)')
+        : colors.glass.backgroundColor;
+
+    const borderColor = isSmoked
+        ? (colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.6)')
+        : colors.glass.borderColor;
+
+    const intensity = isSmoked ? 60 : 20;
 
     return (
         // @ts-ignore
@@ -70,6 +80,7 @@ export function GlassCard({ children, style, onPress, variant = 'default' }: Gla
                 borderColor: borderColor,
                 borderWidth: colors.glass.borderWidth,
                 borderRadius: borderRadius,
+                // Add stronger shadow for smoked card if needed via style prop on parent
             }]}>
                 {Platform.OS !== 'web' ? (
                     // @ts-ignore

@@ -39,6 +39,41 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
     onNavigate?.('meals');
   };
 
+  // Dynamic Greeting Logic
+  const getDynamicGreeting = () => {
+    const hour = new Date().getHours();
+    const currentCalories = totalNutrition.calories;
+    const targetCalories = parseInt(personalInfo?.targetCalories || '2000');
+    const progress = currentCalories / targetCalories;
+
+    if (!personalInfo) return "Start Your Journey";
+
+    // Morning (5 AM - 11 AM)
+    if (hour >= 5 && hour < 12) {
+      if (currentCalories === 0) return "Start with a healthy breakfast!";
+      return "Ready to hit your goals?";
+    }
+
+    // Mid-day (12 PM - 5 PM)
+    if (hour >= 12 && hour < 17) {
+      if (progress < 0.3) return "Fuel up! You're behind on calories.";
+      if (progress > 0.6) return "You're doing great, keep going!";
+      return "Don't forget to log your lunch.";
+    }
+
+    // Evening (5 PM - 9 PM)
+    if (hour >= 17 && hour < 21) {
+      if (progress > 0.9 && progress < 1.1) return "Perfectly on track for today!";
+      if (progress > 1.1) return "Watch your intake tonight.";
+      if (progress < 0.7) return "Dinner time! Hit that target.";
+      return "Finishing strong today?";
+    }
+
+    // Night (9 PM - 5 AM)
+    if (progress >= 0.9) return "Great job hitting your goals!";
+    return "Remember to rest and recover.";
+  };
+
   return (
     <ScreenWrapper style={styles.container}>
       <ScrollView
@@ -48,12 +83,12 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View>
+          <View style={{ flex: 1, marginRight: 16 }}>
             <Text style={[styles.greetingText, { color: colors.icon }]}>
               Hello, {userData.name?.split(' ')[0] || "Friend"}
             </Text>
-            <Text style={[styles.questionText, { color: colors.text }]}>
-              Scheduled Your Diet
+            <Text style={[styles.questionText, { color: colors.text }]} numberOfLines={2}>
+              {getDynamicGreeting()}
             </Text>
           </View>
           <TouchableOpacity

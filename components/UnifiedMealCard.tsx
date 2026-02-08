@@ -35,7 +35,7 @@ export const UnifiedMealCard: React.FC<UnifiedMealCardProps> = ({ meals, onMealP
     };
 
     return (
-        <GlassCard style={styles.container}>
+        <GlassCard style={styles.container} variant="smoked">
             <Text style={[styles.cardTitle, { color: colors.text }]}>Today's Meals</Text>
 
             <View style={styles.listContainer}>
@@ -88,6 +88,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         padding: 20,
         marginBottom: 100, // Space for bottom tab
+        borderRadius: 32,
     },
     cardTitle: {
         fontSize: 18,
