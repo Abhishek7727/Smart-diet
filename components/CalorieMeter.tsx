@@ -24,7 +24,7 @@ interface CalorieMeterProps {
 const { width } = Dimensions.get('window');
 const CARD_PADDING = 20;
 // Make the meter nicely sized but not overwhelming
-const METER_SIZE = width * 0.55;
+const METER_SIZE = width * 0.52;
 const STROKE_WIDTH = 16;
 const RADIUS = (METER_SIZE - STROKE_WIDTH) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
@@ -245,18 +245,18 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     iconBlur: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        width: 36,
+        height: 36,
+        borderRadius: 18,
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 8,
     },
     mainValue: {
-        fontSize: 36,
+        fontSize: 40,
         fontWeight: '800',
-        letterSpacing: -1,
-        lineHeight: 40,
+        letterSpacing: -1.5,
+        lineHeight: 44,
     },
     subLabel: {
         fontSize: 14,
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
     macroPill: {
         flex: 1,
         borderRadius: 20,
-        padding: 12,
+        padding: 10,
         // backgroundColor handled inline for theme
     },
     iconCircle: {
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
         opacity: 0.8,
     },
     macroValue: {
-        fontSize: 15,
+        fontSize: 16,
         fontWeight: '700',
     },
     miniBarBg: {

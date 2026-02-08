@@ -11,16 +11,18 @@ import {
   useColorScheme,
   View,
   Share,
-  Alert
+  Alert,
+  Switch
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'expo-router';
 import { GlassCard } from '@/components/GlassCard';
 import { Meal } from '@/store/mealsSlice';
+import { scheduleDailyReminders, cancelAllReminders, areRemindersScheduled } from '@/utils/notifications';
 
 
 const getMealsStatus = (meals: Meal[]) => {
-    return `${meals.filter((val) => val.hasFood).length}/4`;
+  return `${meals.filter((val) => val.hasFood).length}/4`;
 }
 
 const ProfileScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
@@ -31,13 +33,32 @@ const ProfileScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) =
   const userData = useSelector((state: any) => state.user);
   const router = useRouter();
 
+  const [areNotificationsOn, setAreNotificationsOn] = React.useState(false);
+
+  useEffect(() => {
+    checkNotificationStatus();
+  }, []);
+
+  const checkNotificationStatus = async () => {
+    const isScheduled = await areRemindersScheduled();
+    setAreNotificationsOn(isScheduled);
+  };
+
+  const toggleNotifications = async (value: boolean) => {
+    if (value) {
+      const success = await scheduleDailyReminders();
+      if (success) setAreNotificationsOn(true);
+      else setAreNotificationsOn(false); // Revert if failed
+    } else {
+      await cancelAllReminders();
+      setAreNotificationsOn(false);
+    }
+  };
+
   const handleAction = async (action: string) => {
     switch (action) {
       case 'Edit Profile':
         router.push('/profile/edit');
-        break;
-      case 'Notifications':
-        router.push('/profile/notifications');
         break;
       case 'Help & Support':
         router.push('/profile/help');
@@ -47,7 +68,7 @@ const ProfileScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) =
           await Share.share({
             message: `Check out my progress on Smart Diet! I've burned ${totalNutrition.calories} calories today!`,
           });
-        } catch (error:any) {
+        } catch (error: any) {
           console.log(error);
           Alert.alert('Error', 'Could not share content');
         }
@@ -134,24 +155,45 @@ const ProfileScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) =
         <View style={styles.actionsSection}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Actions</Text>
           <View style={styles.actionButtons}>
-            {[
-              { icon: 'person-outline', label: 'Edit Profile' },
-              { icon: 'notifications-outline', label: 'Notifications' },
-              { icon: 'help-circle-outline', label: 'Help & Support' },
-              { icon: 'share-outline', label: 'Share Progress' },
-            ].map((action, index) => (
-              <TouchableOpacity
-                key={index}
-                activeOpacity={0.8}
-                onPress={() => handleAction(action.label)}
-              >
-                <GlassCard style={styles.actionButton}>
-                  <Ionicons name={action.icon as any} size={20} color={colors.primary} />
-                  <Text style={[styles.actionText, { color: colors.text }]}>{action.label}</Text>
-                  <Ionicons name="chevron-forward" size={20} color={colors.icon} style={{ marginLeft: 'auto' }} />
-                </GlassCard>
-              </TouchableOpacity>
-            ))}
+            {/* Edit Profile */}
+            <TouchableOpacity activeOpacity={0.8} onPress={() => handleAction('Edit Profile')}>
+              <GlassCard style={styles.actionButton}>
+                <Ionicons name="person-outline" size={20} color={colors.primary} />
+                <Text style={[styles.actionText, { color: colors.text }]}>Edit Profile</Text>
+                <Ionicons name="chevron-forward" size={20} color={colors.icon} style={{ marginLeft: 'auto' }} />
+              </GlassCard>
+            </TouchableOpacity>
+
+            {/* Notifications Toggle */}
+            <GlassCard style={styles.actionButton}>
+              <Ionicons name="notifications-outline" size={20} color={colors.primary} />
+              <Text style={[styles.actionText, { color: colors.text, flex: 1 }]}>Daily Reminders</Text>
+              <Switch
+                trackColor={{ false: "#767577", true: colors.primary }}
+                thumbColor={areNotificationsOn ? "#fff" : "#f4f3f4"}
+                ios_backgroundColor="#3e3e3e"
+                onValueChange={toggleNotifications}
+                value={areNotificationsOn}
+              />
+            </GlassCard>
+
+            {/* Help & Support */}
+            <TouchableOpacity activeOpacity={0.8} onPress={() => handleAction('Help & Support')}>
+              <GlassCard style={styles.actionButton}>
+                <Ionicons name="help-circle-outline" size={20} color={colors.primary} />
+                <Text style={[styles.actionText, { color: colors.text }]}>Help & Support</Text>
+                <Ionicons name="chevron-forward" size={20} color={colors.icon} style={{ marginLeft: 'auto' }} />
+              </GlassCard>
+            </TouchableOpacity>
+
+            {/* Share Progress */}
+            <TouchableOpacity activeOpacity={0.8} onPress={() => handleAction('Share Progress')}>
+              <GlassCard style={styles.actionButton}>
+                <Ionicons name="share-outline" size={20} color={colors.primary} />
+                <Text style={[styles.actionText, { color: colors.text }]}>Share Progress</Text>
+                <Ionicons name="chevron-forward" size={20} color={colors.icon} style={{ marginLeft: 'auto' }} />
+              </GlassCard>
+            </TouchableOpacity>
           </View>
         </View>
         <View style={{ height: 40 }} />

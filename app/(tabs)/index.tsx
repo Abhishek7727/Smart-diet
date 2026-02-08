@@ -95,7 +95,15 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
             style={[styles.profileButton, { backgroundColor: colors.surfaceHighlight }]}
             onPress={() => onNavigate?.("profile")}
           >
-            <Ionicons name="person" size={20} color={colors.text} />
+            <Ionicons
+              name={
+                (userData.gender?.toLowerCase() === 'male') ? 'man' :
+                  (userData.gender?.toLowerCase() === 'female') ? 'woman' :
+                    'person'
+              }
+              size={24}
+              color={colors.primary}
+            />
           </TouchableOpacity>
         </View>
 
