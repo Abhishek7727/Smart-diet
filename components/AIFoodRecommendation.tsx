@@ -59,13 +59,13 @@ const AIFoodRecommendation = ({
   selectedMealType = "breakfast",
 }: AIFoodRecommendationProps) => {
 
-   const [customMealData, setCustomMealData] = useState({
-         name: '',
-         calories: '',
-         protein: '',
-         carbs: '',
-         fat: '',
-       });
+  const [customMealData, setCustomMealData] = useState({
+    name: '',
+    calories: '',
+    protein: '',
+    carbs: '',
+    fat: '',
+  });
   const [activeMealType, setActiveMealType] = useState(selectedMealType);
   const [showPersonalInfoModal, setShowPersonalInfoModal] = useState(false);
   const [showCustomMealModal, setShowCustomMealModal] = useState(false);
@@ -79,26 +79,28 @@ const AIFoodRecommendation = ({
   const { meals, addCustomMeal } = useMealPlan();
 
   const handleAddCustomMeal = () => {
-           if (!customMealData.name || !customMealData.calories) {
-             Alert.alert('Error', 'Please enter at least a meal name and calories.');
-             return;
-           }
-       
-           const calories = parseInt(customMealData.calories) || 0;
-           const protein = parseInt(customMealData.protein) || 0;
-           const carbs = parseInt(customMealData.carbs) || 0;
-           const fat = parseInt(customMealData.fat) || 0;
-             addCustomMeal(selectedMealType, customMealData.name, calories, protein, carbs, fat);
-             setShowCustomMealModal(false);
-             onClose();
-             setCustomMealData({ name: '', calories: '', protein: '', carbs: '', fat: '' });
-         };
+    if (!customMealData.name || !customMealData.calories) {
+      Alert.alert('Error', 'Please enter at least a meal name and calories.');
+      return;
+    }
+
+    const calories = parseInt(customMealData.calories) || 0;
+    const protein = parseInt(customMealData.protein) || 0;
+    const carbs = parseInt(customMealData.carbs) || 0;
+    const fat = parseInt(customMealData.fat) || 0;
+    addCustomMeal(selectedMealType, customMealData.name, calories, protein, carbs, fat);
+    setShowCustomMealModal(false);
+    onClose();
+    setCustomMealData({ name: '', calories: '', protein: '', carbs: '', fat: '' });
+  };
 
 
 
 
   useEffect(() => {
     if (visible) {
+      setActiveMealType(selectedMealType);
+
       if (userData.name) {
         setHasCompletedSetup(true);
         // Sync local personal info with Redux
@@ -118,7 +120,7 @@ const AIFoodRecommendation = ({
         setHasApiKey(false);
       }
     }
-  }, [visible, userData]);
+  }, [visible, userData, selectedMealType]);
 
   // Helper functions removed as logic is now in useEffect
 
@@ -128,7 +130,7 @@ const AIFoodRecommendation = ({
 
   const handlePersonalInfoComplete = async (info: PersonalInfo) => {
     try {
-      
+
       setPersonalInfo(info);
       setHasCompletedSetup(true);
       setShowPersonalInfoModal(false);
@@ -477,16 +479,16 @@ const AIFoodRecommendation = ({
       );
     }
 
-    if(showCustomMealModal) {
+    if (showCustomMealModal) {
       return (
-         <CustomMealModal
-              visible={showCustomMealModal}
-              colors={colors}
-              customMealData={customMealData}
-              setCustomMealData={setCustomMealData}
-              onClose={() => setShowCustomMealModal(false)}
-              onSave={handleAddCustomMeal}
-          />
+        <CustomMealModal
+          visible={showCustomMealModal}
+          colors={colors}
+          customMealData={customMealData}
+          setCustomMealData={setCustomMealData}
+          onClose={() => setShowCustomMealModal(false)}
+          onSave={handleAddCustomMeal}
+        />
       )
     }
 
@@ -560,13 +562,13 @@ const AIFoodRecommendation = ({
               />
             </View>
 
-            
+
           )}
           <View style={styles.setupSection}>
             <PrimaryButton
-                  title="Enter Manual Data"
-                  onPress={() => setShowCustomMealModal(true)}
-                  style={styles.setupButton}
+              title="Enter Manual Data"
+              onPress={() => setShowCustomMealModal(true)}
+              style={styles.setupButton}
             />
           </View>
         </View>
@@ -641,13 +643,13 @@ const AIFoodRecommendation = ({
             Generate New Recommendations ({activeMealType})
           </Text>
         </TouchableOpacity>
-          <View style={[styles.setupSection, {paddingHorizontal: 20}]}>
-            <PrimaryButton
-                  title="Enter Manual Data"
-                  onPress={() => setShowCustomMealModal(true)}
-                  style={[styles.setupButton, { borderRadius: 14}]}
-            />
-          </View>
+        <View style={[styles.setupSection, { paddingHorizontal: 20 }]}>
+          <PrimaryButton
+            title="Enter Manual Data"
+            onPress={() => setShowCustomMealModal(true)}
+            style={[styles.setupButton, { borderRadius: 14 }]}
+          />
+        </View>
         <View style={{ height: 40 }} />
       </ScrollView>
     );
