@@ -162,9 +162,9 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
     return (
         <View style={styles.container}>
             <Text style={[styles.headerTitle, { color: colors.text }]}>Today</Text>
-            <GlassCard style={styles.card}>
+            <GlassCard style={styles.card} variant="smoked">
                 <View style={styles.meterContainer}>
-                    <Svg width={METER_SIZE} height={METER_SIZE / 2 + 40} viewBox={`0 0 ${METER_SIZE} ${METER_SIZE / 2 + 40}`}>
+                    <Svg width={METER_SIZE} height={METER_SIZE / 2 + 30} viewBox={`0 0 ${METER_SIZE} ${METER_SIZE / 2 + 30}`}>
                         <Defs>
                             <LinearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
                                 <Stop offset="0" stopColor="#8B5CF6" stopOpacity="1" />
@@ -188,8 +188,8 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
                     </Svg>
 
                     <View style={styles.centerContent}>
-                        <Ionicons name="flame" size={24} color="#F59E0B" style={{ marginBottom: 4 }} />
-                        <Text style={[styles.caloriesValue, { color: colors.text }]}>{calories}</Text>
+                        <Ionicons name="flame" size={28} color="#F59E0B" style={{ marginBottom: 4 }} />
+                        <Text style={[styles.caloriesValue, { color: colors.text }]}>{Math.round(calories)}</Text>
                         <Text style={[styles.caloriesLabel, { color: colors.icon }]}>kcal</Text>
                     </View>
                 </View>
@@ -199,7 +199,9 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
                     {/* Calories - Custom layout to match image */}
                     <View style={styles.statColumn}>
                         <Text style={[styles.statLabel, { color: colors.icon }]}>Calories</Text>
-                        <Text style={[styles.statValueSmall, { color: colors.text }]}>{calories} <Text style={{ color: colors.icon }}>/ {target}</Text></Text>
+                        <Text style={[styles.statValueSmall, { color: colors.text }]}>
+                            {Math.round(calories)} <Text style={{ color: colors.icon, fontSize: 11, fontWeight: '400' }}>/ {Math.round(target)}</Text>
+                        </Text>
                         <View style={[styles.progressBarSmall, { backgroundColor: '#F59E0B20' }]}>
                             <View style={[styles.progressFill, { width: `${percentage * 100}%`, backgroundColor: '#F59E0B' }]} />
                         </View>
@@ -209,7 +211,9 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
 
                     <View style={styles.statColumn}>
                         <Text style={[styles.statLabel, { color: colors.icon }]}>Protein</Text>
-                        <Text style={[styles.statValueSmall, { color: colors.text }]}>{protein} <Text style={{ color: colors.icon }}>/ {proteinTarget}g</Text></Text>
+                        <Text style={[styles.statValueSmall, { color: colors.text }]}>
+                            {Math.round(protein)} <Text style={{ color: colors.icon, fontSize: 11, fontWeight: '400' }}>/ {Math.round(proteinTarget)}g</Text>
+                        </Text>
                         <View style={[styles.progressBarSmall, { backgroundColor: '#10B98120' }]}>
                             <View style={[styles.progressFill, { width: `${Math.min((protein / proteinTarget) * 100, 100)}%`, backgroundColor: '#10B981' }]} />
                         </View>
@@ -218,8 +222,10 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
                     <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                     <View style={styles.statColumn}>
-                        <Text style={[styles.statLabel, { color: colors.icon }]}>Fat Gras</Text>
-                        <Text style={[styles.statValueSmall, { color: colors.text }]}>{fat} <Text style={{ color: colors.icon }}>/ {fatTarget}g</Text></Text>
+                        <Text style={[styles.statLabel, { color: colors.icon }]}>Fat</Text>
+                        <Text style={[styles.statValueSmall, { color: colors.text }]}>
+                            {Math.round(fat)} <Text style={{ color: colors.icon, fontSize: 11, fontWeight: '400' }}>/ {Math.round(fatTarget)}g</Text>
+                        </Text>
                         <View style={[styles.progressBarSmall, { backgroundColor: '#8B5CF620' }]}>
                             <View style={[styles.progressFill, { width: `${Math.min((fat / fatTarget) * 100, 100)}%`, backgroundColor: '#8B5CF6' }]} />
                         </View>

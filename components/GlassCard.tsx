@@ -6,9 +6,10 @@ interface GlassCardProps {
     children: React.ReactNode;
     style?: StyleProp<ViewStyle>;
     onPress?: () => void;
+    variant?: 'default' | 'smoked';
 }
 
-export function GlassCard({ children, style, onPress }: GlassCardProps) {
+export function GlassCard({ children, style, onPress, variant = 'default' }: GlassCardProps) {
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
 
@@ -54,19 +55,25 @@ export function GlassCard({ children, style, onPress }: GlassCardProps) {
 
     const Container = onPress ? TouchableOpacity : View;
 
+    // Determine styles based on variant
+    const isSmoked = variant === 'smoked';
+    const backgroundColor = isSmoked ? (colorScheme === 'dark' ? 'rgba(30, 30, 35, 0.6)' : 'rgba(255, 255, 255, 0.6)') : colors.glass.backgroundColor;
+    const borderColor = isSmoked ? (colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.4)') : colors.glass.borderColor;
+    const intensity = isSmoked ? 40 : 20;
+
     return (
         // @ts-ignore
         <Container style={[styles.shadowContainer, finalContainerStyle]} onPress={onPress} activeOpacity={0.7}>
             {/* Overflow Container clips the BlurView and Content */}
             <View style={[styles.overflowContainer, {
-                backgroundColor: colors.glass.backgroundColor,
-                borderColor: colors.glass.borderColor,
+                backgroundColor: backgroundColor,
+                borderColor: borderColor,
                 borderWidth: colors.glass.borderWidth,
                 borderRadius: borderRadius,
             }]}>
                 {Platform.OS !== 'web' ? (
                     // @ts-ignore
-                    <BlurView intensity={20} tint={colorScheme === 'dark' ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+                    <BlurView intensity={intensity} tint={colorScheme === 'dark' ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
                 ) : null}
                 <View style={[styles.content, contentStyle]}>
                     {children}
