@@ -1,9 +1,9 @@
 import { useMealPlan } from "@/components/MealPlanContext";
 import { Colors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React from "react";
 import {
-  Dimensions,
+
   Platform,
   SafeAreaView,
   ScrollView,
@@ -18,14 +18,14 @@ import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { GlassCard } from "@/components/GlassCard";
 
 
-const { width } = Dimensions.get("window");
+
 
 // Home Screen Component
 const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
   const colorScheme = useColorScheme();
 
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
-  const [selectedView, setSelectedView] = useState("Daily");
+
   const { meals, nutritionalData, getTotalNutrition, personalInfo } =
     useMealPlan();
 
@@ -216,41 +216,7 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
           </GlassCard>
         )}
 
-        {/* View Toggle */}
-        <View style={[styles.toggleContainer, { backgroundColor: colors.surfaceHighlight }]}>
-          <TouchableOpacity
-            style={[
-              styles.toggleButton,
-              selectedView === "Daily" && { backgroundColor: colors.glass.backgroundColor },
-            ]}
-            onPress={() => setSelectedView("Daily")}
-          >
-            <Text
-              style={[
-                styles.toggleText,
-                { color: selectedView === "Daily" ? colors.text : colors.icon },
-              ]}
-            >
-              Daily Plan
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.toggleButton,
-              selectedView === "Weekly" && { backgroundColor: colors.surfaceHighlight },
-            ]}
-            onPress={() => setSelectedView("Weekly")}
-          >
-            <Text
-              style={[
-                styles.toggleText,
-                { color: selectedView === "Weekly" ? colors.text : colors.icon },
-              ]}
-            >
-              Weekly Overview
-            </Text>
-          </TouchableOpacity>
-        </View>
+
 
         {/* Meals Grid */}
         <View style={styles.mealsGrid}>
@@ -356,23 +322,7 @@ const styles = StyleSheet.create({
     height: "100%",
     borderRadius: 3,
   },
-  toggleContainer: {
-    flexDirection: "row",
-    padding: 4,
-    marginHorizontal: 24,
-    borderRadius: 16,
-    marginBottom: 24,
-  },
-  toggleButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  toggleText: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
+
   mealsGrid: {
     paddingHorizontal: 24,
     gap: 16,
