@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, LinearGradient, Stop, G } from 'react-native-svg';
+import Animated, { useSharedValue, useAnimatedProps, withTiming, Easing, useDerivedValue } from 'react-native-reanimated';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from 'react-native';
 import { GlassCard } from './GlassCard';
 import { Ionicons } from '@expo/vector-icons';
+
+// Create Animated Circle
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 interface CalorieMeterProps {
     calories: number;
@@ -18,13 +22,25 @@ interface CalorieMeterProps {
 }
 
 const { width } = Dimensions.get('window');
-const METER_SIZE = width * 0.8; // Larger to fill space nicely
-const STROKE_WIDTH = 32; // Chunkier segments
+const CARD_PADDING = 20;
+// Make the meter nicely sized but not overwhelming
+const METER_SIZE = width * 0.65;
+const STROKE_WIDTH = 18;
 const RADIUS = (METER_SIZE - STROKE_WIDTH) / 2;
-// const CIRCUMFERENCE = Math.PI * RADIUS;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-// Inner dash ring constants
-const INNER_RADIUS = RADIUS - 35; // Better spacing
+// We want a 240-degree arc ( leaving 120 degrees open at bottom)
+// 240 degrees in radians = 4.1888
+// But easiest way with dasharray is to just calculating length.
+// A full circle is 360. We want 2/3 of it roughly? Or just open bottom.
+// Let's do a standard "Speedometer" style: 240 deg.
+// Start angle: 150 deg (bottom left), End angle: 390 deg (bottom right).
+// Or simpler: Rotate -120deg.
+// Let's stick to a simple semi-circle extended (220 deg) or the 270 deg open bottom.
+// Let's do 250 degrees for a nice encompassing feel.
+
+const METER_ARC_ANGLE = 260;
+const ARC_LENGTH = CIRCUMFERENCE * (METER_ARC_ANGLE / 360);
 
 export const CalorieMeter: React.FC<CalorieMeterProps> = ({
     calories,
@@ -39,145 +55,149 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
 
+    // Animation Values
+    const progress = useSharedValue(0);
+
     const percentage = Math.min(calories / target, 1);
 
-    // Dash calculations for the main segmented gauge
-    const TOTAL_SEGMENTS = 24; // Fewer, chunkier segments
-    const SEGMENT_GAP_RATIO = 0.15; // Tighter gaps
+    useEffect(() => {
+        progress.value = withTiming(percentage, {
+            duration: 1500,
+            easing: Easing.out(Easing.exp),
+        });
+    }, [percentage]);
 
-    const FILLED_SEGMENTS = Math.round(percentage * TOTAL_SEGMENTS);
+    const animatedProps = useAnimatedProps(() => {
+        const strokeDashoffset = CIRCUMFERENCE - (CIRCUMFERENCE * progress.value * (METER_ARC_ANGLE / 360));
+        return {
+            strokeDashoffset: strokeDashoffset,
+        };
+    });
 
-    const renderSegments = () => {
-        const segs = [];
-        // Angles: 180 (left) to 360 (right).
-        // Total angle span = 180 degrees.
-        const totalAngle = 180;
-        const perSegmentAngle = totalAngle / TOTAL_SEGMENTS;
-        const gapAngle = perSegmentAngle * SEGMENT_GAP_RATIO;
-        const blockAngle = perSegmentAngle - gapAngle;
+    // Background dash offset (fixed)
+    // We want to show only METER_ARC_ANGLE of the circle.
+    // The "empty" part of the strokeDasharray should be the gap.
+    // strokeDasharray = [visible_len, gap_len]
+    const gapLength = CIRCUMFERENCE - ARC_LENGTH;
+    const strokeDasharray = `${ARC_LENGTH} ${gapLength}`;
 
-        for (let i = 0; i < TOTAL_SEGMENTS; i++) {
-            const isFilled = i < FILLED_SEGMENTS;
-
-            // Start from 180 degrees and move clockwise
-            const startAngle = 180 + (i * perSegmentAngle);
-            const endAngle = startAngle + blockAngle;
-
-            // Calculate coordinates
-            const startRad = (startAngle * Math.PI) / 180;
-            const endRad = (endAngle * Math.PI) / 180;
-
-            const x1 = (METER_SIZE / 2) + RADIUS * Math.cos(startRad);
-            const y1 = (METER_SIZE / 2) + RADIUS * Math.sin(startRad);
-            const x2 = (METER_SIZE / 2) + RADIUS * Math.cos(endRad);
-            const y2 = (METER_SIZE / 2) + RADIUS * Math.sin(endRad);
-
-            const d = `M ${x1} ${y1} A ${RADIUS} ${RADIUS} 0 0 1 ${x2} ${y2}`;
-
-            segs.push(
-                <Path
-                    key={i}
-                    d={d}
-                    stroke={isFilled ? 'url(#grad)' : (colorScheme === 'dark' ? '#333' : '#F3E8FF')}
-                    strokeWidth={STROKE_WIDTH}
-                    strokeLinecap="round" // Rounded edges for "modern" look
-                    fill="none"
-                />
-            );
-        }
-        return segs;
-    };
+    // Rotation to center the opening at the bottom
+    // Opening is `gapLength`. We want the center of the gap to be at 90deg (bottom).
+    // SVG standard start is 0deg (3 o'clock).
+    // The gap is (360 - METER_ARC_ANGLE) degrees wide.
+    // We need to rotate by 90 + (Gap/2).
+    const rotation = 90 + ((360 - METER_ARC_ANGLE) / 2);
 
 
-    const MiniStat = ({ label, value, targetValue, color, icon }: { label: string, value: number, targetValue: number, color: string, icon?: string }) => (
-        <GlassCard style={styles.statItem}>
-            <View style={styles.statHeader}>
-                <Text style={[styles.statLabel, { color: colors.icon }]}>{label}</Text>
+    const MacroPill = ({ label, value, target, color, icon }: any) => {
+        const p = Math.min(value / target, 1);
+        return (
+            <View style={[styles.macroPill, { backgroundColor: colors.surfaceHighlight }]}>
+                {/* Icon Circle */}
+                <View style={[styles.iconCircle, { backgroundColor: color + '20' }]}>
+                    <Ionicons name={icon} size={14} color={color} />
+                </View>
+
+                <View style={styles.macroContent}>
+                    <Text style={[styles.macroLabel, { color: colors.icon }]}>{label}</Text>
+                    <Text style={[styles.macroValue, { color: colors.text }]}>
+                        {Math.round(value)}g
+                    </Text>
+                    {/* Mini bar */}
+                    <View style={styles.miniBarBg}>
+                        <View style={[styles.miniBarFill, { width: `${p * 100}%`, backgroundColor: color }]} />
+                    </View>
+                </View>
             </View>
-            <View style={styles.statContent}>
-                <Text style={[styles.statValue, { color: colors.text }]}>
-                    {value}
-                    <Text style={[styles.statTarget, { color: colors.icon }]}> / {targetValue}{label === "Calories" ? "" : "g"}</Text>
-                </Text>
-            </View>
-            <View style={[styles.progressBar, { backgroundColor: color + '20' }]}>
-                <View style={[styles.progressFill, { width: `${Math.min((value / targetValue) * 100, 100)}%`, backgroundColor: color }]} />
-            </View>
-        </GlassCard>
-    );
+        )
+    }
 
     return (
         <View style={styles.container}>
-            <Text style={[styles.headerTitle, { color: colors.text }]}>Today</Text>
+            {/* Header Text baked into the standard design flow */}
+            <View style={styles.headerRow}>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>Daily Insight</Text>
+                <Text style={[styles.dateText, { color: colors.icon }]}>Today</Text>
+            </View>
+
             <GlassCard style={styles.card} variant="smoked">
-                <View style={styles.meterContainer}>
-                    <Svg width={METER_SIZE} height={METER_SIZE / 2 + 10} viewBox={`0 0 ${METER_SIZE} ${METER_SIZE / 2 + 10}`}>
+                <View style={styles.meterWrapper}>
+                    {/* Main Gauge */}
+                    <Svg width={METER_SIZE} height={METER_SIZE} viewBox={`0 0 ${METER_SIZE} ${METER_SIZE}`}>
                         <Defs>
-                            <LinearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
-                                <Stop offset="0" stopColor="#8B5CF6" stopOpacity="1" />
-                                <Stop offset="1" stopColor="#A78BFA" stopOpacity="1" />
+                            <LinearGradient id="ringGradient" x1="0" y1="1" x2="1" y2="0">
+                                <Stop offset="0" stopColor="#3B82F6" />
+                                <Stop offset="0.5" stopColor="#8B5CF6" />
+                                <Stop offset="1" stopColor="#EC4899" />
                             </LinearGradient>
+                            {/* Inner glow shadow could go here */}
                         </Defs>
 
-                        {/* Render Segments */}
-                        {renderSegments()}
+                        <G rotation={rotation} origin={`${METER_SIZE / 2}, ${METER_SIZE / 2}`}>
+                            {/* Track */}
+                            <Circle
+                                cx={METER_SIZE / 2}
+                                cy={METER_SIZE / 2}
+                                r={RADIUS}
+                                stroke={colors.glass.borderColor} // Very subtle track
+                                strokeWidth={STROKE_WIDTH}
+                                strokeDasharray={strokeDasharray}
+                                strokeLinecap="round"
+                                fill="transparent"
+                                strokeOpacity={0.5}
+                            />
 
-                        {/* Inner Dashed Line */}
-                        <Path
-                            d={`M ${(METER_SIZE / 2) - INNER_RADIUS} ${METER_SIZE / 2} A ${INNER_RADIUS} ${INNER_RADIUS} 0 0 1 ${(METER_SIZE / 2) + INNER_RADIUS} ${METER_SIZE / 2}`}
-                            stroke={colors.icon}
-                            strokeWidth={2}
-                            strokeDasharray="4 6" // More spaced out dots
-                            strokeOpacity={0.4}
-                            strokeLinecap="round"
-                            fill="none"
-                        />
+                            {/* Progress Ring */}
+                            <AnimatedCircle
+                                cx={METER_SIZE / 2}
+                                cy={METER_SIZE / 2}
+                                r={RADIUS}
+                                stroke="url(#ringGradient)"
+                                strokeWidth={STROKE_WIDTH}
+                                strokeDasharray={strokeDasharray}
+                                animatedProps={animatedProps} // Animated Dashoffset
+                                strokeLinecap="round"
+                                fill="transparent"
+                            />
+                        </G>
                     </Svg>
 
-                    <View style={styles.centerContent}>
-                        <Ionicons name="flame" size={32} color="#F59E0B" style={{ marginBottom: 4 }} />
-                        <Text style={[styles.caloriesValue, { color: colors.text }]}>{Math.round(calories)}</Text>
-                        <Text style={[styles.caloriesLabel, { color: colors.icon }]}>kcal</Text>
+                    {/* Center Text Overlaid */}
+                    <View style={styles.innerContent}>
+                        <View style={[styles.iconBlur, { backgroundColor: colors.primary + '10' }]}>
+                            <Ionicons name="flame" size={32} color={colors.primary} />
+                        </View>
+                        <Text style={[styles.mainValue, { color: colors.text }]}>{Math.round(calories)}</Text>
+                        <Text style={[styles.subLabel, { color: colors.icon }]}>kcal consumed</Text>
+                        <Text style={[styles.targetLabel, { color: colors.icon }]}>of {target} goal</Text>
                     </View>
                 </View>
 
-                {/* Bottom Stats Row */}
-                <View style={styles.statsRow}>
-                    {/* Calories - Custom layout to match image */}
-                    <View style={styles.statColumn}>
-                        <Text style={[styles.statLabel, { color: colors.icon }]}>Calories</Text>
-                        <Text style={[styles.statValueSmall, { color: colors.text }]}>
-                            {Math.round(calories)} <Text style={{ color: colors.icon, fontSize: 11, fontWeight: '400' }}>/ {Math.round(target)}</Text>
-                        </Text>
-                        <View style={[styles.progressBarSmall, { backgroundColor: '#F59E0B20' }]}>
-                            <View style={[styles.progressFill, { width: `${percentage * 100}%`, backgroundColor: '#F59E0B' }]} />
-                        </View>
-                    </View>
-
-                    <View style={[styles.divider, { backgroundColor: colors.border }]} />
-
-                    <View style={styles.statColumn}>
-                        <Text style={[styles.statLabel, { color: colors.icon }]}>Protein</Text>
-                        <Text style={[styles.statValueSmall, { color: colors.text }]}>
-                            {Math.round(protein)} <Text style={{ color: colors.icon, fontSize: 11, fontWeight: '400' }}>/ {Math.round(proteinTarget)}g</Text>
-                        </Text>
-                        <View style={[styles.progressBarSmall, { backgroundColor: '#10B98120' }]}>
-                            <View style={[styles.progressFill, { width: `${Math.min((protein / proteinTarget) * 100, 100)}%`, backgroundColor: '#10B981' }]} />
-                        </View>
-                    </View>
-
-                    <View style={[styles.divider, { backgroundColor: colors.border }]} />
-
-                    <View style={styles.statColumn}>
-                        <Text style={[styles.statLabel, { color: colors.icon }]}>Fat</Text>
-                        <Text style={[styles.statValueSmall, { color: colors.text }]}>
-                            {Math.round(fat)} <Text style={{ color: colors.icon, fontSize: 11, fontWeight: '400' }}>/ {Math.round(fatTarget)}g</Text>
-                        </Text>
-                        <View style={[styles.progressBarSmall, { backgroundColor: '#8B5CF620' }]}>
-                            <View style={[styles.progressFill, { width: `${Math.min((fat / fatTarget) * 100, 100)}%`, backgroundColor: '#8B5CF6' }]} />
-                        </View>
-                    </View>
+                {/* Macros Row - Clean Pills */}
+                <View style={styles.macrosRow}>
+                    <MacroPill
+                        label="Protein"
+                        value={protein}
+                        target={proteinTarget}
+                        color="#10B981"
+                        icon="fitness"
+                    />
+                    <MacroPill
+                        label="Carbs"
+                        value={carbs}
+                        target={carbsTarget}
+                        color="#3B82F6"
+                        icon="restaurant"
+                    />
+                    <MacroPill
+                        label="Fats"
+                        value={fat}
+                        target={fatTarget}
+                        color="#F59E0B"
+                        icon="water" // water droplet looks a bit like oil/fat drop
+                    />
                 </View>
+
             </GlassCard>
         </View>
     );
@@ -188,83 +208,109 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         marginBottom: 24,
     },
+    headerRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'baseline',
+        marginBottom: 16,
+        paddingHorizontal: 4,
+    },
     headerTitle: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: '700',
-        marginBottom: 12,
-        marginLeft: 4,
+    },
+    dateText: {
+        fontSize: 14,
+        fontWeight: '500',
     },
     card: {
         padding: 24,
-        borderRadius: 32,
+        borderRadius: 36,
+        // Ensure shadows for depth
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.1,
+        shadowRadius: 20,
+        elevation: 10,
     },
-    meterContainer: {
+    meterWrapper: {
         alignItems: 'center',
         justifyContent: 'center',
-        height: 180,
+        height: METER_SIZE,
+        marginBottom: 24,
     },
-    centerContent: {
+    innerContent: {
         position: 'absolute',
-        bottom: 25,
         alignItems: 'center',
+        justifyContent: 'center',
     },
-    caloriesValue: {
-        fontSize: 48,
-        fontWeight: '800',
-        lineHeight: 54,
-        letterSpacing: -1,
-    },
-    caloriesLabel: {
-        fontSize: 16,
-        fontWeight: '500',
-        opacity: 0.6,
-    },
-    statsRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 16,
-        paddingTop: 16,
-        borderTopWidth: 1,
-        borderTopColor: 'rgba(0,0,0,0.03)', // Very subtle divider
-    },
-    statColumn: {
-        flex: 1,
-        alignItems: 'flex-start',
-        paddingHorizontal: 4,
-    },
-    divider: {
-        width: 1,
-        height: '60%',
-        alignSelf: 'center',
-        opacity: 0.2,
-    },
-    statLabel: {
-        fontSize: 13,
-        marginBottom: 6,
-        fontWeight: '500',
-        opacity: 0.7,
-    },
-    statValueSmall: {
-        fontSize: 14,
-        fontWeight: '700',
+    iconBlur: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
         marginBottom: 8,
     },
-    progressBarSmall: {
+    mainValue: {
+        fontSize: 42,
+        fontWeight: '800',
+        letterSpacing: -1,
+        lineHeight: 48,
+    },
+    subLabel: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 2,
+    },
+    targetLabel: {
+        fontSize: 12,
+        opacity: 0.7,
+    },
+    macrosRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        gap: 12,
+    },
+    macroPill: {
+        flex: 1,
+        borderRadius: 20,
+        padding: 12,
+        // backgroundColor handled inline for theme
+    },
+    iconCircle: {
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 8,
+    },
+    macroContent: {
+        gap: 4,
+    },
+    macroLabel: {
+        fontSize: 11,
+        fontWeight: '600',
+        opacity: 0.8,
+    },
+    macroValue: {
+        fontSize: 15,
+        fontWeight: '700',
+    },
+    miniBarBg: {
+        height: 4,
+        backgroundColor: 'rgba(0,0,0,0.05)',
+        borderRadius: 2,
         width: '100%',
-        height: 8,
-        borderRadius: 4,
-        overflow: 'hidden',
+        marginTop: 4,
     },
-    progressFill: {
+    miniBarFill: {
         height: '100%',
-        borderRadius: 4,
+        borderRadius: 2,
     },
-    // Unused but kept for reference or removal
-    statItem: { padding: 10 },
-    statHeader: { flexDirection: 'row' },
-    statContent: { marginBottom: 5 },
-    statValue: { fontSize: 16 },
-    statTarget: { fontSize: 12 },
-    progressBar: { height: 4, borderRadius: 2 },
-    caloriesTarget: { fontSize: 12 },
+    caloriesTarget: {
+        fontSize: 12,
+        opacity: 0.7,
+    },
 });
