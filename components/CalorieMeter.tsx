@@ -118,7 +118,7 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
                             </Defs>
 
                             {data.map((item, index) => {
-                                const radius = (SVG_SIZE - STROKE_WIDTH) / 2 - (index * (STROKE_WIDTH + GAP));
+                                const radius = (SVG_SIZE - STROKE_WIDTH) / 2 - (index * (STROKE_WIDTH + GAP)) - 4;
                                 const circumference = 2 * Math.PI * radius;
                                 return (
                                     <RingSegment
@@ -180,7 +180,7 @@ const RingSegment = ({ radius, circumference, gradientId, animValue, isActive, c
         strokeDashoffset: circumference * (1 - animValue.value),
     }));
 
-    const trackColor = colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+    const trackColor = colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(223, 141, 223, 0.1)';
 
     return (
         <G rotation="-90" origin={`${CENTER}, ${CENTER}`}>
