@@ -19,6 +19,7 @@ import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { GlassCard } from "@/components/GlassCard";
 import { CalorieMeter } from "@/components/CalorieMeter";
 import { UnifiedMealCard } from "@/components/UnifiedMealCard";
+import { MealCategoryCarousel } from "@/components/MealCategoryCarousel";
 
 
 
@@ -114,6 +115,7 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
           </TouchableOpacity>
         </View>
 
+
         {/* Start Your Journey / Calorie Meter */}
         {!personalInfo ? (
           <GlassCard style={styles.setupPrompt}>
@@ -132,16 +134,21 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
             </TouchableOpacity>
           </GlassCard>
         ) : (
-          <CalorieMeter
-            calories={totalNutrition.calories}
-            target={parseInt(personalInfo.targetCalories) || 2000}
-            protein={totalNutrition.protein}
-            proteinTarget={nutritionalData.protein}
-            carbs={totalNutrition.carbs}
-            carbsTarget={nutritionalData.carbs}
-            fat={totalNutrition.fat}
-            fatTarget={nutritionalData.fat}
-          />
+          <View>
+            <CalorieMeter
+              calories={totalNutrition.calories}
+              target={parseInt(personalInfo.targetCalories) || 2000}
+              protein={totalNutrition.protein}
+              proteinTarget={nutritionalData.protein}
+              carbs={totalNutrition.carbs}
+              carbsTarget={nutritionalData.carbs}
+              fat={totalNutrition.fat}
+              fatTarget={nutritionalData.fat}
+            />
+
+            {/* Meal Category Carousel */}
+            <MealCategoryCarousel />
+          </View>
         )}
 
 

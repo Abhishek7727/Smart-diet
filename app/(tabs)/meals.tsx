@@ -3,7 +3,8 @@ import AIFoodRecommendation from '@/components/AIFoodRecommendation';
 import { useMealPlan } from '@/components/MealPlanContext';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import { useLocalSearchParams } from 'expo-router';
+import React, { useState, useEffect } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -20,7 +21,8 @@ import { useSelector } from 'react-redux';
 import { CustomMealModal } from '@/components/customMealModel';
 
 
-const MealsScreen = ( {onNavigate }: { onNavigate?: (tab: string) => void }) => {
+const MealsScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
+  const params = useLocalSearchParams();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
   const [showAIRecommendations, setShowAIRecommendations] = useState(false);
@@ -33,6 +35,19 @@ const MealsScreen = ( {onNavigate }: { onNavigate?: (tab: string) => void }) => 
     carbs: '',
     fat: '',
   });
+
+  // Handle Navigation Params
+  useEffect(() => {
+    if (params.openModal === 'ai' && params.mealType) {
+      setSelectedMealId(params.mealType as string);
+      setShowAIRecommendations(true);
+    } else if (params.openModal === 'manual') {
+      // Handle manual entry if needed, though current request implies AI modal mostly
+      // modifying to support manual if params passed
+      setSelectedMealId(params.mealType as string);
+      setShowCustomMealModal(true);
+    }
+  }, [params]);
   const userData = useSelector((state: any) => state.user);
   const hasCompletedSetup = !!(userData.name && userData.targetCalories);
   const hasApiKey = !!userData.apiKey;
@@ -93,10 +108,10 @@ const MealsScreen = ( {onNavigate }: { onNavigate?: (tab: string) => void }) => 
     const carbs = parseInt(customMealData.carbs) || 0;
     const fat = parseInt(customMealData.fat) || 0;
     const smartId = getSmartMealId();
-      addCustomMeal(smartId, customMealData.name, calories, protein, carbs, fat);
-      setShowCustomMealModal(false);
-      setSelectedMealId(null);
-      setCustomMealData({ name: '', calories: '', protein: '', carbs: '', fat: '' });
+    addCustomMeal(smartId, customMealData.name, calories, protein, carbs, fat);
+    setShowCustomMealModal(false);
+    setSelectedMealId(null);
+    setCustomMealData({ name: '', calories: '', protein: '', carbs: '', fat: '' });
   };
 
   // Helper to determine meal type based on current time
@@ -130,7 +145,7 @@ const MealsScreen = ( {onNavigate }: { onNavigate?: (tab: string) => void }) => 
           {
             text: 'Go to Settings', onPress: () => {
               // Navigate to settings (implementation pending)
-                onNavigate?.('settings');
+              onNavigate?.('settings');
             }
           },
         ]
