@@ -20,6 +20,7 @@ export interface Meal {
 
 export interface MealsState {
     meals: Meal[];
+    lastResetDate?: string;
 }
 
 const initialState: MealsState = {
@@ -49,6 +50,11 @@ const initialState: MealsState = {
             hasFood: false,
         },
     ],
+    // Initialize with local date
+    lastResetDate: (() => {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    })(),
 };
 
 const mealsSlice = createSlice({
@@ -79,9 +85,26 @@ const mealsSlice = createSlice({
                 meal.hasFood = false;
             });
         },
+        checkDailyReset: (state) => {
+            const now = new Date();
+            // Use local time instead of UTC (toISOString) to ensure reset happens at local 12 AM
+            const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+            if (!state.lastResetDate) {
+                // If checking for the first time (migration), just set the date
+                state.lastResetDate = today;
+            } else if (state.lastResetDate !== today) {
+                // It's a new day! Reset meals.
+                state.meals.forEach((meal) => {
+                    meal.food = undefined;
+                    meal.hasFood = false;
+                });
+                state.lastResetDate = today;
+            }
+        },
     },
 });
 
-export const { setMeals, updateMeal, removeMeal, clearAllMeals } = mealsSlice.actions;
+export const { setMeals, updateMeal, removeMeal, clearAllMeals, checkDailyReset } = mealsSlice.actions;
 
 export default mealsSlice.reducer;

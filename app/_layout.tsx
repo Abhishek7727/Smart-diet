@@ -6,8 +6,9 @@ import 'react-native-reanimated';
 import { Provider, useSelector } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from '@/store/store';
+import { checkDailyReset } from '@/store/mealsSlice';
 import React, { useEffect } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, AppState, AppStateStatus } from 'react-native';
 
 import { MealPlanProvider } from '@/components/MealPlanContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -20,6 +21,19 @@ function AuthProtection({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     setIsMounted(true);
+    // Check for daily reset on mount
+    store.dispatch(checkDailyReset());
+
+    // Check for daily reset when app comes to foreground
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState === 'active') {
+        store.dispatch(checkDailyReset());
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   React.useEffect(() => {
