@@ -9,6 +9,8 @@ import Animated, {
     withSpring,
     Easing,
     withDelay,
+    FadeIn,
+    FadeOut,
 } from 'react-native-reanimated';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from 'react-native';
@@ -134,16 +136,34 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
                             })}
                         </Svg>
 
-                        {/* Minimal center - just calories */}
+                        {/* Dynamic Center Content */}
                         <View style={styles.centerContent}>
-                            <Text style={[styles.centerValue, { color: colors.text }]}>
-                                {Math.round(calories)}
-                            </Text>
-                            <Text style={[styles.centerUnit, { color: colors.icon }]}>kcal</Text>
+                            <Animated.Text
+                                entering={FadeIn.duration(400)}
+                                exiting={FadeOut.duration(200)}
+                                key={`${activeItem.key}-val`}
+                                style={[styles.centerValue, { color: colors.text }]}
+                            >
+                                {Math.round(activeItem.value)}
+                            </Animated.Text>
+                            <Animated.Text
+                                entering={FadeIn.delay(100).duration(400)}
+                                exiting={FadeOut.duration(200)}
+                                key={`${activeItem.key}-label`}
+                                style={[styles.centerLabel, { color: colors.text }]}
+                            >
+                                {activeItem.unit}
+                            </Animated.Text>
+                            <Animated.Text
+                                entering={FadeIn.delay(200).duration(400)}
+                                key={`${activeItem.key}-title`}
+                                style={[styles.centerSubLabel, { color: colors.icon }]}
+                            >
+                                {activeItem.label.toUpperCase()}
+                            </Animated.Text>
                         </View>
                     </AnimatedPressable>
 
-                    {/* Right: Stats Panel */}
                     <View style={styles.statsPanel}>
                         {data.map((item, index) => {
                             const pct = Math.round((item.value / (item.target || 1)) * 100);
@@ -152,19 +172,29 @@ export const CalorieMeter: React.FC<CalorieMeterProps> = ({
                                 <Pressable
                                     key={item.key}
                                     onPress={() => setActiveIndex(index)}
-                                    style={[
+                                    style={({ pressed }) => [
                                         styles.statRow,
-                                        isActive && { backgroundColor: item.colors[0] + '15' }
+                                        isActive && [styles.activeStatRow, {
+                                            backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+                                            borderColor: item.colors[0] + '50'
+                                        }],
+                                        pressed && { opacity: 0.7 }
                                     ]}
                                 >
-                                    <View style={[styles.statDot, { backgroundColor: item.colors[0] }]} />
+                                    <View style={[styles.statDot, { backgroundColor: item.colors[0], shadowColor: item.colors[0] }]} />
                                     <View style={styles.statInfo}>
-                                        <Text style={[styles.statLabel, { color: colors.text }]}>{item.label}</Text>
+                                        <Text style={[
+                                            styles.statLabel,
+                                            { color: colors.text },
+                                            isActive && { fontWeight: '700' }
+                                        ]}>{item.label}</Text>
                                         <Text style={[styles.statValue, { color: colors.icon }]}>
-                                            {Math.round(item.value)}{item.unit === 'kcal' ? '' : 'g'} / {item.target}{item.unit === 'kcal' ? '' : 'g'}
+                                            {Math.round(item.value)} / {item.target} {item.unit}
                                         </Text>
                                     </View>
-                                    <Text style={[styles.statPercent, { color: item.colors[0] }]}>{pct}%</Text>
+                                    <View style={{ alignItems: 'flex-end' }}>
+                                        <Text style={[styles.statPercent, { color: item.colors[0] }]}>{pct}%</Text>
+                                    </View>
                                 </Pressable>
                             );
                         })}
@@ -206,31 +236,42 @@ const RingSegment = ({ radius, circumference, gradientId, animValue, isActive, c
 const styles = StyleSheet.create({
     container: {
         marginHorizontal: 16,
-        marginBottom: 20,
+        marginBottom: 24,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 10,
+        },
+        shadowOpacity: 0.15,
+        shadowRadius: 20,
+        elevation: 10,
     },
     headerRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 12,
-        paddingHorizontal: 4,
+        marginBottom: 16,
+        paddingHorizontal: 8,
     },
     headerTitle: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: '700',
+        letterSpacing: 0.5,
     },
     glassCard: {
-        borderRadius: 24,
+        borderRadius: 30,
         overflow: 'hidden',
         borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.15)',
     },
     glassOverlay: {
         ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(255,255,255,0.05)', // Very subtle overlay
     },
     contentRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 16,
+        padding: 20,
     },
     chartWrapper: {
         position: 'relative',
@@ -241,47 +282,68 @@ const styles = StyleSheet.create({
         position: 'absolute',
         alignItems: 'center',
         justifyContent: 'center',
+        width: 120, // ensure enough width for text not to wrap weirdly
     },
     centerValue: {
-        fontSize: 26,
+        fontSize: 36,
         fontWeight: '800',
         fontVariant: ['tabular-nums'],
+        includeFontPadding: false,
     },
-    centerUnit: {
-        fontSize: 12,
+    centerLabel: {
+        fontSize: 14,
         fontWeight: '600',
+        marginBottom: 4,
+    },
+    centerSubLabel: {
+        fontSize: 10,
+        fontWeight: '700',
+        letterSpacing: 1.5,
+        opacity: 0.8,
     },
     statsPanel: {
         flex: 1,
-        marginLeft: 12,
-        gap: 8,
+        marginLeft: 20,
+        gap: 12,
     },
     statRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 10,
-        paddingHorizontal: 10,
-        borderRadius: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: 'transparent',
+    },
+    activeStatRow: {
+        borderWidth: 1,
+        // backgroundColor and borderColor handled dynamically in render
     },
     statDot: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        marginRight: 10,
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        marginRight: 12,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.5,
+        shadowRadius: 4,
+        elevation: 3,
     },
     statInfo: {
         flex: 1,
     },
     statLabel: {
-        fontSize: 13,
+        fontSize: 14,
         fontWeight: '600',
+        marginBottom: 2,
     },
     statValue: {
         fontSize: 11,
-        marginTop: 1,
+        opacity: 0.8,
     },
     statPercent: {
-        fontSize: 14,
-        fontWeight: '800',
+        fontSize: 13,
+        fontWeight: '700',
+        marginLeft: 8,
     },
 });
