@@ -18,10 +18,10 @@ const SPACING = 12;
 const SPACER_WIDTH = (width - ITEM_WIDTH) / 2;
 
 const DATA = [
-    { id: 'breakfast', title: 'Breakfast', image: require('@/assets/images/icon.png') }, // Placeholders
-    { id: 'lunch', title: 'Lunch', image: require('@/assets/images/icon.png') },
-    { id: 'snacks', title: 'Snacks', image: require('@/assets/images/icon.png') },
-    { id: 'dinner', title: 'Dinner', image: require('@/assets/images/icon.png') },
+    { id: 'breakfast', title: 'Breakfast', image: require('@/assets/images/breakfast_3d.png') },
+    { id: 'lunch', title: 'Lunch', image: require('@/assets/images/lunch_3d.png') },
+    { id: 'snacks', title: 'Snacks', image: require('@/assets/images/snacks_3d.png') },
+    { id: 'dinner', title: 'Dinner', image: require('@/assets/images/dinner_3d.png') },
 ];
 
 // 3D Card Component
@@ -79,7 +79,7 @@ const CarouselItem = ({ item, index, scrollX, onNavigate }: { item: any, index: 
                     tint={colorScheme === 'dark' ? 'dark' : 'light'}
                     style={[styles.glassCard, { borderColor: colors.border }]}
                 >
-                    {/* 3D Image Placeholder */}
+                    {/* 3D Image */}
                     <View style={styles.imageContainer}>
                         <Image
                             source={item.image}
@@ -111,7 +111,7 @@ export const MealCategoryCarousel = () => {
         // We'll use router.push with params, targeting the meals route.
         router.push({
             pathname: '/(tabs)/meals',
-            params: { openModal: 'ai', mealType: id }
+            params: { openModal: 'choice', mealType: id }
         });
     };
 
@@ -183,6 +183,8 @@ const styles = StyleSheet.create({
         width: 100,
         height: 100,
         marginBottom: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 10 },
         shadowOpacity: 0.3,
@@ -192,6 +194,12 @@ const styles = StyleSheet.create({
     image: {
         width: '100%',
         height: '100%',
+    },
+    emojiText: {
+        fontSize: 80,
+        textShadowColor: 'rgba(0,0,0,0.3)',
+        textShadowOffset: { width: 0, height: 10 },
+        textShadowRadius: 10,
     },
     title: {
         fontSize: 24,

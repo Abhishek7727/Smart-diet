@@ -42,10 +42,30 @@ const MealsScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => 
       setSelectedMealId(params.mealType as string);
       setShowAIRecommendations(true);
     } else if (params.openModal === 'manual') {
-      // Handle manual entry if needed, though current request implies AI modal mostly
-      // modifying to support manual if params passed
       setSelectedMealId(params.mealType as string);
       setShowCustomMealModal(true);
+    } else if (params.openModal === 'choice' && params.mealType) {
+      Alert.alert(
+        'Choose Entry Method',
+        `How would you like to log your ${params.mealType}?`,
+        [
+          {
+            text: 'AI Recommendation',
+            onPress: () => {
+              setSelectedMealId(params.mealType as string);
+              setShowAIRecommendations(true);
+            }
+          },
+          {
+            text: 'Manual Entry',
+            onPress: () => {
+              setSelectedMealId(params.mealType as string);
+              setShowCustomMealModal(true);
+            }
+          },
+          { text: 'Cancel', style: 'cancel' }
+        ]
+      );
     }
   }, [params]);
   const userData = useSelector((state: any) => state.user);
