@@ -4,11 +4,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { combineReducers } from 'redux';
 import userReducer from './userSlice';
 import mealsReducer from './mealsSlice';
-
+import commonReducer from './commonSlice';
 
 const rootReducer = combineReducers({
     user: userReducer,
     meals: mealsReducer,
+    common: commonReducer,
 });
 
 const persistConfig = {

@@ -17,13 +17,15 @@ import {
   View
 } from 'react-native';
 import { GlassCard } from '@/components/GlassCard';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { CustomMealModal } from '@/components/customMealModel';
+import { removeData } from '@/store/commonSlice';
 
 
 const MealsScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
-  const params = useLocalSearchParams();
   const colorScheme = useColorScheme();
+  const dispatch = useDispatch();
+  const commonData = useSelector((state:any)=>state.common.data);
   const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
   const [showAIRecommendations, setShowAIRecommendations] = useState(false);
   const [showCustomMealModal, setShowCustomMealModal] = useState(false);
@@ -36,42 +38,6 @@ const MealsScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => 
     fat: '',
   });
 
-  // Handle Navigation Params
-  useEffect(() => {
-    if (params.openModal === 'ai' && params.mealType) {
-      setSelectedMealId(params.mealType as string);
-      setShowAIRecommendations(true);
-    } else if (params.openModal === 'manual') {
-      setSelectedMealId(params.mealType as string);
-      setShowCustomMealModal(true);
-    } else if (params.openModal === 'choice' && params.mealType) {
-      Alert.alert(
-        'Choose Entry Method',
-        `How would you like to log your ${params.mealType}?`,
-        [
-          {
-            text: 'AI Recommendation',
-            onPress: () => {
-              setSelectedMealId(params.mealType as string);
-              setShowAIRecommendations(true);
-            }
-          },
-          {
-            text: 'Manual Entry',
-            onPress: () => {
-              setSelectedMealId(params.mealType as string);
-              setShowCustomMealModal(true);
-            }
-          },
-          { text: 'Cancel', style: 'cancel' }
-        ]
-      );
-    }
-  }, [params]);
-  const userData = useSelector((state: any) => state.user);
-  const hasCompletedSetup = !!(userData.name && userData.targetCalories);
-  const hasApiKey = !!userData.apiKey;
-
   const {
     meals,
     updateMeal,
@@ -82,6 +48,31 @@ const MealsScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => 
     personalInfo,
     isLoading: contextLoading
   } = useMealPlan();
+  
+useEffect(() => {
+  
+  if (commonData && commonData.id === "home-meal-click" && commonData.data) {
+    const isPresent = meals.find((m) => m.id === commonData.data)?.hasFood;
+    setSelectedMealId(String(commonData.data));
+    const mealText = commonData.data.toString().at(0)?.toUpperCase()+commonData.data.toString().slice(1);
+      Alert.alert(
+        isPresent ? `${mealText} already added! Want to update?`: `Add ${mealText} data`,
+        `Please select how would you like to add ${mealText} data.`,
+        [
+          { text: 'Cancel', style: 'cancel', onPress: () => {dispatch(removeData())} },
+          { text: 'Generate With AI', onPress: () => {  dispatch(removeData()); setShowAIRecommendations(true)} },
+          { text: 'Manual Entry', onPress: () => {  dispatch(removeData()); setShowCustomMealModal(true)} },
+        ]
+      );
+      return;
+    }
+}, [commonData, dispatch, meals]);
+
+
+  const userData = useSelector((state: any) => state.user);
+  const hasCompletedSetup = !!(userData.name && userData.targetCalories);
+  const hasApiKey = !!userData.apiKey;
+
 
   const totalNutrition = getTotalNutrition();
 
@@ -142,6 +133,10 @@ const MealsScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => 
     if (hour >= 16 && hour < 19) return 'snacks';
     return 'dinner';
   };
+
+  
+
+
 
   const handleAIRecommendations = () => {
     if (!hasCompletedSetup) {

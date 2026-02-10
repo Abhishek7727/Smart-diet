@@ -18,12 +18,17 @@ interface Meal {
 
 interface UnifiedMealCardProps {
     meals: Meal[];
-    onMealPress: (mealId: string) => void;
+    onMealPress: (data: any) => void;
 }
 
 export const UnifiedMealCard: React.FC<UnifiedMealCardProps> = ({ meals, onMealPress }) => {
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
+
+
+    const handleOnMealPress = (id: string) => {
+        onMealPress(id);
+    };
 
     const getIconFn = (id: string) => {
         switch (id) {
@@ -36,7 +41,7 @@ export const UnifiedMealCard: React.FC<UnifiedMealCardProps> = ({ meals, onMealP
 
     return (
         <GlassCard style={styles.container} variant="smoked">
-            <Text style={[styles.cardTitle, { color: colors.text }]}>Today's Meals</Text>
+            <Text style={[styles.cardTitle, { color: colors.text }]}>{`Today's Meals`}</Text>
 
             <View style={styles.listContainer}>
                 {meals.map((meal, index) => (
@@ -46,7 +51,7 @@ export const UnifiedMealCard: React.FC<UnifiedMealCardProps> = ({ meals, onMealP
                             styles.mealRow,
                             index !== meals.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.border }
                         ]}
-                        onPress={() => onMealPress(meal.id)}
+                        onPress={() => {if(!meal.hasFood) handleOnMealPress(meal.id)}}
                         activeOpacity={0.7}
                     >
                         {/* Icon */}

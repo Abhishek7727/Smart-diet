@@ -5,7 +5,6 @@ import React from "react";
 import {
 
   Platform,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,12 +13,13 @@ import {
   View,
   Image
 } from "react-native";
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { GlassCard } from "@/components/GlassCard";
 import { CalorieMeter } from "@/components/CalorieMeter";
 import { UnifiedMealCard } from "@/components/UnifiedMealCard";
 import { MealCategoryCarousel } from "@/components/MealCategoryCarousel";
+import { addData } from "@/store/commonSlice";
 
 
 
@@ -27,6 +27,7 @@ import { MealCategoryCarousel } from "@/components/MealCategoryCarousel";
 // Home Screen Component
 const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
   const colorScheme = useColorScheme();
+  const dispatch = useDispatch();
 
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
@@ -36,10 +37,14 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
   const totalNutrition = getTotalNutrition();
   const userData = useSelector((state: any) => state.user);
 
-  const handleMealPress = (mealId: string) => {
-    // Navigate to meals tab
-    onNavigate?.('meals');
-  };
+  const handleMealPress = (id: any) => {
+    dispatch(addData({
+            id: "home-meal-click",
+            data: id
+        }));
+
+        onNavigate?.('meals');
+  }
 
   // Dynamic Greeting Logic
   const getDynamicGreeting = () => {
@@ -147,7 +152,7 @@ const HomeScreen = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
             />
 
             {/* Meal Category Carousel */}
-            <MealCategoryCarousel />
+            <MealCategoryCarousel onPress={handleMealPress} />
           </View>
         )}
 

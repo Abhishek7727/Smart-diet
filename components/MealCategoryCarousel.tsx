@@ -6,15 +6,15 @@ import Animated, {
     useAnimatedScrollHandler,
     interpolate,
     Extrapolation,
+    runOnJS,
 } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from 'react-native';
-import { useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 
 const { width } = Dimensions.get('window');
-const ITEM_WIDTH = width * 0.7;
-const SPACING = 12;
+const ITEM_WIDTH = width * 0.8;
 const SPACER_WIDTH = (width - ITEM_WIDTH) / 2;
 
 const DATA = [
@@ -87,32 +87,26 @@ const CarouselItem = ({ item, index, scrollX, onNavigate }: { item: any, index: 
                             resizeMode="contain"
                         />
                     </View>
-
-                    <Text style={[styles.title, { color: colors.text }]}>{item.title}</Text>
-                    <Text style={[styles.subtitle, { color: colors.icon }]}>Tap to Log</Text>
                 </BlurView>
             </TouchableOpacity>
         </Animated.View>
     );
 };
 
-export const MealCategoryCarousel = () => {
+export const MealCategoryCarousel = ({onPress}:{onPress: (data: any)=> void}) => {
     const scrollX = useSharedValue(0);
-    const router = useRouter();
+
+    const triggerHaptic = async() => {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
 
     const onScroll = useAnimatedScrollHandler((event) => {
         scrollX.value = event.contentOffset.x;
+        runOnJS(triggerHaptic)();
     });
 
     const handleNavigate = (id: string) => {
-        // Navigate to Meals tab and trigger modal
-        // We pass params to the tab screen. 
-        // Note: expo-router with tabs usually requires jumping to the tab first.
-        // We'll use router.push with params, targeting the meals route.
-        router.push({
-            pathname: '/(tabs)/meals',
-            params: { openModal: 'choice', mealType: id }
-        });
+        onPress(id);
     };
 
     return (
@@ -144,15 +138,17 @@ export const MealCategoryCarousel = () => {
 
 const styles = StyleSheet.create({
     container: {
-        marginVertical: 20,
+        marginTop: 4,
+        marginBottom: 30,
         height: 220,
+
     },
     scrollContent: {
         alignItems: 'center',
     },
     itemContainer: {
         width: ITEM_WIDTH,
-        height: 200,
+        height: 204,
         marginHorizontal: 0, // Handled by snapToInterval logic mostly, but can add detailed spacing
         justifyContent: 'center',
         alignItems: 'center',
@@ -160,40 +156,34 @@ const styles = StyleSheet.create({
     touchable: {
         width: '90%',
         height: '100%',
-        borderRadius: 24,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 8,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 10.00,
-        elevation: 12,
+        borderRadius: 20,
+       
     },
     glassCard: {
         flex: 1,
-        borderRadius: 24,
-        borderWidth: 1,
-        padding: 20,
+        borderRadius: 20,
+        borderWidth: 4,
+        padding: 0,
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
+        elevation: 6,
+        shadowColor: '#000',
+        shadowOpacity: 0.02,
+        shadowOffset:{ width: 0, height: 10 },
     },
     imageContainer: {
-        width: 100,
-        height: 100,
-        marginBottom: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.3,
-        shadowRadius: 10,
-        elevation: 8,
-    },
-    image: {
         width: '100%',
         height: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 20,
+    },
+    image: {
+        width: 300,
+        height: 300,
+        borderRadius: 20,
+
     },
     emojiText: {
         fontSize: 80,
