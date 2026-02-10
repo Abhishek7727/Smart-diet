@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, ViewStyle } from 'react-native';
+import { View, useColorScheme, StyleSheet, Dimensions, Image, TouchableOpacity, ViewStyle } from 'react-native';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -10,7 +10,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
 import { Colors } from '@/constants/Colors';
-import { useColorScheme } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
 const { width } = Dimensions.get('window');
