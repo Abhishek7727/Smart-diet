@@ -1,50 +1,108 @@
-# Welcome to your Expo app 👋
+# 🥗 Smart Diet Planner
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Expo](https://img.shields.io/badge/Expo-54.0.32-blue.svg)](https://expo.dev/)
+[![React Native](https://img.shields.io/badge/React_Native-0.81.5-cyan.svg)](https://reactnative.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue.svg)](https://www.typescriptlang.org/)
 
-## Get started
+A smart, AI-powered diet planning application built with **React Native** and **Expo**. This app helps users generate personalized meal plans, track nutrition, and achieve their fitness goals using the power of **Google Gemini AI**.
 
-1. Install dependencies
+## ✨ Features
 
-   ```bash
-   npm install
-   ```
+- **🤖 AI-Powered Recommendations:** Generates personalized meal options based on your profile, goals, and dietary restrictions using Google Gemini AI.
+- **📊 Nutritional Tracking:** Real-time tracking of calories, protein, carbs, and fats against your daily targets.
+- **📝 Meal Planning:** Organize your daily meals (Breakfast, Lunch, Dinner, Snacks) with ease.
+- **👤 User Profiling:** Customized plans based on age, gender, weight, height, activity level, and goals (e.g., Weight Loss, Muscle Build).
+- **📈 Progress Stats:** Visualize your nutritional intake and progress with interactive charts.
+- **💾 Local Persistence:** Your data is secure and saved locally on your device for privacy and offline access.
+- **🌗 Modern UI:** Built with Expo Router and sleek components for a smooth user experience, supporting dark and light modes.
 
-2. Start the app
+## 🛠 Tech Stack
 
-   ```bash
-   npx expo start
-   ```
+- **Framework:** [React Native](https://reactnative.dev/) (via [Expo](https://expo.dev/))
+- **Navigation:** [Expo Router](https://docs.expo.dev/router/introduction/) (Tab-based navigation)
+- **AI Engine:** [Google Gemini API](https://ai.google.dev/) (`@google/generative-ai`)
+- **Language:** TypeScript
+- **State Management:** React Context API
+- **Styling:** React Native Styles / CSS-in-JS
+- **Icons:** Expo Vector Icons
 
-In the output, you'll find options to open the app in a
+## 🚀 Getting Started
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Prerequisites
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- [Node.js](https://nodejs.org/) (v18 or higher)
+- npm or yarn
+- Expo Go app on your physical device OR an Android/iOS emulator.
+- **Google Gemini API Key**: You need to obtain an API key from [Google AI Studio](https://aistudio.google.com/).
 
-## Get a fresh project
+### Installation
 
-When you're ready, run:
+1.  **Clone the repository:**
 
-```bash
-npm run reset-project
+    ```bash
+    git clone https://github.com/your-username/diet-planner.git
+    cd diet-planner
+    ```
+
+2.  **Install dependencies:**
+
+    ```bash
+    npm install
+    # or
+    yarn install
+    ```
+
+3.  **Setup API Key:**
+
+    The app requires a valid Google Gemini API Key to generate recommendations. You will be prompted to enter this in the App Settings. ensure you have one ready.
+
+### Running the App
+
+1.  **Start the development server:**
+
+    ```bash
+    npx expo start
+    ```
+
+2.  **Run on device/emulator:**
+    -   Scan the QR code with **Expo Go** (Android) or Camera (iOS).
+    -   Press `a` for Android Emulator.
+    -   Press `i` for iOS Simulator.
+    -   Press `w` for Web (limited functionality).
+
+## 📂 Project Structure
+
+```
+diet-planner/
+├── app/                 # Expo Router screens and navigation
+│   ├── (tabs)/          # Main tab screens (Index, Meals, Stats, Profile)
+│   ├── _layout.tsx      # Root layout configuration
+│   └── ...
+├── components/          # Reusable UI components & Context Providers
+│   ├── MealPlanContext.tsx  # Core state management
+│   ├── AIFoodRecommendation.tsx # AI integration component
+│   └── ...
+├── services/            # Business logic and external services
+│   ├── GeminiService.ts # AI integration logic
+│   └── StorageService.ts # Data persistence
+├── hooks/               # Custom React hooks (e.g., useColorScheme, useStorage)
+├── assets/              # Images, fonts, and icons
+├── constants/           # App constants and theme colors
+└── services/            # API and storage services
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 🗺 Roadmap
 
-## Learn more
+- [ ] Cloud Sync & Multi-device support
+- [ ] Social Sharing features
+- [ ] Barcode Scanner for food logging
+- [ ] Integration with HealthKit / Google Fit
 
-To learn more about developing your project with Expo, look at the following resources:
+## 🤝 Contributing
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
 
-## Join the community
+## 📄 License
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
