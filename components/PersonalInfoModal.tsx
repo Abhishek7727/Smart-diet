@@ -78,14 +78,10 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({
 
     const dietaryRestrictions = [
         'Vegetarian',
-        'Vegan',
         'Gluten-Free',
         'Dairy-Free',
         'Keto',
-        'Paleo',
-        'Mediterranean',
-        'Low-Carb',
-        'Low-Fat',
+        'Vegan',
     ];
 
     const handleNext = () => {
